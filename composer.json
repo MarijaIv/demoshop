@@ -1,0 +1,12 @@
+{
+    "name": "vendor/composer",
+    "require": {},
+    "config": {
+        "vendor-dir": "vendor"
+    },
+    "autoload": {
+        "psr-4": {
+            "Demoshop\\": "app"
+        }
+    }
+}
