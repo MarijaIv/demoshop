@@ -9,7 +9,7 @@ FROM product;
 DELETE
 FROM category;
 
-INSERT INTO statistics (homeViewCount)
+INSERT INTO statistics (home_view_count)
 VALUES (5);
 
 INSERT INTO admin (username, password)
@@ -17,8 +17,8 @@ VALUES ('admin', 'sifra123'),
        ('petar', 'sifra123'),
        ('marija', 'sifra123');
 
-INSERT INTO product(categoryId, SKU, title, brand, price, shortDescription, description, image, enabled, featured,
-                    viewCount)
+INSERT INTO product(category_id, sku, title, brand, price, short_description, description, image, enabled, featured,
+                    view_count)
 VALUES (2, 'ASD-AG-AF', 'Asus Game Master', 'Asus', 179499, 'Intel I7 16Gb SSD 128',
         'Useful in all situations. No limits. Fast 100%.', LOAD_FILE('/home/marija/images/asus game master.jpg'), 1, 1,
         4),
@@ -32,7 +32,7 @@ VALUES (2, 'ASD-AG-AF', 'Asus Game Master', 'Asus', 179499, 'Intel I7 16Gb SSD 1
         'Useful in all situations. No limits. Fast 100%.', LOAD_FILE('/home/marija/images/soho 2 thinkpad.jpg'), 0, 0,
         2);
 
-INSERT INTO category(parentId, code, title, description)
+INSERT INTO category(parent_id, code, title, description)
 VALUES (DEFAULT, 'LAP1', 'Laptops', 'Laptop category'),
        (1, 'GAM1', 'Gaming', 'Gaming laptops'),
        (1, 'OFF1', 'Office', 'Office laptops'),
