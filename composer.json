@@ -1,6 +1,8 @@
 {
     "name": "vendor/composer",
-    "require": {},
+    "require": {
+        "illuminate/database": "^6.13"
+    },
     "config": {
         "vendor-dir": "vendor"
     },
