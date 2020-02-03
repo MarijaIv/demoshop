@@ -8,18 +8,19 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 class DatabaseInit
 {
+    // function for initializing database connection
     public static function init(): void
     {
         $capsule = new Capsule();
         $capsule->addConnection([
-            'driver' => 'mysql',
-            'host' => 'localhost',
+            'driver' => DRIVER,
+            'host' => HOST,
             'database' => DATABASE,
             'username' => USERNAME,
             'password' => PASSWORD,
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
+            'charset' => CHARSET,
+            'collation' => COLLATION,
+            'prefix' => PREFIX,
         ]);
 
         $capsule->setAsGlobal();

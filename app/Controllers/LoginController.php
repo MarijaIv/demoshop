@@ -8,12 +8,16 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 class LoginController extends FrontController
 {
+    // function for rendering login.php page
     public function renderLogInPage(): void
     {
         $htmlResponse = new HTMLResponse(__DIR__ . '/../../resources/views/admin/login.php');
         $htmlResponse->render();
     }
 
+    /* function for authenticating admin
+    * if admin is authenticated, redirect to admin.php page
+    */
     public function logIn(string $username, string $password, string $keepLoggedIn): void
     {
 
@@ -30,6 +34,9 @@ class LoginController extends FrontController
         $redirectResponse->render();
     }
 
+    /* function for redirecting to admin.php page if
+    * admin checked Keep me logged in checkbox
+    */
     public function loggedIn(): void
     {
         $redirectResponse = new RedirectResponse('/admin.php');

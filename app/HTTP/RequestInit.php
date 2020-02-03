@@ -6,13 +6,7 @@ namespace Demoshop\HTTP;
 
 class RequestInit
 {
-    //private $request;
-
-   /* public function __construct()
-    {
-        $this->request = new Request();
-    } */
-
+    // function for initializing request
     public static function init(): Request
     {
         $request = new Request();
