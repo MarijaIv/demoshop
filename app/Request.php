@@ -13,17 +13,37 @@ class Request
     private $headers;
     private $requestURI;
 
-    public function __construct()
+    public function setMethod($method): void
     {
-        $this->method = $_SERVER['REQUEST_METHOD'];
-        $this->postData = $_POST;
-        $this->getData = $_GET;
-        $this->queryParameters = $_SERVER['QUERY_STRING'];
-        $this->requestURI = $_SERVER['REQUEST_URI'];
-        $this->headers = get_headers($_SERVER['HTTP_HOST' . $this->requestURI]);
+        $this->method = $method;
     }
 
-    public function getMethod(): string
+    public function setPostData($postData): void
+    {
+        $this->postData = $postData;
+    }
+
+    public function setGetData($getData): void
+    {
+        $this->getData = $getData;
+    }
+
+    public function setQueryParameters($queryParameters): void
+    {
+        $this->queryParameters = $queryParameters;
+    }
+
+    public function setHeaders($headers): void
+    {
+        $this->headers = $headers;
+    }
+
+    public function setRequestURI($requestURI): void
+    {
+        $this->requestURI = $requestURI;
+    }
+
+    public function getMethod()
     {
         return $this->method;
     }

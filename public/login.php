@@ -3,21 +3,19 @@
 require_once __DIR__ . '/../bootstrap.php';
 
 use Demoshop\Controllers\LoginController;
-use Demoshop\HTTP\Request;
 
 $loginController = new LoginController();
-$request = new Request();
 
 if (isset($_COOKIE['loggedIn'])) {
     $loginController->loggedIn();
-} else if ($request->getMethod() === 'GET') {
+} else if ($requestInit->getMethod() === 'GET') {
     $loginController->renderLogInPage();
-} else if ($request->getMethod() === 'POST') {
-    $username = $request->getPostData()['username'];
-    $password = md5($request->getPostData()['password']);
+} else if ($requestInit->getMethod() === 'POST') {
+    $username = $requestInit->getPostData()['username'];
+    $password = md5($requestInit->getPostData()['password']);
 
-    if ($request->getPostData()['keepLoggedIn']) {
-        $keepLoggedIn = $request->getPostData()['keepLoggedIn'];
+    if ($requestInit->getPostData()['keepLoggedIn']) {
+        $keepLoggedIn = $requestInit->getPostData()['keepLoggedIn'];
     } else {
         $keepLoggedIn = '';
     }
