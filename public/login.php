@@ -2,20 +2,20 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-use Demoshop\Controllers\LoginController;
+use Demoshop\Controllers\FrontControllers\LoginController;
 
 $loginController = new LoginController();
 
 if (isset($_COOKIE['loggedIn'])) {
     $loginController->loggedIn();
-} else if ($requestInit->getMethod() === 'GET') {
+} else if ($request->getMethod() === 'GET') {
     $loginController->renderLogInPage();
-} else if ($requestInit->getMethod() === 'POST') {
-    $username = $requestInit->getPostData()['username'];
-    $password = md5($requestInit->getPostData()['password']);
+} else if ($request->getMethod() === 'POST') {
+    $username = $request->getPostData()['username'];
+    $password = md5($request->getPostData()['password']);
 
-    if ($requestInit->getPostData()['keepLoggedIn']) {
-        $keepLoggedIn = $requestInit->getPostData()['keepLoggedIn'];
+    if ($request->getPostData()['keepLoggedIn']) {
+        $keepLoggedIn = $request->getPostData()['keepLoggedIn'];
     } else {
         $keepLoggedIn = '';
     }

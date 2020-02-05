@@ -8,4 +8,3 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 $result = Capsule::table('admin')->where('id', '=', 2)->get('username');
 echo $result;
-
