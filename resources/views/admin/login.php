@@ -1,9 +1,7 @@
 <html lang="en">
-
 <head>
     <title>Login Page</title>
 </head>
-
 <body>
 <br/>
 <br/>
