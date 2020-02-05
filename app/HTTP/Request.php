@@ -4,82 +4,128 @@
 namespace Demoshop\HTTP;
 
 
+/**
+ * Class Request
+ * @package Demoshop\HTTP
+ */
 class Request
 {
+    /**
+     * @var
+     */
     private $method;
+    /**
+     * @var
+     */
     private $postData;
+    /**
+     * @var
+     */
     private $getData;
-    private $queryParameters;
+    /**
+     * @var
+     */
     private $headers;
+    /**
+     * @var
+     */
     private $requestURI;
 
-    // set request method
+    /**
+     * Set request method.
+     *
+     * @param $method
+     */
     public function setMethod($method): void
     {
         $this->method = $method;
     }
 
-    // set request post data
+    /**
+     * Set request post data.
+     *
+     * @param $postData
+     */
     public function setPostData($postData): void
     {
         $this->postData = $postData;
     }
 
-    // set request get data
+    /**
+     * Set request get data.
+     *
+     * @param $getData
+     */
     public function setGetData($getData): void
     {
         $this->getData = $getData;
     }
 
-    // set request query parameters
-    public function setQueryParameters($queryParameters): void
-    {
-        $this->queryParameters = $queryParameters;
-    }
-
-    // set request headers
+    /**
+     * Set request headers.
+     *
+     * @param $headers
+     */
     public function setHeaders($headers): void
     {
         $this->headers = $headers;
     }
 
-    // set request URI
+    /**
+     * Set request URI.
+     *
+     * @param $requestURI
+     */
     public function setRequestURI($requestURI): void
     {
         $this->requestURI = $requestURI;
     }
 
-    // get request method
+    /**
+     * Get request method.
+     *
+     * @return mixed
+     */
     public function getMethod()
     {
         return $this->method;
     }
 
-    // get request post data
+    /**
+     * Get request post data.
+     *
+     * @return mixed
+     */
     public function getPostData()
     {
         return $this->postData;
     }
 
-    // get request get data
+    /**
+     * Get request get data.
+     *
+     * @return mixed
+     */
     public function getGetData()
     {
         return $this->getData;
     }
 
-    // get request query parameters
-    public function getQueryParameters()
-    {
-        return $this->queryParameters;
-    }
-
-    // get request headers
+    /**
+     * Get request headers.
+     *
+     * @return string
+     */
     public function getHeaders(): string
     {
         return $this->headers;
     }
 
-    // get request URI
+    /**
+     * Get request URI.
+     *
+     * @return string
+     */
     public function getRequestURI(): string
     {
         return $this->requestURI;

@@ -4,25 +4,41 @@
 namespace Demoshop\HTTP;
 
 
+/**
+ * Class RedirectResponse
+ * @package Demoshop\HTTP
+ */
 class RedirectResponse extends Response
 {
+    /**
+     * @var
+     */
     private $redirectionURL;
 
-    /* RedirectResponse constructor
-     *  $redirectionURL -> redirection URL
+    /**
+     * RedirectResponse constructor.
+     * @param string $redirectionURL
      */
     public function __construct($redirectionURL)
     {
         $this->redirectionURL = $redirectionURL;
     }
 
-    // get redirect response redirection URL
-    public function getRedirectionURL()
+    /**
+     * Get redirect response redirection URL.
+     *
+     * @return string
+     */
+    public function getRedirectionURL(): string
     {
         return $this->redirectionURL;
     }
 
-    // function for redirecting to redirectionURL
+    /**
+     * Function for redirecting to redirectionURL.
+     *
+     * @return void
+     */
     public function render(): void
     {
         header('Location: ' . $this->redirectionURL);

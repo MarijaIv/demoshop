@@ -4,33 +4,63 @@
 namespace Demoshop\HTTP;
 
 
+/**
+ * Class Response
+ * @package Demoshop\HTTP
+ */
 abstract class Response
 {
+    /**
+     * @var
+     */
     protected $headers;
+    /**
+     * @var
+     */
     protected $status;
 
-    // function for rendering/redirecting pages
+    /**
+     * Function for rendering/redirecting pages.
+     *
+     * @return mixed
+     */
     abstract public function render();
 
-    // get response headers
+    /**
+     * Get response headers.
+     *
+     * @return mixed
+     */
     public function getHeaders()
     {
         return $this->headers;
     }
 
-    // set response headers
+    /**
+     * Set response headers.
+     *
+     * @param $headers
+     */
     public function setHeaders($headers): void
     {
         $this->headers = $headers;
     }
 
-    // get response status
+    /**
+     * Get response status.
+     *
+     * @return mixed
+     */
     public function getStatus()
     {
         return $this->status;
     }
 
-    // set response status
+    /**
+     * Set response status.
+     *
+     * @param $status
+     */
     public function setStatus($status): void
     {
         $this->status = $status;

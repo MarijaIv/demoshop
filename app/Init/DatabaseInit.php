@@ -6,9 +6,17 @@ namespace Demoshop\Init;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 
+/**
+ * Class DatabaseInit
+ * @package Demoshop\Init
+ */
 class DatabaseInit
 {
-    // function for initializing database connection
+    /**
+     * Init database.
+     *
+     * @return void
+     */
     public static function init(): void
     {
         $capsule = new Capsule();

@@ -8,4 +8,4 @@ use Demoshop\Init\DatabaseInit;
 
 DatabaseInit::init();
 
-$requestInit = RequestInit::init();
+$request = RequestInit::init();

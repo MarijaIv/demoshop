@@ -5,10 +5,10 @@ namespace Demoshop\Controllers;
 
 
 /**
- * Class BaseController
+ * Class AdminController
  * @package Demoshop\Controllers
  */
-abstract class BaseController
+abstract class AdminController
 {
 
 }
