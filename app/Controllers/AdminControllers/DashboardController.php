@@ -6,6 +6,9 @@ namespace Demoshop\Controllers\AdminControllers;
 
 use Demoshop\Controllers\AdminController;
 use Demoshop\HTTP\HTMLResponse;
+use Demoshop\Services\CategoryService;
+use Demoshop\Services\ProductService;
+use Demoshop\Services\StatisticsService;
 
 /**
  * Class DashboardController
@@ -20,7 +23,16 @@ class DashboardController extends AdminController
      */
     public function index(): void
     {
-        $htmlResponse = new HTMLResponse(__DIR__ . '/../../../resources/views/admin/dashboard.php');
+        $myObj = [
+            'amountOfProducts' => ProductService::getAmountOfProducts(),
+            'amountOfCategories' => CategoryService::getAmountOfCategories(),
+            'homeViewCount' => StatisticsService::getTotalHomeViewCount(),
+            'mostViewedProductId' => ProductService::getMostViewedProductId(),
+            'mostViewedProduct' => ProductService::getMostViewedProduct(),
+            'numberOfMostViews' => ProductService::getNumberOfMostViews()
+        ];
+
+        $htmlResponse = new HTMLResponse(__DIR__ . '/../../../resources/views/admin/dashboard.php', $myObj);
         $htmlResponse->render();
     }
 

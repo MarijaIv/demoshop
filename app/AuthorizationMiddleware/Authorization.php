@@ -5,7 +5,8 @@ namespace Demoshop\AuthorizationMiddleware;
 
 
 use Demoshop\HTTP\RedirectResponse;
-use Illuminate\Database\Capsule\Manager as Capsule;
+use Demoshop\Services\LoginService;
+
 
 /**
  * Class Authorization
@@ -23,22 +24,7 @@ class Authorization
      */
     public static function authenticate(string $username, string $password, string $keepLoggedIn): bool
     {
-        $result = Capsule::table('admin')->select('username', 'password')
-            ->where('username', '=', $username)
-            ->where('password', '=', $password)->get();
-        if ($result !== null) {
-            if ($keepLoggedIn === 'on') {
-                setcookie('username', $username, time() + 15);
-                setcookie('password', $password, time() + 15);
-                return true;
-            }
-            $_SESSION['username'] = $result[0]->username;
-            $_SESSION['password'] = md5($result[0]->password);
-            setcookie('loggedIn', '');
-            return true;
-        }
-
-        return false;
+       return LoginService::verifyCredentials($username, $password, $keepLoggedIn);
     }
 
     /**

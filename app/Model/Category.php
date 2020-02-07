@@ -3,93 +3,22 @@
 
 namespace Demoshop\Model;
 
-use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Category
  * @package Demoshop\Model
+ *
+ * @property int id
+ * @property int parent_id
+ * @property string code
+ * @property string title
+ * @property string description
  */
-class Category
+class Category extends Model
 {
     /**
-     * @var
+     * @var string
      */
-    private $id;
-    /**
-     * @var
-     */
-    private $parent_id;
-    /**
-     * @var
-     */
-    private $code;
-    /**
-     * @var
-     */
-    private $title;
-    /**
-     * @var
-     */
-    private $description;
-
-    /**
-     * Get category id.
-     *
-     * @return int
-     */
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    /**
-     * Get category parent id.
-     *
-     * @return int
-     */
-    public function getParentId(): int
-    {
-        return $this->parent_id;
-    }
-
-    /**
-     * Get category code.
-     *
-     * @return string
-     */
-    public function getCode(): string
-    {
-        return $this->code;
-    }
-
-    /**
-     * Get category title.
-     *
-     * @return string
-     */
-    public function getTitle(): string
-    {
-        return $this->title;
-    }
-
-    /**
-     * Get category description.
-     *
-     * @return string
-     */
-    public function getDescription(): string
-    {
-        return $this->description;
-    }
-
-    /**
-     * Get total amount of categories.
-     *
-     * @return void
-     */
-    public static function getAmountOfCategories(): void
-    {
-       echo Capsule::table('category')->count();
-    }
-
+    protected $table = 'category';
 }

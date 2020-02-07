@@ -58,7 +58,7 @@ class HTMLResponse extends Response
     public function render(): void
     {
         if($this->viewArguments) {
-            extract($this->viewArguments, null);
+            extract($this->viewArguments);
         }
         include $this->path;
     }

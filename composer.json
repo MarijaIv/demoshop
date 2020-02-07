@@ -1,7 +1,8 @@
 {
     "name": "vendor/composer",
     "require": {
-        "illuminate/database": "^6.13"
+        "illuminate/database": "^6.13",
+      "ext-json": "*"
     },
     "config": {
         "vendor-dir": "vendor"

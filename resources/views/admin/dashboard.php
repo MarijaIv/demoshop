@@ -1,16 +1,23 @@
 <?php
+    /**
+     * @var int $amountOfProducts
+     * @var int $amountOfCategories
+     * @var int $homeViewCount
+     * @var int $mostViewedProductId
+     * @var string $mostViewedProduct
+     * @var int $numberOfMostViews
+     *
+     */
+?>
 
-use Demoshop\Model\{Product, Category, Statistic};
 
-require_once 'defaultComponents.php';
-
+<?php
+    require_once 'defaultComponents.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <style>
-        <?php require_once __DIR__ . '/../../../public/css/dashboard.css'; ?>
-    </style>
+    <link rel="stylesheet" href="/css/dashboard.css">
     <title>Dashboard</title>
     <meta charset="utf-8">
 </head>
@@ -22,20 +29,20 @@ require_once 'defaultComponents.php';
 <div id="dashboard" class="tabcontent">
     <div class="column">
         <label>Products count: </label>
-        <output><?php Product::getAmountOfProducts(); ?></output>
+        <?php echo $amountOfProducts; ?>
         <br/><br/>
         <label>Categories count: </label>
-        <output><?php Category::getAmountOfCategories(); ?></output>
+        <?php echo $amountOfCategories; ?>
     </div>
     <div class="column">
         <label>Home page opening count: </label>
-        <output><?php Statistic::getTotalHomeViewCount(); ?></output>
+        <?php echo $homeViewCount; ?>
         <br/><br/>
         <label>Most often viewed product: </label>
-        <output><?php Product::getMostViewedProduct(); ?></output>
+        <?php echo $mostViewedProductId; ?>
         <br/><br/>
-        <label>Number of <?php Product::getMostViewedProduct(); ?> views: </label>
-        <output><?php Product::getNumberOfMostViews(); ?></output>
+        <label>Number of <?php echo $mostViewedProduct; ?>  views: </label>
+        <?php echo $numberOfMostViews; ?>
     </div>
 </div>
 </body>
