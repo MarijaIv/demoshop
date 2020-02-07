@@ -50,6 +50,4 @@ class Authorization
             $redirectResponse->render();
         }
     }
-
-
 }
