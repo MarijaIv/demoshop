@@ -3,52 +3,21 @@
 
 namespace Demoshop\Model;
 
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * Class Admin
  * @package Demoshop\Model
+ *
+ * @property int id
+ * @property string username
+ * @property string password
  */
-class Admin
+class Admin extends Model
 {
     /**
-     * @var
+     * @var string
      */
-    private $id;
-    /**
-     * @var
-     */
-    private $username;
-    /**
-     * @var
-     */
-    private $password;
+    protected $table = 'admin';
 
-    /**
-     * Get admin id.
-     *
-     * @return int
-     */
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    /**
-     * Get admin username.
-     *
-     * @return string
-     */
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    /**
-     * Get admin password.
-     *
-     * @return string
-     */
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
 }

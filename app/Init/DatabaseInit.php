@@ -32,6 +32,7 @@ class DatabaseInit
         ]);
 
         $capsule->setAsGlobal();
+        $capsule->bootEloquent();
     }
 
 }

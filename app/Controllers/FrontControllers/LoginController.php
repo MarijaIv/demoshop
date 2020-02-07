@@ -31,6 +31,8 @@ class LoginController extends FrontController
      * @param string $username
      * @param string $password
      * @param string $keepLoggedIn
+     *
+     * @return void
      */
     public function logIn(string $username, string $password, string $keepLoggedIn): void
     {
