@@ -4,8 +4,9 @@
 namespace Demoshop\AuthorizationMiddleware;
 
 
-use Demoshop\HTTP\RedirectResponse;
-use Demoshop\Services\LoginService;
+use Demoshop\AuthorizationMiddleware\Exceptions\HttpUnauthorizedException;
+use Demoshop\HTTP\Request;
+use Demoshop\ServiceRegistry\ServiceRegistry;
 
 
 /**
@@ -15,39 +16,23 @@ use Demoshop\Services\LoginService;
 class Authorization
 {
     /**
-     * Function for authenticating admin.
-     *
-     * @param string $username
-     * @param string $password
-     * @param string $keepLoggedIn
-     * @return bool
-     */
-    public static function authenticate(string $username, string $password, string $keepLoggedIn): bool
-    {
-       return LoginService::verifyCredentials($username, $password, $keepLoggedIn);
-    }
-
-    /**
      * If admin is authenticated, redirect to admin.php page.
      * If admin is not authenticated, render login.php page.
      *
-     * @param string $username
-     * @param string $password
-     * @param string $keepLoggedIn
-     * @return void
+     * @param Request $request
+     * @return bool
+     * @throws HttpUnauthorizedException
      */
-    public static function redirection(string $username, string $password, string $keepLoggedIn): void
+    public static function handle(Request $request): bool
     {
-        if (isset($_SESSION['username']) || $_COOKIE['username'] === $username) {
-            $redirectResponse = new RedirectResponse('/admin.php');
-            $redirectResponse->render();
-        } else {
-            if (self::authenticate($username, $password, $keepLoggedIn)) {
-                $redirectResponse = new RedirectResponse('/admin.php');
-                $redirectResponse->render();
-            }
-            $redirectResponse = new RedirectResponse('/login.php');
-            $redirectResponse->render();
+        $serviceRegistry = ServiceRegistry::getInstance();
+        $session = $serviceRegistry->get('Session');
+        $cookie = $serviceRegistry->get('Cookie');
+        if ($cookie->get('username') || $session->get('username')) {
+            return true;
         }
+
+        throw new HttpUnauthorizedException();
+
     }
 }
