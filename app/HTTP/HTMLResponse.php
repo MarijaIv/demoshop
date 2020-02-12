@@ -11,22 +11,22 @@ namespace Demoshop\HTTP;
 class HTMLResponse extends Response
 {
     /**
-     * @var
+     * @var string
      */
     private $path;
     /**
-     * @var null
+     * @var array
      */
     private $viewArguments;
 
     /**
      * HTMLResponse constructor.
      * @param string $path
-     * @param null $viewArguments
+     * @param array $viewArguments
      */
     public function __construct($path, $viewArguments = null)
     {
-        $this->path = $path;
+        $this->path = __DIR__ . '/../../resources' . $path;
         $this->viewArguments = $viewArguments;
     }
 
@@ -43,9 +43,9 @@ class HTMLResponse extends Response
     /**
      * Get html response view arguments.
      *
-     * @return |null
+     * @return array |null
      */
-    public function getViewArguments()
+    public function getViewArguments(): array
     {
         return $this->viewArguments;
     }
@@ -57,7 +57,7 @@ class HTMLResponse extends Response
      */
     public function render(): void
     {
-        if($this->viewArguments) {
+        if ($this->viewArguments) {
             extract($this->viewArguments);
         }
         include $this->path;

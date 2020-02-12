@@ -11,7 +11,7 @@ namespace Demoshop\HTTP;
 class RedirectResponse extends Response
 {
     /**
-     * @var
+     * @var string
      */
     private $redirectionURL;
 
