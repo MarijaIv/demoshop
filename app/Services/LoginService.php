@@ -4,6 +4,7 @@ namespace Demoshop\Services;
 
 use Demoshop\Cookie\CookieManager;
 use Demoshop\Repositories\AdminRepository;
+use Demoshop\ServiceRegistry\ServiceRegistry;
 use Demoshop\Session\PHPSession;
 
 /**
@@ -24,15 +25,16 @@ class LoginService
     {
         $adminRepository = new AdminRepository();
         $result = $adminRepository->adminExists($username);
+        $serviceRegistry = ServiceRegistry::getInstance();
 
         if($result) {
             if ($keepLoggedIn) {
-                $cookie = new CookieManager();
+                $cookie = $serviceRegistry->get('Cookie');
                 $cookie->add('username', $username, time() + 60);
                 $cookie->add('password', md5($password), time() + 60);
                 return true;
             }
-            $session = new PHPSession();
+            $session = $serviceRegistry->get('Session');
             $session->add('username', $username);
             $session->add('password', md5($password));
 
