@@ -24,6 +24,7 @@ class StatisticsService
      * Increase home page open count.
      *
      * @param int $count
+     * @return void
      */
     public static function increaseHomeViewCount(int $count = 1): void
     {

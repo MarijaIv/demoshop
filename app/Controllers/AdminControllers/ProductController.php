@@ -6,6 +6,7 @@ namespace Demoshop\Controllers\AdminControllers;
 
 use Demoshop\Controllers\AdminController;
 use Demoshop\HTTP\HTMLResponse;
+use Demoshop\HTTP\Request;
 
 /**
  * Class ProductController
@@ -16,11 +17,11 @@ class ProductController extends AdminController
     /**
      * Function for rendering product.php page.
      *
-     * @return void
+     * @param Request $request
+     * @return HTMLResponse
      */
-    public function index(): void
+    public function index(Request $request): HTMLResponse
     {
-        $htmlResponse = new HTMLResponse(__DIR__ . '/../../../resources/views/admin/product.php');
-        $htmlResponse->render();
+        return new HTMLResponse('/views/admin/product.php');
     }
 }
