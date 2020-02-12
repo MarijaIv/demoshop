@@ -11,30 +11,30 @@ namespace Demoshop\HTTP;
 class Request
 {
     /**
-     * @var
+     * @var string
      */
     private $method;
     /**
-     * @var
+     * @var array
      */
     private $postData;
     /**
-     * @var
+     * @var array
      */
     private $getData;
     /**
-     * @var
+     * @var string
      */
     private $headers;
     /**
-     * @var
+     * @var string
      */
     private $requestURI;
 
     /**
      * Set request method.
      *
-     * @param $method
+     * @param string $method
      */
     public function setMethod($method): void
     {
@@ -44,7 +44,7 @@ class Request
     /**
      * Set request post data.
      *
-     * @param $postData
+     * @param array $postData
      */
     public function setPostData($postData): void
     {
@@ -54,7 +54,7 @@ class Request
     /**
      * Set request get data.
      *
-     * @param $getData
+     * @param array $getData
      */
     public function setGetData($getData): void
     {
@@ -64,7 +64,7 @@ class Request
     /**
      * Set request headers.
      *
-     * @param $headers
+     * @param string $headers
      */
     public function setHeaders($headers): void
     {
@@ -74,7 +74,7 @@ class Request
     /**
      * Set request URI.
      *
-     * @param $requestURI
+     * @param string $requestURI
      */
     public function setRequestURI($requestURI): void
     {
@@ -84,9 +84,9 @@ class Request
     /**
      * Get request method.
      *
-     * @return mixed
+     * @return string
      */
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->method;
     }
@@ -94,9 +94,9 @@ class Request
     /**
      * Get request post data.
      *
-     * @return mixed
+     * @return array
      */
-    public function getPostData()
+    public function getPostData(): array
     {
         return $this->postData;
     }
@@ -104,9 +104,9 @@ class Request
     /**
      * Get request get data.
      *
-     * @return mixed
+     * @return array
      */
-    public function getGetData()
+    public function getGetData(): array
     {
         return $this->getData;
     }
