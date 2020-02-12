@@ -2,11 +2,14 @@
 
 namespace Demoshop\Controllers\FrontControllers;
 
-use Demoshop\AuthorizationMiddleware\Authorization;
+use Demoshop\Controllers\FrontController;
+use Demoshop\Cookie\CookieManager;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\RedirectResponse;
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Demoshop\Controllers\FrontController;
+use Demoshop\HTTP\Request;
+use Demoshop\HTTP\Response;
+use Demoshop\Services\LoginService;
+use Demoshop\Session\PHPSession;
 
 /**
  * Class LoginController
@@ -17,25 +20,34 @@ class LoginController extends FrontController
     /**
      * Function for rendering login.php page.
      *
-     * @return void
+     * @param Request $request
+     * @return HTMLResponse
      */
-    public function renderLogInPage(): void
+    public function renderLogInPage(Request $request): Response
     {
-        $htmlResponse = new HTMLResponse(__DIR__ . '/../../../resources/views/admin/login.php');
-        $htmlResponse->render();
+        $cookie = new CookieManager();
+        $session = new PHPSession();
+        if($cookie->get('username') || $session->get('username')) {
+            return new RedirectResponse('/admin.php');
+        }
+        return new HTMLResponse('/views/admin/login.php');
     }
 
     /**
      * Function for logging in.
      *
-     * @param string $username
-     * @param string $password
-     * @param string $keepLoggedIn
-     *
-     * @return void
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function logIn(string $username, string $password, string $keepLoggedIn): void
+    public function logIn(Request $request): RedirectResponse
     {
-        Authorization::redirection($username, $password, $keepLoggedIn);
+
+        if ($request->getPostData()['username'] !== null &&
+                LoginService::verifyCredentials($request->getPostData()['username'],
+                    $request->getPostData()['password'], $request->getPostData()['keepLoggedIn'])) {
+            return new RedirectResponse('/admin.php');
+        }
+
+        return new RedirectResponse('/login.php');
     }
 }

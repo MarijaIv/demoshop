@@ -1,6 +1,7 @@
 <html lang="en">
 <head>
     <title>Login Page</title>
+    <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
 <br/>
@@ -8,7 +9,7 @@
 <br/>
 <br/>
 <div align="center">
-    <h1 style="font-size:60px">Welcome</h1>
+    <h1>Welcome</h1>
     <p>To demo shop administration!</p>
 </div>
 <br/>

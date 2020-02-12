@@ -2,7 +2,9 @@
 
 namespace Demoshop\Services;
 
+use Demoshop\Cookie\CookieManager;
 use Demoshop\Repositories\AdminRepository;
+use Demoshop\Session\PHPSession;
 
 /**
  * Class LoginService
@@ -21,18 +23,22 @@ class LoginService
     public static function verifyCredentials($username, $password, $keepLoggedIn): bool
     {
         $adminRepository = new AdminRepository();
-        $result = $adminRepository->getAdmin($username, $password);
+        $result = $adminRepository->adminExists($username);
+
         if($result) {
-            if ($keepLoggedIn === 'on') {
-                setcookie('username', $username, time() + 15);
-                setcookie('password', $password, time() + 15);
+            if ($keepLoggedIn) {
+                $cookie = new CookieManager();
+                $cookie->add('username', $username, time() + 60);
+                $cookie->add('password', md5($password), time() + 60);
                 return true;
             }
-            $_SESSION['username'] = $username;
-            $_SESSION['password'] = md5($password);
-            setcookie('loggedIn', '');
+            $session = new PHPSession();
+            $session->add('username', $username);
+            $session->add('password', md5($password));
+
             return true;
         }
+
         return false;
     }
 }

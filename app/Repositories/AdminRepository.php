@@ -7,16 +7,16 @@ use Demoshop\Model\Admin;
 class AdminRepository
 {
     /**
-     * @param $username
-     * @param $password
+     * Check if admin exists for given username.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @param string $username
+     *
+     * @return bool
      */
-    public function getAdmin($username, $password): bool
+    public function adminExists(string $username): bool
     {
         $result = Admin::query()
             ->where('username', '=', $username)
-            ->where('password', '=', $password)
             ->get();
 
         return !$result->isEmpty();
