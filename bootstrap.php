@@ -12,23 +12,19 @@ use Demoshop\Session\PHPSession;
 
 DatabaseInit::init();
 
-$serviceRegistry = ServiceRegistry::getInstance();
 
 try {
-    $serviceRegistry->register('Session', function () {
+    ServiceRegistry::register('Session', static function () {
         return new PHPSession();
     });
-} catch (ServiceAlreadyRegisteredException $e) {
-}
-
-try {
-    $serviceRegistry->register('Cookie', function () {
+    ServiceRegistry::register('Cookie', static function () {
         return new CookieManager();
     });
 } catch (ServiceAlreadyRegisteredException $e) {
+    echo "<h1 style=\"color:red\">{$e->getMessage()}</h1>";
 }
 
-$session = $serviceRegistry->get('Session');
+$session = ServiceRegistry::get('Session');
 $session->start();
 
 $request = RequestInit::init();

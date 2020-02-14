@@ -10,10 +10,6 @@
      */
 ?>
 
-
-<?php
-    require_once 'defaultComponents.php';
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,6 +18,9 @@
     <meta charset="utf-8">
 </head>
 <body>
+<?php
+require_once 'navigation/navigation.php';
+?>
 <div class="title">
     <h1>Hello from dashboard page</h1>
 </div>
