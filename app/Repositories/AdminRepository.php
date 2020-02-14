@@ -3,7 +3,12 @@
 namespace Demoshop\Repositories;
 
 use Demoshop\Model\Admin;
+use Illuminate\Support\Collection;
 
+/**
+ * Class AdminRepository
+ * @package Demoshop\Repositories
+ */
 class AdminRepository
 {
     /**
@@ -11,14 +16,12 @@ class AdminRepository
      *
      * @param string $username
      *
-     * @return bool
+     * @return Collection
      */
-    public function adminExists(string $username): bool
+    public function adminExists(string $username): Collection
     {
-        $result = Admin::query()
+        return Admin::query()
             ->where('username', '=', $username)
             ->get();
-
-        return !$result->isEmpty();
     }
 }

@@ -21,7 +21,7 @@
         <label for="pass">password </label><input type="password" name="password" id="pass"/><br/><br/>
         <div align="center">
             <input type="checkbox" name="keepLoggedIn" id="loggedIn"/> <label for="loggedIn">Keep me logged in</label>
-            &emsp; &emsp; &emsp; &emsp;
+            <span class="space"></span>
             <input type="submit" value=" Log in "/>
         </div>
 

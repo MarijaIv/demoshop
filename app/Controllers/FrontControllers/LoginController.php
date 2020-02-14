@@ -43,7 +43,7 @@ class LoginController extends FrontController
     {
 
         if ($request->getPostData()['username'] !== null &&
-                LoginService::verifyCredentials($request->getPostData()['username'],
+                LoginService::login($request->getPostData()['username'],
                     $request->getPostData()['password'], $request->getPostData()['keepLoggedIn'])) {
             return new RedirectResponse('/admin.php');
         }

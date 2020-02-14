@@ -1,3 +1,8 @@
 .h1 {
     font-size:60px;
 }
+
+.space {
+    display: inline-block;
+    width: 80px;
+}
