@@ -24,4 +24,14 @@ class AdminRepository
             ->where('username', '=', $username)
             ->get();
     }
+
+    /**
+     * Get all admins.
+     *
+     * @return Collection
+     */
+    public function getAllAdmins(): Collection
+    {
+        return Admin::query()->select('username', 'password')->get();
+    }
 }

@@ -7,6 +7,7 @@ namespace Demoshop\AuthorizationMiddleware;
 use Demoshop\AuthorizationMiddleware\Exceptions\HttpUnauthorizedException;
 use Demoshop\HTTP\Request;
 use Demoshop\ServiceRegistry\ServiceRegistry;
+use Demoshop\Services\LoginService;
 
 
 /**
@@ -20,19 +21,21 @@ class Authorization
      * If admin is not authenticated, render login.php page.
      *
      * @param Request $request
-     * @return bool
+     * @return void
      * @throws HttpUnauthorizedException
      */
-    public static function handle(Request $request): bool
+    public static function handle(Request $request): void
     {
-        $serviceRegistry = ServiceRegistry::getInstance();
-        $session = $serviceRegistry->get('Session');
-        $cookie = $serviceRegistry->get('Cookie');
-        if ($cookie->get('username') || $session->get('username')) {
-            return true;
+        $session = ServiceRegistry::get('Session');
+        $cookie = ServiceRegistry::get('Cookie');
+
+        if($cookie->get('user') && (!(LoginService::validate($cookie->get('user')))
+                || !strpos($cookie->get('user'), sha1('demoshop')))) {
+            throw new HttpUnauthorizedException();
         }
 
-        throw new HttpUnauthorizedException();
-
+        if (!($cookie->get('user') || $session->get('username'))) {
+            throw new HttpUnauthorizedException();
+        }
     }
 }

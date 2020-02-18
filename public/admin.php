@@ -2,6 +2,7 @@
 
 use Demoshop\AuthorizationMiddleware\Authorization;
 use Demoshop\Controllers\AdminControllers\{DashboardController};
+use Demoshop\AuthorizationMiddleware\Exceptions\ControllerOrActionNotFoundException;
 use Demoshop\AuthorizationMiddleware\Exceptions\HttpUnauthorizedException;
 use Demoshop\HTTP\RedirectResponse;
 use Demoshop\Router;
@@ -9,16 +10,20 @@ use Demoshop\Router;
 require_once __DIR__ . '/../bootstrap.php';
 
 try {
-    if ($request->getGetData()['controller'] === null && Authorization::handle($request)) {
+    Authorization::handle($request);
+
+    if ($request->getGetData()['controller'] === null) {
         $response = (new DashboardController())->index($request);
         $response->render();
     } else {
         $router = new Router();
-        $router->route($request);
+        $response = $router->route($request);
+        $response->render();
     }
 } catch (HttpUnauthorizedException $e) {
     $redirect = new RedirectResponse('/error.php');
     $redirect->render();
+} catch (ControllerOrActionNotFoundException $e) {
 }
 
 

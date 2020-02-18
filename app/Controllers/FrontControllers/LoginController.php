@@ -2,14 +2,14 @@
 
 namespace Demoshop\Controllers\FrontControllers;
 
+use Demoshop\AuthorizationMiddleware\Authorization;
+use Demoshop\AuthorizationMiddleware\Exceptions\HttpUnauthorizedException;
 use Demoshop\Controllers\FrontController;
-use Demoshop\Cookie\CookieManager;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\RedirectResponse;
 use Demoshop\HTTP\Request;
 use Demoshop\HTTP\Response;
 use Demoshop\Services\LoginService;
-use Demoshop\Session\PHPSession;
 
 /**
  * Class LoginController
@@ -25,10 +25,10 @@ class LoginController extends FrontController
      */
     public function renderLogInPage(Request $request): Response
     {
-        $cookie = new CookieManager();
-        $session = new PHPSession();
-        if($cookie->get('username') || $session->get('username')) {
+        try {
+            Authorization::handle($request);
             return new RedirectResponse('/admin.php');
+        } catch (HttpUnauthorizedException $e) {
         }
         return new HTMLResponse('/views/admin/login.php');
     }

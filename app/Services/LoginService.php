@@ -12,7 +12,7 @@ use Demoshop\ServiceRegistry\ServiceRegistry;
 class LoginService
 {
     /**
-     * Function for verifying admin credentials
+     * Function for verifying admin credentials.
      *
      * @param $username
      * @param $password
@@ -36,8 +36,8 @@ class LoginService
             if ($foundUser) {
                 if ($keepLoggedIn) {
                     $cookie = ServiceRegistry::get('Cookie');
-                    $cookie->add('username', $username, time() + 60);
-                    $cookie->add('password', md5($password), time() + 60);
+                    $hash = md5($username) . md5($password) . sha1('demoshop');
+                    $cookie->add('user', $hash, time() + 120);
                     return true;
                 }
                 $session = ServiceRegistry::get('Session');
@@ -48,6 +48,27 @@ class LoginService
             }
 
             return false;
+        }
+
+        return false;
+    }
+
+    /**
+     * Function for validating cookie content.
+     * @param string $user
+     * @return bool
+     */
+    public static function validate(string $user): bool
+    {
+        $adminRepository = new AdminRepository();
+        $admins = $adminRepository->getAllAdmins();
+
+        for ($i = 0; $i < $admins->count(); $i++) {
+            $us = md5($admins[$i]->username);
+            $pass = $admins[$i]->password;
+            if (strpos($user, $admins[$i]->password) !== false && strpos($user, md5($admins[$i]->username)) !== false) {
+                return true;
+            }
         }
 
         return false;
