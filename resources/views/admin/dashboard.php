@@ -1,13 +1,13 @@
 <?php
-    /**
-     * @var int $amountOfProducts
-     * @var int $amountOfCategories
-     * @var int $homeViewCount
-     * @var int $mostViewedProductId
-     * @var string $mostViewedProduct
-     * @var int $numberOfMostViews
-     *
-     */
+/**
+ * @var int $amountOfProducts
+ * @var int $amountOfCategories
+ * @var int $homeViewCount
+ * @var int $mostViewedProductId
+ * @var string $mostViewedProduct
+ * @var int $numberOfMostViews
+ *
+ */
 ?>
 
 <!DOCTYPE html>
@@ -21,27 +21,15 @@
 <?php
 require_once 'navigation/navigation.php';
 ?>
-<div class="title">
-    <h1>Hello from dashboard page</h1>
-</div>
-<br/>
 <div id="dashboard" class="tabcontent">
     <div class="column">
-        <label>Products count: </label>
-        <?php echo $amountOfProducts; ?>
-        <br/><br/>
-        <label>Categories count: </label>
-        <?php echo $amountOfCategories; ?>
+        <label class="text">Products count: <?php echo $amountOfProducts; ?></label>
+        <label class="text">Categories count: <?php echo $amountOfCategories; ?> </label>
     </div>
     <div class="column">
-        <label>Home page opening count: </label>
-        <?php echo $homeViewCount; ?>
-        <br/><br/>
-        <label>Most often viewed product: </label>
-        <?php echo $mostViewedProductId; ?>
-        <br/><br/>
-        <label>Number of <?php echo $mostViewedProduct; ?>  views: </label>
-        <?php echo $numberOfMostViews; ?>
+        <label class="text">Home page opening count: <?php echo $homeViewCount; ?></label>
+        <label class="text">Most often viewed product: <?php echo $mostViewedProductId; ?></label>
+        <label class="text">Number of <?php echo $mostViewedProduct; ?> views: <?php echo $numberOfMostViews; ?></label>
     </div>
 </div>
 </body>
