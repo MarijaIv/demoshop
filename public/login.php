@@ -11,6 +11,7 @@ if ($request->getMethod() === 'GET') {
 } else if ($request->getMethod() === 'POST') {
     $response = $loginController->logIn($request);
 }
+
 $response->render();
 
 

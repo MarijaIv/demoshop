@@ -5,6 +5,7 @@ namespace Demoshop;
 
 
 use Demoshop\AuthorizationMiddleware\Exceptions\ControllerOrActionNotFoundException;
+use Demoshop\AuthorizationMiddleware\Exceptions\InvalidControllerOrActionException;
 use Demoshop\HTTP\Request;
 use Demoshop\HTTP\Response;
 
@@ -20,28 +21,31 @@ class Router
      * @param Request $request
      * @return Response
      * @throws ControllerOrActionNotFoundException
+     * @throws InvalidControllerOrActionException
      */
     public function route(Request $request): Response
     {
-        $controller = '';
-        $action = '';
-        $controllerName = 'Demoshop\Controllers\AdminControllers\\' .
-            ucfirst($request->getGetData()['controller']) . 'Controller';
-
-        if (class_exists($controllerName, true)) {
-            $controller = new $controllerName();
-            if (is_callable($request->getGetData()['action'], true) && method_exists($controllerName, $request->getGetData()['action'])) {
-                $action = $request->getGetData()['action'];
-
-            } else {
-                throw new ControllerOrActionNotFoundException();
-            }
+        if(empty($request->getGetData()['controller']) || empty($request->getGetData()['action'])) {
+            throw new InvalidControllerOrActionException();
         }
 
-        if ($controller && $action) {
-            return $controller->$action($request);
+        $controllerName = ucfirst($request->getGetData()['controller']);
+        $action = $request->getGetData()['action'];
+
+        $controllerName = 'Demoshop\Controllers\AdminControllers\\' . $controllerName
+            . 'Controller';
+
+        if (!class_exists($controllerName, true)) {
+            throw new ControllerOrActionNotFoundException();
         }
 
-        return null;
+        $controller = new $controllerName();
+
+        if (!is_callable($action, true)) {
+            throw new ControllerOrActionNotFoundException();
+        }
+
+        return $controller->$action($request);
+
     }
 }

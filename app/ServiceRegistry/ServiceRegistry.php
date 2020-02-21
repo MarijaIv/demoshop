@@ -53,7 +53,7 @@ class ServiceRegistry
     public static function register(string $key, callable $method): void
     {
         if (isset(self::$registeredServices[$key])) {
-            throw new ServiceAlreadyRegisteredException('Service already regitered for ' . $key);
+            throw new ServiceAlreadyRegisteredException('Service already registered for ' . $key);
         }
 
         self::$registeredServices[$key] = $method;

@@ -22,39 +22,35 @@ class LoginService
     public static function login($username, $password, $keepLoggedIn): bool
     {
         $adminRepository = new AdminRepository();
-        $result = $adminRepository->adminExists($username);
 
-        if ($result) {
-            $foundUser = false;
-            for ($i = 0; $i < $result->count(); $i++) {
-                if ($result[$i]->password === md5($password)) {
-                    $foundUser = true;
-                    break;
-                }
-            }
-
-            if ($foundUser) {
-                if ($keepLoggedIn) {
-                    $cookie = ServiceRegistry::get('Cookie');
-                    $hash = md5($username) . md5($password) . sha1('demoshop');
-                    $cookie->add('user', $hash, time() + 120);
-                    return true;
-                }
-                $session = ServiceRegistry::get('Session');
-                $session->add('username', $username);
-                $session->add('password', md5($password));
-
-                return true;
-            }
-
+        if (!$adminRepository->adminExists($username)) {
             return false;
         }
 
-        return false;
+        $admin = $adminRepository->getAdminWithUsername($username);
+
+        if($admin->password !== md5($password)) {
+            return false;
+        }
+
+        if ($keepLoggedIn) {
+            $cookie = ServiceRegistry::get('Cookie');
+            $hash = $username . md5('demoshop');
+            $cookie->add('user', $hash, time() + 120);
+
+            return true;
+        }
+
+        $session = ServiceRegistry::get('Session');
+        $session->add('username', $username);
+        $session->add('password', md5($password));
+
+        return true;
     }
 
     /**
      * Function for validating cookie content.
+     *
      * @param string $user
      * @return bool
      */
@@ -64,9 +60,7 @@ class LoginService
         $admins = $adminRepository->getAllAdmins();
 
         for ($i = 0; $i < $admins->count(); $i++) {
-            $us = md5($admins[$i]->username);
-            $pass = $admins[$i]->password;
-            if (strpos($user, $admins[$i]->password) !== false && strpos($user, md5($admins[$i]->username)) !== false) {
+            if (strpos($user, $admins[$i]->username) !== false) {
                 return true;
             }
         }

@@ -3,6 +3,7 @@
 namespace Demoshop\Repositories;
 
 use Demoshop\Model\Admin;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
@@ -12,17 +13,36 @@ use Illuminate\Support\Collection;
 class AdminRepository
 {
     /**
-     * Check if admin exists for given username.
+     * Get admin with given username.
      *
      * @param string $username
      *
-     * @return Collection
+     * @return Model
      */
-    public function adminExists(string $username): Collection
+    public function getAdminWithUsername(string $username): Model
     {
         return Admin::query()
             ->where('username', '=', $username)
-            ->get();
+            ->first();
+    }
+
+    /**
+     * Check if admin with given username exists.
+     *
+     * @param string $username
+     * @return bool
+     */
+    public function adminExists(string $username): bool
+    {
+        $admin = Admin::query()
+            ->where('username', '=', $username)
+            ->first();
+
+        if(!$admin) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

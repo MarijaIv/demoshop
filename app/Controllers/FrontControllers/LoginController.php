@@ -9,7 +9,9 @@ use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\RedirectResponse;
 use Demoshop\HTTP\Request;
 use Demoshop\HTTP\Response;
+use Demoshop\ServiceRegistry\ServiceRegistry;
 use Demoshop\Services\LoginService;
+use Demoshop\Session\PHPSession;
 
 /**
  * Class LoginController
@@ -25,11 +27,10 @@ class LoginController extends FrontController
      */
     public function renderLogInPage(Request $request): Response
     {
-        try {
-            Authorization::handle($request);
+        if($this->isLoggedIn()) {
             return new RedirectResponse('/admin.php');
-        } catch (HttpUnauthorizedException $e) {
         }
+
         return new HTMLResponse('/views/admin/login.php');
     }
 
@@ -37,17 +38,34 @@ class LoginController extends FrontController
      * Function for logging in.
      *
      * @param Request $request
-     * @return RedirectResponse
+     * @return Response
      */
-    public function logIn(Request $request): RedirectResponse
+    public function logIn(Request $request): Response
     {
+        $data = $request->getPostData();
+        $response = new RedirectResponse('/admin.php');
 
-        if ($request->getPostData()['username'] !== null &&
-                LoginService::login($request->getPostData()['username'],
-                    $request->getPostData()['password'], $request->getPostData()['keepLoggedIn'])) {
-            return new RedirectResponse('/admin.php');
+        if(empty($data['username']) || empty($data['password'])) {
+            $response = new HTMLResponse('/views/admin/login.php');
         }
 
-        return new RedirectResponse('/login.php');
+        if(!LoginService::login($data['username'], $data['password'], $data['keepLoggedIn'] ?? false)) {
+            $response = new HTMLResponse('/views/admin/login.php');
+        }
+
+        return $response;
+    }
+
+    /**
+     * Check if admin is in session or cookie.
+     *
+     * @return bool
+     */
+    private function isLoggedIn(): bool
+    {
+        $session = ServiceRegistry::get('Session');
+        $cookie = ServiceRegistry::get('Cookie');
+
+        return !(!$session->get('username') && !$cookie->get('user'));
     }
 }
