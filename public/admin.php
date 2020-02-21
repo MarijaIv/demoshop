@@ -4,6 +4,7 @@ use Demoshop\AuthorizationMiddleware\Authorization;
 use Demoshop\Controllers\AdminControllers\{DashboardController};
 use Demoshop\AuthorizationMiddleware\Exceptions\ControllerOrActionNotFoundException;
 use Demoshop\AuthorizationMiddleware\Exceptions\HttpUnauthorizedException;
+use Demoshop\AuthorizationMiddleware\Exceptions\InvalidControllerOrActionException;
 use Demoshop\HTTP\RedirectResponse;
 use Demoshop\Router;
 
@@ -21,9 +22,10 @@ try {
         $response->render();
     }
 } catch (HttpUnauthorizedException $e) {
-    $redirect = new RedirectResponse('/error.php');
+    $redirect = new RedirectResponse('/login.php');
     $redirect->render();
 } catch (ControllerOrActionNotFoundException $e) {
+} catch (InvalidControllerOrActionException $e) {
 }
 
 
