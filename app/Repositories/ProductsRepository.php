@@ -5,6 +5,7 @@ namespace Demoshop\Repositories;
 
 
 use Demoshop\Model\Product;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class ProductsRepository
@@ -42,7 +43,7 @@ class ProductsRepository
     public function getMostViewedProductId(): int
     {
         $result = Product::query()->orderBy('view_count', 'desc')->first();
-        return $result? $result->id : '';
+        return $result ? $result->id : '';
     }
 
     /**
@@ -53,5 +54,17 @@ class ProductsRepository
     public function getNumberOfMostViews(): int
     {
         return Product::query()->max('view_count');
+    }
+
+
+    /**
+     * Get products by category id.
+     *
+     * @param int $id
+     * @return Collection
+     */
+    public function getProductsByCategoryId(int $id): Collection
+    {
+        return Product::query()->where('category_id', '=', $id)->get();
     }
 }

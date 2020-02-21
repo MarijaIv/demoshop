@@ -1,0 +1,47 @@
+ul, #myUL {
+    list-style-type: none;
+}
+
+#myUL {
+    margin: 0;
+    padding: 0;
+}
+
+.root {
+    cursor: pointer;
+    user-select: none;
+}
+
+.root::before {
+    content: "\25B6";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+    margin-left: 6px;
+    background-color: inherit;
+}
+
+.child-down::before {
+    transform: rotate(90deg);
+    background-color: inherit;
+}
+
+.child {
+    display: none;
+}
+
+.active {
+    display: block;
+    background-color: white;
+}
+
+.selected {
+    display: block;
+    background-color: #22B14C;
+}
+
+li {
+    cursor: pointer;
+    font-size: 20px;
+    padding-top: 3px;
+}

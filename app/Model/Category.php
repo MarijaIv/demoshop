@@ -18,6 +18,11 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     /**
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * @var string
      */
     protected $table = 'category';

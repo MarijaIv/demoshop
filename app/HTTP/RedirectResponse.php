@@ -11,12 +11,20 @@ namespace Demoshop\HTTP;
 class RedirectResponse extends Response
 {
     /**
+     * @var int
+     *
+     * default value 302 - found
+     */
+    protected $status = 302;
+
+    /**
      * @var string
      */
     private $redirectionURL;
 
     /**
      * RedirectResponse constructor.
+     *
      * @param string $redirectionURL
      */
     public function __construct($redirectionURL)
@@ -41,6 +49,8 @@ class RedirectResponse extends Response
      */
     public function render(): void
     {
+        parent::render();
+
         header('Location: ' . $this->redirectionURL);
         exit();
     }

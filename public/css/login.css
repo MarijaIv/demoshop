@@ -1,8 +1,40 @@
-.h1 {
-    font-size:60px;
+h1 {
+    display: flex;
+    justify-content: center;
+    font-size: 60px;
 }
 
-.space {
-    display: inline-block;
-    width: 80px;
+p {
+    display: flex;
+    justify-content: center;
+    font-size: 20px;
+}
+
+form {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding-top: 40px;
+    margin: 10px;
+}
+
+label {
+    font-size: 20px;
+    padding: 10px;
+}
+
+.login {
+    width: 100px;
+    font-size: 20px;
+    font-family: sans-serif;
+}
+
+.username {
+    position: relative;
+    float: left;
+}
+
+.password {
+    position: relative;
+    float: left;
 }

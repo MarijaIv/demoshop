@@ -57,6 +57,8 @@ class HTMLResponse extends Response
      */
     public function render(): void
     {
+        parent::render();
+
         if ($this->viewArguments) {
             extract($this->viewArguments);
         }

@@ -2,9 +2,11 @@
   <dictionary name="marija">
     <words>
       <w>demoshop</w>
+      <w>popuptext</w>
       <w>tabcontent</w>
       <w>toggler</w>
       <w>treeview</w>
+      <w>xmlhttp</w>
     </words>
   </dictionary>
 </component>

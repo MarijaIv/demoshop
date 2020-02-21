@@ -3,6 +3,7 @@
 namespace Demoshop\Services;
 
 use Demoshop\Repositories\ProductsRepository;
+use Illuminate\Support\Collection;
 
 /**
  * Class ProductService
@@ -51,5 +52,18 @@ class ProductService
     {
         $products = new ProductsRepository();
         return $products->getMostViewedProductId();
+    }
+
+
+    /**
+     * Get products by category id.
+     *
+     * @param int $id
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getProductsByCategoryId(int $id): Collection
+    {
+        $products = new ProductsRepository();
+        return $products->getProductsByCategoryId($id);
     }
 }

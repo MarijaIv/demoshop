@@ -28,6 +28,6 @@ class CookieManager implements CookieInterface
      */
     public function get(string $key): string
     {
-        return $_COOKIE[$key]?:'';
+        return $_COOKIE[$key] ?: '';
     }
 }

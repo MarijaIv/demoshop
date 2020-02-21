@@ -12,7 +12,7 @@ INSERT INTO category(parent_id, code, title, description)
 VALUES (DEFAULT, 'LAP1', 'Laptops', 'Laptop category'),
        (1, 'GAM1', 'Gaming', 'Gaming laptops'),
        (1, 'OFF1', 'Office', 'Office laptops'),
-       (1, 'MUL1', 'Miltimedia', 'Multimedia laptops'),
+       (1, 'MUL1', 'Multimedia', 'Multimedia laptops'),
        (DEFAULT, 'PRO1', 'Processors', 'Processor category');
 
 INSERT INTO product(category_id, sku, title, brand, price, short_description, description, image, enabled, featured,

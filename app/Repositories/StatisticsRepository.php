@@ -31,7 +31,7 @@ class StatisticsRepository
     public function increaseHomeViewCount(int $count): void
     {
         $result = Statistic::query()->where('id', '=', 1)->first();
-        if($result) {
+        if ($result) {
             $result->home_view_count += $count;
             $result->save();
         }

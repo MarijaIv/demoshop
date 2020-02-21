@@ -16,7 +16,8 @@
 a:link {
     color: black;
     display: block;
-    text-align: center;
+    margin-left: 10px;
+    text-align: left;
     text-decoration: none;
     font-size: 25px;
 }
@@ -52,94 +53,17 @@ a:hover {
 }
 
 .column {
+    position: relative;
+    top: 30%;
+    display: flex;
+    justify-content: left;
+    flex-direction: column;
     float: left;
     width: 50%;
     height: 78%;
-    padding-left: 10px;
+    padding-left: 20px;
 }
 
-.tabcontent1 {
-    padding: 0 12px;
-    height: 70%;
-    position: relative;
-    top: 40px;
-    text-align: left;
-    margin: auto;
-    width: 65%;
-    font-size: 18px;
-}
-
-.column1 {
-    position: absolute;
-    left: 50px;
-    top: 0;
-    width: 45%;
-    border: 3px solid green;
-    margin-left: 10px;
-    height: 100%;
-    background: white;
-}
-
-.column2 {
-    position: absolute;
-    left: 600px;
-    top: 0;
-    width: 45%;
-    border: 3px solid green;
-    margin-left: 10px;
-    height: 100%;
-    background: white;
-}
-
-.title {
-    text-align: left;
-    width: 35%;
-    margin: auto;
-}
-
-.header {
-    padding: 15px;
-    text-align: center;
-    background: darkgreen;
-    color: white;
-    width: 100%;
-    font-size: 20px;
-    height: 50px;
-}
-
-.deleteButton {
-    position: absolute;
-    left: 30px;
-    bottom: 9px;
-    font-size: 18px;
-    width: 110px;
-}
-
-.editButton {
-    position: absolute;
-    right: 30px;
-    bottom: 10px;
-    font-size: 18px;
-    width: 110px;
-}
-
-.addCategory {
-    position: absolute;
-    left: 30px;
-    bottom: 9px;
-    font-size: 18px;
-    width: 200px;
-}
-
-.addSub {
-    position: absolute;
-    right: 30px;
-    bottom: 9px;
-    font-size: 18px;
-    width: 200px;
-}
-
-.space1 {
-    display: block;
-    height: 10px;
+.text {
+    padding: 10px;
 }

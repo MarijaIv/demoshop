@@ -15,16 +15,41 @@ abstract class Response
      */
     protected $headers;
     /**
-     * @var string
+     * @var int
+     *
+     * default value 200 - OK
      */
-    protected $status;
+    protected $status = 200;
 
     /**
      * Function for rendering/redirecting pages.
      *
      * @return void
      */
-    abstract public function render(): void;
+    public function render(): void
+    {
+        http_response_code($this->getStatus());
+    }
+
+    /**
+     * Get response status.
+     *
+     * @return int
+     */
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    /**
+     * Set response status.
+     *
+     * @param string $status
+     */
+    public function setStatus($status): void
+    {
+        $this->status = $status;
+    }
 
     /**
      * Get response headers.
@@ -44,26 +69,6 @@ abstract class Response
     public function setHeaders($headers): void
     {
         $this->headers = $headers;
-    }
-
-    /**
-     * Get response status.
-     *
-     * @return string
-     */
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    /**
-     * Set response status.
-     *
-     * @param string $status
-     */
-    public function setStatus($status): void
-    {
-        $this->status = $status;
     }
 
 }

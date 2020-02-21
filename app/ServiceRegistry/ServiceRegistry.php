@@ -15,7 +15,7 @@ class ServiceRegistry
     /**
      * @var array
      */
-    private $registeredServices;
+    private static $registeredServices;
     /**
      * @var ServiceRegistry
      */
@@ -23,11 +23,10 @@ class ServiceRegistry
 
     /**
      * ServiceRegistry constructor.
-     * @param array $registeredServices
      */
-    private function __construct(array $registeredServices = null)
+    private function __construct()
     {
-        $this->registeredServices = $registeredServices;
+
     }
 
     /**
@@ -37,21 +36,11 @@ class ServiceRegistry
      */
     public static function getInstance(): ServiceRegistry
     {
-        if(self::$serviceRegistry === null) {
+        if (self::$serviceRegistry === null) {
             self::$serviceRegistry = new ServiceRegistry();
         }
 
         return self::$serviceRegistry;
-    }
-
-    /**
-     * Get registered services.
-     *
-     * @return array
-     */
-    public function getRegisteredServices(): array
-    {
-        return $this->registeredServices;
     }
 
     /**
@@ -61,13 +50,13 @@ class ServiceRegistry
      * @param callable $method
      * @throws ServiceAlreadyRegisteredException
      */
-    public function register(string $key, callable $method): void
+    public static function register(string $key, callable $method): void
     {
-        if(isset($this->registeredServices[$key])) {
-            throw new ServiceAlreadyRegisteredException();
+        if (isset(self::$registeredServices[$key])) {
+            throw new ServiceAlreadyRegisteredException('Service already regitered for ' . $key);
         }
 
-        $this->registeredServices[$key] = $method;
+        self::$registeredServices[$key] = $method;
     }
 
     /**
@@ -76,8 +65,8 @@ class ServiceRegistry
      * @param string $key
      * @return mixed
      */
-    public function get(string $key)
+    public static function get(string $key)
     {
-        return $this->registeredServices[$key]();
+        return (self::$registeredServices[$key])();
     }
 }
