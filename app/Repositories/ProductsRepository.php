@@ -5,6 +5,7 @@ namespace Demoshop\Repositories;
 
 
 use Demoshop\Model\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -66,5 +67,15 @@ class ProductsRepository
     public function getProductsByCategoryId(int $id): Collection
     {
         return Product::query()->where('category_id', '=', $id)->get();
+    }
+
+    /**
+     * Get all products.
+     *
+     * @return Builder[]|Collection
+     */
+    public function getAllProducts(): Collection
+    {
+        return Product::query()->get();
     }
 }

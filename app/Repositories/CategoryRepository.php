@@ -51,7 +51,7 @@ class CategoryRepository
      * Get category by id.
      *
      * @param int $id
-     * @return Builder|Model|object|null
+     * @return Builder|Model
      */
     public function getCategoryById(int $id): Model
     {

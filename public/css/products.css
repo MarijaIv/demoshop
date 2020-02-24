@@ -1,0 +1,106 @@
+.products {
+    display: flex;
+}
+
+.products-content {
+    flex-grow: 2;
+    border: solid 2px darkgreen;
+    margin-top: 100px;
+    margin-left: 10px;
+    padding: 10px;
+}
+
+.products-header {
+    margin-bottom: 50px;
+}
+
+.products-btn {
+    font: 18px Serif;
+    margin-right: 5px;
+}
+
+table {
+    margin-top: 20px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding-left: 5px;
+}
+
+th {
+    font-size: 18px;
+    height: 30px;
+}
+
+.products-table {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.paginator {
+    display: inline-block;
+    margin-top: 20px;
+    height: 40px;
+}
+
+.pagination {
+    color: black;
+    background-color: white;
+    font-size: 20px;
+    border: none;
+    width: 40px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.pagination:active {
+    background-color: green;
+    font-size: 20px;
+    color: white;
+}
+
+.pagination:hover {
+    background-color: #22B14C;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+.edit {
+    background: url("../img/icons8-edit-30.png") no-repeat left center;
+    border: 1px solid #555555;
+    height: 30px;
+    width: 30px;
+    -webkit-border-radius: 3px;
+    cursor: pointer;
+}
+
+.delete {
+    background: url("../img/icons8-delete-bin-30.png") no-repeat center;
+    border: 1px solid #555555;
+    height: 30px;
+    width: 30px;
+    -webkit-border-radius: 3px;
+    cursor: pointer;
+}
+
+.sortable::after {
+    content: "\25BE";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+    margin-left: 6px;
+}
+
+.sortable-clk::after {
+    content: "\25B4";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+    margin-left: 6px;
+}
