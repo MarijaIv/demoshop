@@ -117,6 +117,12 @@ class CategoryController extends AdminController
         return $json;
     }
 
+    /**
+     * Update existing category.
+     *
+     * @param Request $request
+     * @return JSONResponse
+     */
     public function updateCategory(Request $request): JSONResponse
     {
         $data = json_decode(stripslashes(file_get_contents('php://input')),

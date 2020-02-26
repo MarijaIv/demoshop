@@ -13,7 +13,7 @@
     padding-top: 20px;
 }
 
-a:link {
+.tab-link:link {
     color: black;
     display: block;
     margin-left: 10px;
@@ -22,14 +22,14 @@ a:link {
     font-size: 25px;
 }
 
-a:visited {
+.tab-link:visited {
     color: green;
     display: block;
     alignment: center;
     text-decoration: none;
 }
 
-a:hover {
+.tab-link:hover {
     text-decoration: underline;
     display: block;
     alignment: center;

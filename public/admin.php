@@ -1,10 +1,10 @@
 <?php
 
 use Demoshop\AuthorizationMiddleware\Authorization;
-use Demoshop\Controllers\AdminControllers\{DashboardController};
 use Demoshop\AuthorizationMiddleware\Exceptions\ControllerOrActionNotFoundException;
 use Demoshop\AuthorizationMiddleware\Exceptions\HttpUnauthorizedException;
 use Demoshop\AuthorizationMiddleware\Exceptions\InvalidControllerOrActionException;
+use Demoshop\Controllers\AdminControllers\{DashboardController, ProductController};
 use Demoshop\HTTP\RedirectResponse;
 use Demoshop\Router;
 
@@ -14,21 +14,22 @@ try {
     Authorization::handle($request);
 
     if ($request->getGetData()['controller'] === null) {
-        $response = (new DashboardController())->index($request);
-        $response->render();
+        if (!$request->getPostData()) {
+            $response = (new DashboardController())->index($request);
+        } else {
+            $response = (new ProductController())->createNewProduct($request);
+        }
     } else {
         $router = new Router();
         $response = $router->route($request);
-        $response->render();
     }
 } catch (HttpUnauthorizedException $e) {
-    $redirect = new RedirectResponse('/login.php');
-    $redirect->render();
+    $response = new RedirectResponse('/login.php');
 } catch (ControllerOrActionNotFoundException $e) {
 } catch (InvalidControllerOrActionException $e) {
 }
 
-
+$response->render();
 
 
 

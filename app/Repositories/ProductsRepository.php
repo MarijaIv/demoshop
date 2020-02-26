@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class ProductsRepository
 {
-
     /**
      * Get total amount of products.
      *
@@ -77,5 +76,53 @@ class ProductsRepository
     public function getAllProducts(): Collection
     {
         return Product::query()->get();
+    }
+
+    /**
+     * Create new product.
+     *
+     * @param array $data
+     * @param $file
+     * @return bool
+     */
+    public function createNewProduct($data, $file): bool
+    {
+        Product::query()->insert(
+            [
+                'category_id' => $data['category'],
+                'sku' => $data['sku'],
+                'title' => $data['title'],
+                'brand' => $data['brand'],
+                'price' => $data['price'],
+                'short_description' => $data['shortDesc'],
+                'description' => $data['description'],
+                'image' => $data['img'],
+                'enabled' => $data['enabled'],
+                'featured' => $data['featured'],
+            ]
+        );
+
+        if (!$product = Product::query()->where('sku', '=', $data['sku'])->first()) {
+            return false;
+        }
+
+        $product->image = $file;
+        $product->save();
+
+        return true;
+    }
+
+    /**
+     * Get product by sku.
+     *
+     * @param string $sku
+     * @return bool
+     */
+    public function getProductBySku(string $sku): bool
+    {
+        if (Product::query()->where('sku', '=', $sku)->first()) {
+            return false;
+        }
+        return true;
     }
 }

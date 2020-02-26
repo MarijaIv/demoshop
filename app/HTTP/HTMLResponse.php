@@ -41,6 +41,16 @@ class HTMLResponse extends Response
     }
 
     /**
+     * Set html response path.
+     *
+     * @param string $path
+     */
+    public function setPath(string $path): void
+    {
+        $this->path = $path;
+    }
+
+    /**
      * Get html response view arguments.
      *
      * @return array |null
@@ -48,6 +58,16 @@ class HTMLResponse extends Response
     public function getViewArguments(): array
     {
         return $this->viewArguments;
+    }
+
+    /**
+     * Set html response view arguments.
+     *
+     * @param array $viewArguments
+     */
+    public function setViewArguments(array $viewArguments): void
+    {
+        $this->viewArguments = $viewArguments;
     }
 
     /**

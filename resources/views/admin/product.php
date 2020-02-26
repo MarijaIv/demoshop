@@ -1,3 +1,8 @@
+<?php
+/**
+ * @var string $message
+ */
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +12,7 @@
     <script type="text/javascript" src="/js/Ajax/AjaxService.js"></script>
     <script type="text/javascript" src="/js/Category/messages.js"></script>
     <script type="text/javascript" src="/js/Products/productsTable.js"></script>
+    <script type="text/javascript" src="/js/Products/addEditProduct.js"></script>
     <title>Products</title>
     <meta charset="utf-8">
 </head>
@@ -15,12 +21,23 @@
     <?php
     require 'navigation/navigation.php';
     ?>
-    <div class="products-content">
+    <div class="products-content" id="tableTab">
         <h2 class="products-header">Products</h2>
-        <input type="button" value="Add new product" class="products-btn">
-        <input type="button" value="Delete selected" class="products-btn">
-        <input type="button" value="Enable selected" class="products-btn">
-        <input type="button" value="Disable selected" class="products-btn">
+        <output class="message-success"><?php echo $message; ?></output>
+        <div>
+            <button class="products-btn">
+                <a class="button-link" href="/admin.php?controller=product&action=addEditProduct">Add new product</a>
+            </button>
+            <button class="products-btn">
+                <a class="button-link" href="/admin.php?controller=product&action=deleteSelected">Delete selected</a>
+            </button>
+            <button class="products-btn">
+                <a class="button-link" href="/admin.php?controller=product&action=enableSelected">Enable selected</a>
+            </button>
+            <button class="products-btn">
+                <a class="button-link" href="/admin.php?controller=product&action=disableSelected">Disable selected</a>
+            </button>
+        </div>
         <div id="productsTable" class="products-table">
             <table id="products">
             </table>

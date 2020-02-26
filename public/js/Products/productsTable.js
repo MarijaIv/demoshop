@@ -282,7 +282,6 @@ class ProductsTable {
             rows[0].getElementsByTagName("TH")[n].classList.remove("sortable-clk");
             rows[0].getElementsByTagName("TH")[n].classList.add("sortable");
         }
-
     }
 }
 

@@ -9,4 +9,5 @@ class ProductsService {
         let ajaxService = new AjaxService();
         return ajaxService.get("/admin.php?controller=product&action=getAllProducts");
     }
+
 }

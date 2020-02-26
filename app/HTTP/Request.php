@@ -30,6 +30,31 @@ class Request
      * @var string
      */
     private $requestURI;
+    /**
+     * @var array
+     */
+    private $file;
+
+    /**
+     * Get request file.
+     *
+     * @param string $name
+     * @return array
+     */
+    public function getFile(string $name): array
+    {
+        return $_FILES[$name];
+    }
+
+    /**
+     * Set request file.
+     *
+     * @param array $file
+     */
+    public function setFile(array $file): void
+    {
+        $this->file = $file;
+    }
 
     /**
      * Set request method.

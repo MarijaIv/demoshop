@@ -9,7 +9,7 @@
     <p>To demo shop administration!</p>
 </div>
 <div>
-    <form action="" method="post">
+    <form action="/login.php" method="post">
         <div class="row">
             <div class="column">
                 <label for="user" class="user-pass">Username: </label>
