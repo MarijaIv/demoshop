@@ -35,7 +35,7 @@ class LoginService
 
         if ($keepLoggedIn) {
             $cookie = ServiceRegistry::get('Cookie');
-            $hash = $username . md5('demoshop');
+            $hash = $username. ' ' . md5('demoshop');
             $cookie->add('user', $hash, time() + 120);
 
             return true;
@@ -57,14 +57,13 @@ class LoginService
     public static function validate(string $user): bool
     {
         $adminRepository = new AdminRepository();
-        $admins = $adminRepository->getAllAdmins();
 
-        for ($i = 0; $i < $admins->count(); $i++) {
-            if (strpos($user, $admins[$i]->username) !== false) {
-                return true;
-            }
+        $username = explode(' ',trim($user))[0];
+
+        if(!$adminRepository->adminExists($username)) {
+            return false;
         }
 
-        return false;
+        return true;
     }
 }

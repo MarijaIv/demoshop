@@ -29,12 +29,7 @@ class Authorization
         $session = ServiceRegistry::get('Session');
         $cookie = ServiceRegistry::get('Cookie');
 
-        if (!($cookie->get('user') || $session->get('username'))) {
-            throw new HttpUnauthorizedException();
-        }
-
-        if (!(LoginService::validate($cookie->get('user'))
-            || !strpos($cookie->get('user'), md5('demoshop')))) {
+        if (!$session->get('username') && (!$cookie->get('user') || !(LoginService::validate($cookie->get('user'))))) {
             throw new HttpUnauthorizedException();
         }
     }
