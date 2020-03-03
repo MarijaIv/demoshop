@@ -7,6 +7,7 @@ namespace Demoshop\Repositories;
 use Demoshop\Model\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ProductsRepository
@@ -15,11 +16,11 @@ use Illuminate\Database\Eloquent\Collection;
 class ProductsRepository
 {
     /**
-     * Get total amount of products.
+     * Get number of products.
      *
      * @return int
      */
-    public function getAmountOfProducts(): int
+    public function getNumberOfProducts(): int
     {
         return Product::query()->count();
     }
@@ -69,13 +70,15 @@ class ProductsRepository
     }
 
     /**
-     * Get all products.
+     * Get products for current page.
      *
-     * @return Builder[]|Collection
+     * @param int $offset
+     * @param int $recordsPerPage
+     * @return Collection
      */
-    public function getAllProducts(): Collection
+    public function getProductsForCurrentPage(int $offset, int $recordsPerPage): Collection
     {
-        return Product::query()->get();
+        return Product::query()->offset($offset)->limit($recordsPerPage)->get();
     }
 
     /**
@@ -96,7 +99,7 @@ class ProductsRepository
                 'price' => $data['price'],
                 'short_description' => $data['shortDesc'],
                 'description' => $data['description'],
-                'image' => $data['img'],
+                'image' => 'img',
                 'enabled' => $data['enabled'],
                 'featured' => $data['featured'],
             ]
@@ -113,16 +116,99 @@ class ProductsRepository
     }
 
     /**
-     * Get product by sku.
+     * Check if product with given sku exists.
      *
      * @param string $sku
      * @return bool
      */
-    public function getProductBySku(string $sku): bool
+    public function productSkuExists(string $sku): bool
     {
-        if (Product::query()->where('sku', '=', $sku)->first()) {
+        if (!Product::query()->where('sku', '=', $sku)->first()) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Get product by sku.
+     *
+     * @param string $sku
+     * @return Builder|Model
+     */
+    public function getProductBySku(string $sku): Model
+    {
+        return Product::query()->where('sku', '=', $sku)->first();
+    }
+
+    /**
+     * Update product.
+     *
+     * @param array $data
+     * @param string $image
+     * @return int
+     */
+    public function updateProduct(array $data, string $image): int
+    {
+        return Product::query()
+            ->where('sku', '=', $data['oldSku'])
+            ->update(
+                [
+                    'category_id' => $data['category'],
+                    'sku' => $data['sku'],
+                    'title' => $data['title'],
+                    'brand' => $data['brand'],
+                    'price' => $data['price'],
+                    'short_description' => $data['shortDesc'],
+                    'description' => $data['description'],
+                    'enabled' => $data['enabled'],
+                    'featured' => $data['featured'],
+                    'image' => $image,
+                ]
+            );
+    }
+
+    /**
+     * Delete product by sku.
+     *
+     * @param string $sku
+     * @return int
+     */
+    public function deleteProduct(string $sku): int
+    {
+        return Product::query()->where('sku', '=', $sku)->delete();
+    }
+
+    /**
+     * Enable product.
+     *
+     * @param string $sku
+     * @return int
+     */
+    public function enableProduct(string $sku): int
+    {
+        return Product::query()
+            ->where('sku', '=', $sku)
+            ->update(
+                [
+                    'enabled' => 1,
+                ]
+            );
+    }
+
+    /**
+     * Disable product.
+     *
+     * @param string $sku
+     * @return int
+     */
+    public function disableProduct(string $sku): int
+    {
+        return Product::query()
+            ->where('sku', '=', $sku)
+            ->update(
+                [
+                    'enabled' => 0,
+                ]
+            );
     }
 }

@@ -17,6 +17,7 @@
 .products-btn {
     font: 18px Serif;
     margin-right: 5px;
+    color: black;
 }
 
 .button-link {
@@ -41,6 +42,7 @@ th, td {
 th {
     font-size: 18px;
     height: 30px;
+    cursor: pointer;
 }
 
 .products-table {
@@ -53,16 +55,25 @@ th {
     display: inline-block;
     margin-top: 20px;
     height: 40px;
+    list-style-type: none;
+}
+
+li {
+    float: left;
 }
 
 .pagination {
+    display: block;
     color: black;
     background-color: white;
     font-size: 20px;
+    padding: 3px;
     border: none;
     width: 40px;
     height: 30px;
     cursor: pointer;
+    text-align: center;
+    text-decoration: none;
 }
 
 .pagination:active {
@@ -78,7 +89,6 @@ th {
 }
 
 .edit {
-    background: url("../img/icons8-edit-30.png") no-repeat left center;
     border: 1px solid #555555;
     height: 30px;
     width: 30px;
@@ -88,6 +98,7 @@ th {
 
 .delete {
     background: url("../img/icons8-delete-bin-30.png") no-repeat center;
+    color: transparent;
     border: 1px solid #555555;
     height: 30px;
     width: 30px;
@@ -151,4 +162,18 @@ th {
         opacity: 0;
         -webkit-transform: translateY(-30px);
     }
+}
+
+.message-fail {
+    font: 25px Serif;
+    color: darkorange;
+    margin-bottom: 5px;
+    transition: .5s ease-out;
+    animation: message-success 0.5s 1;
+    -webkit-animation: message-success 0.5s 1;
+    animation-fill-mode: forwards;
+
+    animation-delay: 2s;
+    -webkit-animation-delay: 1s;
+    -webkit-animation-fill-mode: forwards;
 }

@@ -96,14 +96,37 @@
     font: 18px Serif;
     color: black;
     width: 150px;
+    height: 35px;
     margin: 30px 135px 20px 10px;
+    border: 1px solid #c3c3c3;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background-image: linear-gradient(to top, rgb(236, 236, 236) 20%, rgb(251, 252, 252) 80%);
+}
+
+.upload-btn:active {
+    border: 1px solid #b8b8b8;
 }
 
 .cancel-btn {
     font: 18px Serif;
     color: black;
     width: 150px;
+    height: 35px;
+    text-align: center;
+    padding-top: 5px;
     margin: 35px 135px 20px 10px;
+    text-decoration: none;
+    border: 1px solid #c3c3c3;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background-image: linear-gradient(to top, rgb(236, 236, 236) 20%, rgb(251, 252, 252) 80%);
+}
+
+.cancel-btn:active {
+    border: 1px solid #b8b8b8;
 }
 
 .custom-file-input {
@@ -114,4 +137,12 @@
 .message {
     font: 25px Serif;
     color: #e37900;
+}
+
+.product-image {
+    height: 300px;
+    width: 400px;
+    margin-left: 100px;
+    margin-bottom: 30px;
+    border: none;
 }

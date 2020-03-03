@@ -1,21 +1,34 @@
 <?php
 /**
+ * @var int $id
  * @var array $categories
  * @var string $message
+ * @var string $sku
+ * @var string $title
+ * @var string $brand
+ * @var string $category
+ * @var float $price
+ * @var string $shortDesc
+ * @var string $description
+ * @var bool $enabled
+ * @var bool $featured
+ * @var array $image
+ *
  */
+if($sku) {
+    $oldSku = $sku;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="/css/products.css">
     <link rel="stylesheet" href="/css/addEditProduct.css">
-    <script type="text/javascript" src="/js/ProductsService/ProductsService.js"></script>
-    <script type="text/javascript" src="/js/Ajax/AjaxService.js"></script>
     <script type="text/javascript" src="/js/Category/messages.js"></script>
     <script type="text/javascript" src="/js/Products/addEditProduct.js"></script>
     <title>Products</title>
-    <meta charset="utf-8">
 </head>
 <body>
 <div class="products">
@@ -38,37 +51,64 @@
                     <label class="description" for="description">Description:</label>
                     <label class="details-names" for="enabled">Enabled in shop</label>
                     <label class="details-names" for="featured">Featured</label>
-                    <button class="cancel-btn">
-                        <a class="button-link" href="/admin.php?controller=product&action=index">Cancel</a>
-                    </button>
+                    <a href="/admin.php?controller=product&action=index" class="cancel-btn">Cancel</a>
                 </div>
                 <div class="product-inputs">
-                    <input type="text" class="details" id="sku" name="sku" required>
-                    <input type="text" class="details" id="title" name="title" required>
-                    <input type="text" class="details" id="brand" name="brand" required>
+                    <input type="text" class="details" id="sku" name="sku" required value="<?php echo $sku; ?>">
+                    <input type="text" class="details" id="title" name="title" required value="<?php echo $title; ?>">
+                    <input type="text" class="details" id="brand" name="brand" required value="<?php echo $brand; ?>">
                     <select id="category" class="details" name="category">
                         <?php
-                        for ($i = 0, $iMax = count($categories); $i < $iMax; $i++) {
-                            echo '<option value="' . $categories[$i]['id']
-                                . '" >' . $categories[$i]['title'] . '</option>';
+                        foreach ($categories as $item) {
+                            echo '<option value="' . $item->id
+                                . '" >' . $item->title . '</option>';
                         }
                         ?>
                     </select>
-                    <input type="text" class="details" id="price" name="price" required>
-                    <textarea class="details-ta" id="shortDesc" name="shortDesc" required></textarea>
-                    <textarea class="details-ta" id="description" name="description" required></textarea>
-                    <input type="checkbox" class="enable-feature" id="enabled" name="enable">
-                    <input type="checkbox" class="enable-feature" id="featured" name="feature">
+                    <input type="text" class="details" id="price" name="price" required value="<?php echo $price; ?>">
+                    <textarea class="details-ta" id="shortDesc" name="shortDesc"
+                              required><?php echo $shortDesc; ?></textarea>
+                    <textarea class="details-ta" id="description" name="description"
+                              required><?php echo $description; ?></textarea>
+                    <?php if ($enabled) {
+                        echo '<input type="checkbox" class="enable-feature" id="enabled"
+                           name="enabled" checked>';
+                    } else {
+                        echo '<input type="checkbox" class="enable-feature" id="enabled"
+                           name="enabled">';
+                    } ?>
+                    <?php if ($featured) {
+                        echo '<input type="checkbox" class="enable-feature" id="featured"
+                           name="featured" checked>';
+                    } else {
+                        echo '<input type="checkbox" class="enable-feature" id="featured"
+                           name="featured">';
+                    } ?>
+                    <input type="hidden" name="controller" value="product">
+                    <?php if ($sku) {
+                        echo '<input type="hidden" name="action" value="updateProduct">';
+                        echo '<input type="hidden" name="oldSku" value="' . $oldSku . '">';
+                    } else {
+                        echo '<input type="hidden" name="action" value="createNewProduct">';
+                    } ?>
                     <input type="submit" value="OK" class="upload-btn">
                 </div>
             </div>
             <div class="product-inputs">
                 <label class="details-names">
                     Image:
-                    <img src="/img/index.png" alt="Upload image." class="image" id="imgPlaceHolder">
+                    <?php if (!$image) {
+                        echo '<img src="/img/index.png" alt="Upload image." class="image" id="imgPlaceHolder">';
+                    } else {
+                        echo '<img src="data:image/png;base64,' . $image . '" alt="Product image." 
+                        class="product-image" id="imgPlaceHolder">';
+                    }
+                    ?>
                 </label>
                 <input type="file" id="img" name="img" accept="image/*"
-                       onchange="addEditProduct.loadImage(this);" class="custom-file-input" required>
+                       onchange="addEditProduct.loadImage(this);" class="custom-file-input" <?php if(!$oldSku) {
+                    echo 'required';
+                } ?>>
             </div>
         </form>
     </div>
