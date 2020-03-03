@@ -1,4 +1,7 @@
-class EditCategory {
+var Demoshop = Demoshop || {};
+Demoshop.Category = Demoshop.Category || {};
+
+Demoshop.Category.EditCategory = class {
 
     /**
      * Edit selected category.
@@ -20,10 +23,19 @@ class EditCategory {
         document.getElementById("parentCategoryInput").hidden = true;
         document.getElementById("parentCategory").hidden = false;
 
-        treeView.treeViewDisable();
+        Demoshop.Category.treeView.treeViewDisable();
 
-        let p = new CategoryService();
-        p.listAllCategories().then(this.addOptionsToSelect, treeView.displayError);
+        let p = Demoshop.Service.categoryService;
+        p.listAllCategories().then(this.addOptionsToSelect, this.displayError);
+    }
+
+    /**
+     * Call Messages.displayError.
+     *
+     * @param {object} data
+     */
+    displayError(data) {
+        Demoshop.CategoryMessages.messages.displayError(data);
     }
 
     /**
@@ -57,14 +69,14 @@ class EditCategory {
         let parentCategory = document.getElementById("parentCategory").value;
         let code = document.getElementById("code").value;
         let description = document.getElementById("description").value;
-        let id = treeView.id;
+        let id = Demoshop.Category.treeView.id;
 
         if (title !== "" && code !== "" && description !== "") {
-            let p = new CategoryService();
+            let p = Demoshop.Service.categoryService;
             p.updateCategory(id, title, parentCategory, code, description)
-                .then(this.categoryUpdated, message.displayError);
+                .then(this.categoryUpdated, this.displayError);
         } else {
-            popup.addPopups();
+            Demoshop.CategoryPopups.popup.addPopups();
         }
     }
 
@@ -75,28 +87,28 @@ class EditCategory {
      */
     categoryUpdated(data) {
         document.getElementById("tree").innerHTML = "";
-        treeView.drawTree(data, document.getElementById("tree"));
-        treeView.expand();
-        treeView.display();
-        editCategory.cancelEdit();
-        treeView.setEmpty();
-        message.displayInfo("CategoryService updated.");
+        Demoshop.Category.treeView.drawTree(data, document.getElementById("tree"));
+        Demoshop.Category.treeView.expand();
+        Demoshop.Category.treeView.display();
+        Demoshop.Category.editCategory.cancelEdit();
+        Demoshop.Category.treeView.setEmpty();
+        Demoshop.CategoryMessages.messages.displayInfo("Category updated.");
     }
 
     /**
      * Cancel editing category.
      */
     cancelEdit() {
-        popup.removePopups();
+        Demoshop.CategoryPopups.popup.removePopups();
 
         document.getElementById("header").innerText = "Selected category";
 
         document.getElementById("parentCategory").hidden = true;
         document.getElementById("parentCategoryInput").hidden = false;
 
-        treeView.disable();
-        treeView.treeViewEnable();
-        treeView.displayCategory("");
+        Demoshop.Category.treeView.disable();
+        Demoshop.Category.treeView.treeViewEnable();
+        Demoshop.Category.treeView.displayCategory("");
 
         document.getElementById("cancelEdit").hidden = true;
         document.getElementById("okEdit").hidden = true;
@@ -106,6 +118,6 @@ class EditCategory {
         document.getElementById("deleteBtn").disabled = false;
         document.getElementById("editBtn").disabled = false;
     }
-}
+};
 
-editCategory = new EditCategory();
+window.Demoshop.Category.editCategory = new Demoshop.Category.EditCategory();

@@ -7,7 +7,6 @@ namespace Demoshop\AuthorizationMiddleware;
 use Demoshop\AuthorizationMiddleware\Exceptions\HttpUnauthorizedException;
 use Demoshop\HTTP\Request;
 use Demoshop\ServiceRegistry\ServiceRegistry;
-use Demoshop\Services\LoginService;
 
 
 /**
@@ -28,8 +27,9 @@ class Authorization
     {
         $session = ServiceRegistry::get('Session');
         $cookie = ServiceRegistry::get('Cookie');
+        $loginService = ServiceRegistry::get('LoginService');
 
-        if (!$session->get('username') && (!$cookie->get('user') || !(LoginService::validate($cookie->get('user'))))) {
+        if (!$session->get('username') && (!$cookie->get('user') || !($loginService->validate($cookie->get('user'))))) {
             throw new HttpUnauthorizedException();
         }
     }

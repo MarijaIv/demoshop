@@ -1,4 +1,9 @@
-class CategoryService {
+var Demoshop = Demoshop || {};
+Demoshop.Service = Demoshop.Service || {};
+
+Demoshop.Service.CategoryService = class {
+
+    ajaxService = new AjaxService();
 
     /**
      *  Delete category.
@@ -8,8 +13,7 @@ class CategoryService {
      * @return Promise
      */
     deleteCategory(id) {
-        let ajaxService = new AjaxService();
-        return ajaxService.get("/admin.php?controller=category&action=deleteOK&id=" + id);
+        return this.ajaxService.get("/admin.php?controller=category&action=delete&id=" + id);
     }
 
     /**
@@ -18,8 +22,7 @@ class CategoryService {
      * @return Promise
      */
     listCategory() {
-        let ajaxService = new AjaxService();
-        return ajaxService.get("/admin.php?controller=category&action=listCategories");
+        return this.ajaxService.get("/admin.php?controller=category&action=listCategories");
     }
 
     /**
@@ -30,8 +33,7 @@ class CategoryService {
      * @return Promise
      */
     displayCategory(id) {
-        let ajaxService = new AjaxService();
-        return ajaxService.get("/admin.php?controller=category&action=displayCategory&id=" + id);
+        return this.ajaxService.get("/admin.php?controller=category&action=displayCategory&id=" + id);
     }
 
     /**
@@ -40,8 +42,7 @@ class CategoryService {
      * @return Promise
      */
     listAllCategories() {
-        let ajaxService = new AjaxService();
-        return ajaxService.get("/admin.php?controller=category&action=listAllCategories");
+        return this.ajaxService.get("/admin.php?controller=category&action=listAllCategories");
     }
 
     /**
@@ -55,12 +56,10 @@ class CategoryService {
      * @return Promise
      */
     addNewCategory(title, parentCategory, code, description) {
-        let ajaxService = new AjaxService();
-        if(parentCategory === "root") {
-            parentCategory = "";
-        }
-        let data = {title: title, parentCategory: parentCategory, code: code, description: description};
-        return ajaxService.post("/admin.php?controller=category&action=addNewCategory", data);
+        let data = {title: title, code: code, description: description};
+        data.parentCategory = parentCategory === "root" ? null : parentCategory;
+
+        return this.ajaxService.post("/admin.php?controller=category&action=addNewCategory", data);
     }
 
     /**
@@ -75,11 +74,11 @@ class CategoryService {
      * @return Promise
      */
     updateCategory(id, title, parentCategory, code, description) {
-        let ajaxService = new AjaxService();
-        if(parentCategory === "root") {
-            parentCategory = ""
-        }
-        let data = {id: id, title: title, parentCategory: parentCategory, code: code, description: description};
-        return ajaxService.put("/admin.php?controller=category&action=updateCategory", data);
+        let data = {id: id, title: title, code: code, description: description};
+        data.parentCategory = parentCategory === "root" ? null : parentCategory;
+
+        return this.ajaxService.put("/admin.php?controller=category&action=updateCategory&jsonString=" + JSON.stringify(data), data);
     }
-}
+};
+
+window.Demoshop.Service.categoryService = new Demoshop.Service.CategoryService();

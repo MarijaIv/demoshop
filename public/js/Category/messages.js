@@ -1,12 +1,15 @@
-class Messages {
+var Demoshop = Demoshop || {};
+Demoshop.CategoryMessages = Demoshop.CategoryMessages || {};
 
+Demoshop.CategoryMessages.Messages = class
+{
     /**
      * Alert user that category can't be deleted.
      *
      * @param {object} data
      */
     deleteError(data) {
-        message.closeConfirm();
+        this.closeConfirm();
         document.getElementById("popup").classList.toggle("popup-show");
         document.getElementById("message").value = data["message"];
     }
@@ -67,6 +70,6 @@ class Messages {
         document.getElementById("info").classList.remove("popup-show");
         document.getElementById("info").classList.add("popup");
     }
-}
+};
 
-message = new Messages();
+window.Demoshop.CategoryMessages.messages = new Demoshop.CategoryMessages.Messages();

@@ -7,7 +7,7 @@ namespace Demoshop\Repositories;
 use Demoshop\Model\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model as Model;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class CategoryRepository
@@ -20,7 +20,7 @@ class CategoryRepository
      *
      * @return int
      */
-    public function getAmountOfCategories(): int
+    public function getCountOfCategories(): int
     {
         return Category::query()->count();
     }
@@ -45,7 +45,6 @@ class CategoryRepository
     {
         return Category::query()->where('parent_id', '=', $id)->get();
     }
-
 
     /**
      * Get category by id.
@@ -88,7 +87,7 @@ class CategoryRepository
      */
     public function getAllCategories(): Collection
     {
-        return Category::query()->select('id', 'parent_id', 'code', 'title', 'description')->get();
+        return Category::query()->get();
     }
 
     /**
@@ -99,15 +98,9 @@ class CategoryRepository
      */
     public function addNewCategory($data): bool
     {
-        if ($data['parentCategory'] === '') {
-            $parentCategory = null;
-        } else {
-            $parentCategory = $data['parentCategory'];
-        }
-
         return Category::query()->insert(
             [
-                'parent_id' => $parentCategory,
+                'parent_id' => $data['parentCategory'],
                 'code' => $data['code'],
                 'title' => $data['title'],
                 'description' => $data['description'],
@@ -123,17 +116,11 @@ class CategoryRepository
      */
     public function updateCategory($data): int
     {
-        if ($data['parentCategory'] === '') {
-            $parentCategory = null;
-        } else {
-            $parentCategory = $data['parentCategory'];
-        }
-
         return Category::query()
             ->where('id', '=', $data['id'])
             ->update(
                 [
-                    'parent_id' => $parentCategory,
+                    'parent_id' => $data['parentCategory'],
                     'code' => $data['code'],
                     'title' => $data['title'],
                     'description' => $data['description'],
@@ -149,12 +136,7 @@ class CategoryRepository
      */
     public function categoryExists(int $id): bool
     {
-        $category = Category::query()->where('id', '=', $id)->first();
-        if (!$category) {
-            return false;
-        }
-
-        return true;
+        return Category::query()->where('id', '=', $id)->exists();
     }
 
     /**
@@ -165,11 +147,6 @@ class CategoryRepository
      */
     public function categoryExistsCode(string $code): bool
     {
-        $category = Category::query()->where('code', '=', $code)->first();
-        if (!$category) {
-            return false;
-        }
-
-        return true;
+        return Category::query()->where('code', '=', $code)->exists();
     }
 }

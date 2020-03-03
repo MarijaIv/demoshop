@@ -15,7 +15,7 @@
     <title>Categories</title>
     <meta charset="utf-8">
 </head>
-<body>
+<body onload="Demoshop.Category.treeView.listCategory()">
 <?php
 require 'navigation/navigation.php';
 ?>
@@ -24,8 +24,9 @@ require 'navigation/navigation.php';
         <ul id="tree" class="myUL">
         </ul>
         <input type="submit" value="Add root category" class="add-category"
-               onclick="createCategory.addRootCategory();">
-        <input type="submit" value="Add subcategory" class="add-sub" onclick="createCategory.addSubcategory();">
+               onclick="Demoshop.Category.createCategory.displayOrCancelAddCategory(true);">
+        <input type="submit" value="Add subcategory" class="add-sub"
+               onclick="Demoshop.Category.createCategory.addSubcategory();">
     </div>
     <div class="column-right" id="rightTab">
         <div class="category-content" id="selectedCategory">
@@ -41,12 +42,15 @@ require 'navigation/navigation.php';
                     <label for="description" class="right-tab-label">Description:</label>
                 </div>
                 <div class="right-tab-content">
-                    <input type="text" id="title" class="input-right" oninput="popup.filledOut();">
+                    <input type="text" id="title" class="input-right"
+                           oninput="Demoshop.CategoryPopups.popup.filledOut();">
                     <select id="parentCategory" class="input-right" hidden>
                     </select>
                     <input type="text" id="parentCategoryInput" class="input-right">
-                    <input type="text" id="code" class="input-right" oninput="popup.filledOut();">
-                    <textarea id="description" class="ta-right" oninput="popup.filledOut();"></textarea>
+                    <input type="text" id="code" class="input-right"
+                           oninput="Demoshop.CategoryPopups.popup.filledOut();">
+                    <textarea id="description" class="ta-right" oninput="Demoshop.CategoryPopups.popup.filledOut();">
+                    </textarea>
                 </div>
                 <div id="popupRequiredTitle" class="popup-required-title">
                     <span class="popup-text">Please fill out this field.</span>
@@ -58,22 +62,25 @@ require 'navigation/navigation.php';
                     <span class="popup-text">Please fill out this field.</span>
                 </div>
             </div>
-            <input id="deleteBtn" type="button" value="Delete" class="delete" onclick="treeView.confirmDelete();">
-            <input id="editBtn" type="button" value="Edit" class="edit" onclick="editCategory.edit();" disabled>
+            <input id="deleteBtn" type="button" value="Delete" class="delete"
+                   onclick="Demoshop.Category.treeView.confirmDelete();">
+            <input id="editBtn" type="button" value="Edit" class="edit"
+                   onclick="Demoshop.Category.editCategory.edit();" disabled>
             <input id="cancelBtn" type="button" value="Cancel" class="cancel"
-                   onclick="createCategory.cancelAddCategory();" hidden>
-            <input id="okBtn" type="button" value="OK" class="ok" onclick="createCategory.saveCategory();" hidden>
-
-            <input id="cancelEdit" type="button" value="Cancel" class="cancel" onclick="editCategory.cancelEdit();"
-                   hidden>
-            <input id="okEdit" type="button" value="OK" class="ok" onclick="editCategory.saveEdited();" hidden>
+                   onclick="Demoshop.Category.createCategory.displayOrCancelAddCategory(false);" hidden>
+            <input id="okBtn" type="button" value="OK" class="ok"
+                   onclick="Demoshop.Category.createCategory.saveCategory();" hidden>
+            <input id="cancelEdit" type="button" value="Cancel" class="cancel"
+                   onclick="Demoshop.Category.editCategory.cancelEdit();" hidden>
+            <input id="okEdit" type="button" value="OK" class="ok"
+                   onclick="Demoshop.Category.editCategory.saveEdited();" hidden>
         </div>
     </div>
 </div>
 <div id="popup" class="popup">
     <div class="popup-content">
         <div class="popup-header">
-            <span class="close" onclick="message.closePopup();">&times</span>
+            <span class="close" onclick="Demoshop.CategoryMessages.messages.closePopup();">&times</span>
         </div>
         <output id="message" class="message"></output>
     </div>
@@ -81,19 +88,20 @@ require 'navigation/navigation.php';
 <div id="confirm" class="popup">
     <div class="popup-content">
         <div class="popup-header">
-            <span class="close" onclick="message.closeConfirm();">&times</span>
+            <span class="close" onclick="Demoshop.CategoryMessages.messages.closeConfirm();">&times</span>
         </div>
         <output id="messageConf" class="message"></output>
-        <input id="confirm" type="button" value="OK" class="confirm" onclick="treeView.delete();">
+        <input id="confirm" type="button" value="OK" class="confirm" onclick="Demoshop.Category.treeView.delete();">
     </div>
 </div>
 <div id="info" class="popup">
     <div class="popup-content">
         <div class="popup-header">
-            <span class="close" onclick="message.closeInfo();">&times</span>
+            <span class="close" onclick="Demoshop.CategoryMessages.messages.closeInfo();">&times</span>
         </div>
         <output id="messageInfo" class="message"></output>
-        <input id="confirm" type="button" value="OK" class="confirm" onclick="message.closeInfo();">
+        <input id="confirm" type="button" value="OK" class="confirm"
+               onclick="Demoshop.CategoryMessages.messages.closeInfo();">
     </div>
 </div>
 </body>

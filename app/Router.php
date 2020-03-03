@@ -25,12 +25,16 @@ class Router
      */
     public function route(Request $request): Response
     {
-        if(empty($request->getGetData()['controller']) || empty($request->getGetData()['action'])) {
+        $getData = $request->getGetData();
+        $postData = $request->getPostData();
+
+        if ((empty($getData) && (empty($getData['controller']) || empty($getData['action'])))
+            && (empty($postData) && (empty($postData()['controller']) || empty($postData()['action'])))) {
             throw new InvalidControllerOrActionException();
         }
 
-        $controllerName = ucfirst($request->getGetData()['controller']);
-        $action = $request->getGetData()['action'];
+        $controllerName = $getData ? ucfirst($getData['controller']) : ucfirst($postData['controller']);
+        $action = $getData ? $getData['action'] : $postData['action'];
 
         $controllerName = 'Demoshop\Controllers\AdminControllers\\' . $controllerName
             . 'Controller';
@@ -46,6 +50,5 @@ class Router
         }
 
         return $controller->$action($request);
-
     }
 }

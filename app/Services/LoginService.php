@@ -12,6 +12,19 @@ use Demoshop\ServiceRegistry\ServiceRegistry;
 class LoginService
 {
     /**
+     * @var AdminRepository
+     */
+    public $adminRepository;
+
+    /**
+     * LoginService constructor.
+     */
+    public function __construct()
+    {
+        $this->adminRepository = ServiceRegistry::get('AdminRepository');
+    }
+
+    /**
      * Function for verifying admin credentials.
      *
      * @param $username
@@ -19,23 +32,21 @@ class LoginService
      * @param $keepLoggedIn
      * @return bool
      */
-    public static function login($username, $password, $keepLoggedIn): bool
+    public function login($username, $password, $keepLoggedIn): bool
     {
-        $adminRepository = new AdminRepository();
-
-        if (!$adminRepository->adminExists($username)) {
+        if (!$this->adminRepository->adminExists($username)) {
             return false;
         }
 
-        $admin = $adminRepository->getAdminWithUsername($username);
+        $admin = $this->adminRepository->getAdminWithUsername($username);
 
-        if($admin->password !== md5($password)) {
+        if ($admin->password !== md5($password)) {
             return false;
         }
 
         if ($keepLoggedIn) {
             $cookie = ServiceRegistry::get('Cookie');
-            $hash = $username. ' ' . md5('demoshop');
+            $hash = $username . ' ' . md5('demoshop');
             $cookie->add('user', $hash, time() + 120);
 
             return true;
@@ -54,16 +65,11 @@ class LoginService
      * @param string $user
      * @return bool
      */
-    public static function validate(string $user): bool
+    public function validate(string $user): bool
     {
-        $adminRepository = new AdminRepository();
+        $username = explode(' ', trim($user))[0];
+        $key = explode(' ', trim($user))[1];
 
-        $username = explode(' ',trim($user))[0];
-
-        if(!$adminRepository->adminExists($username)) {
-            return false;
-        }
-
-        return true;
+        return !(!$this->adminRepository->adminExists($username) || $key !== md5('demoshop'));
     }
 }

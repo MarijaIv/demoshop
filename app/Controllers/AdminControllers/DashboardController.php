@@ -7,9 +7,7 @@ namespace Demoshop\Controllers\AdminControllers;
 use Demoshop\Controllers\AdminController;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
-use Demoshop\Services\CategoryService;
-use Demoshop\Services\ProductService;
-use Demoshop\Services\StatisticsService;
+use Demoshop\ServiceRegistry\ServiceRegistry;
 
 /**
  * Class DashboardController
@@ -25,13 +23,17 @@ class DashboardController extends AdminController
      */
     public function index(Request $request): HTMLResponse
     {
+        $productService = ServiceRegistry::get('ProductsService');
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $statisticsService = ServiceRegistry::get('StatisticsService');
+
         $myObj = [
-            'amountOfProducts' => ProductService::getAmountOfProducts(),
-            'amountOfCategories' => CategoryService::getAmountOfCategories(),
-            'homeViewCount' => StatisticsService::getTotalHomeViewCount(),
-            'mostViewedProductId' => ProductService::getMostViewedProductId(),
-            'mostViewedProduct' => ProductService::getMostViewedProduct(),
-            'numberOfMostViews' => ProductService::getNumberOfMostViews()
+            'amountOfProducts' => $productService->getNumberOfProducts(),
+            'amountOfCategories' => $categoryService->getCountOfCategories(),
+            'homeViewCount' => $statisticsService->getTotalHomeViewCount(),
+            'mostViewedProductId' => $productService->getMostViewedProductId(),
+            'mostViewedProduct' => $productService->getMostViewedProduct(),
+            'numberOfMostViews' => $productService->getNumberOfMostViews()
         ];
 
         return new HTMLResponse('/views/admin/dashboard.php', $myObj);

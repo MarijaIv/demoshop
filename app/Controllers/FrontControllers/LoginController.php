@@ -44,12 +44,13 @@ class LoginController extends FrontController
     {
         $data = $request->getPostData();
         $response = new RedirectResponse('/admin.php');
+        $loginService = ServiceRegistry::get('LoginService');
 
         if(empty($data['username']) || empty($data['password'])) {
             $response = new HTMLResponse('/views/admin/login.php');
         }
 
-        if(!LoginService::login($data['username'], $data['password'], $data['keepLoggedIn'] ?? false)) {
+        if(!$loginService->login($data['username'], $data['password'], $data['keepLoggedIn'] ?? false)) {
             $response = new HTMLResponse('/views/admin/login.php');
         }
 

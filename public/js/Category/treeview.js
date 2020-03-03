@@ -1,4 +1,7 @@
-class TreeView {
+var Demoshop = Demoshop || {};
+Demoshop.Category = Demoshop.Category || {};
+
+Demoshop.Category.TreeView = class{
 
     /**
      * @type {number}
@@ -17,17 +20,20 @@ class TreeView {
                 toggler[i].classList.remove("selected");
                 toggler[i].classList.toggle("active");
             }
+        }
 
-        }
         if(id !== "") {
-            treeView.id = parseInt(id);
+            Demoshop.Category.treeView.id = parseInt(id);
         } else {
-            id = "" + treeView.id;
+            id = "" + Demoshop.Category.treeView.id;
         }
-        document.getElementById("" + id).classList.toggle("selected");
-        let p = new CategoryService();
-        p.displayCategory(parseInt(id))
-            .then(this.displayCategoryDetails, message.displayError);
+
+        if(Demoshop.Category.treeView.id) {
+            document.getElementById("" + id).classList.toggle("selected");
+            let p = Demoshop.Service.categoryService;
+            p.displayCategory(parseInt(id))
+                .then(Demoshop.Category.treeView.displayCategoryDetails, this.displayError);
+        }
     }
 
     /**
@@ -36,8 +42,8 @@ class TreeView {
      * @param {object} data
      */
     displayCategoryDetails(data) {
-        treeView.disable();
-        treeView.id = data['id'];
+        Demoshop.Category.treeView.disable();
+        Demoshop.Category.treeView.id = data['id'];
         document.getElementById("title").value = data['title'];
         document.getElementById("parentCategoryInput").value =
             (data['parentId'] ? data['parentId'] : "No parent category");
@@ -50,13 +56,13 @@ class TreeView {
      * Check if category can be deleted.
      */
     confirmDelete() {
-        let id = treeView.id;
+        let id = Demoshop.Category.treeView.id;
         if (document.getElementById("" + id).className.indexOf("root") > -1) {
             document.getElementById("popup").classList.remove("popup");
             document.getElementById("popup").classList.add("popup-show");
             document.getElementById("message").value = "CategoryService has subcategories, it can't be deleted.";
         } else {
-            message.displayConfirm("Do you want to delete this category?");
+            Demoshop.CategoryMessages.messages.displayConfirm("Do you want to delete this category?");
         }
     }
 
@@ -64,8 +70,17 @@ class TreeView {
      *  Delete category.
      */
     delete() {
-        let p = new CategoryService();
-        p.deleteCategory(treeView.id).then(this.deleteCategory, message.deleteError);
+        let p = Demoshop.Service.categoryService;
+        p.deleteCategory(Demoshop.Category.treeView.id).then(this.deleteCategory, this.deleteError);
+    }
+
+    /**
+     * Call Messages.deleteError.
+     *
+     * @param {object} data
+     */
+    deleteError(data) {
+        Demoshop.CategoryMessages.messages.deleteError(data);
     }
 
     /**
@@ -75,13 +90,13 @@ class TreeView {
      */
     deleteCategory(data) {
         document.getElementById("tree").innerHTML = "";
-        treeView.drawTree(data, document.getElementById("tree"));
-        treeView.expand();
-        treeView.display();
-        treeView.disable();
-        treeView.setEmpty();
-        message.closeConfirm();
-        message.displayInfo("CategoryService deleted.");
+        Demoshop.Category.treeView.drawTree(data, document.getElementById("tree"));
+        Demoshop.Category.treeView.expand();
+        Demoshop.Category.treeView.display();
+        Demoshop.Category.treeView.disable();
+        Demoshop.Category.treeView.setEmpty();
+        Demoshop.CategoryMessages.messages.closeConfirm();
+        Demoshop.CategoryMessages.messages.displayInfo("Category deleted.");
     }
 
     /**
@@ -89,9 +104,18 @@ class TreeView {
      */
     listCategory() {
         document.getElementById("selectedCategory").style.display = "block";
-        let p = new CategoryService();
+        let p = Demoshop.Service.categoryService;
         p.listCategory()
-            .then(treeView.drawTreeWrapper, message.displayError);
+            .then(this.drawTreeWrapper, this.displayError);
+    }
+
+    /**
+     * Call Messages.displayError.
+     *
+     * @param {object} data
+     */
+    displayError(data) {
+        Demoshop.CategoryMessages.messages.displayError(data);
     }
 
     /**
@@ -101,10 +125,10 @@ class TreeView {
      */
     drawTreeWrapper(data) {
         let parentNode = document.getElementById("tree");
-        treeView.drawTree(data, parentNode);
-        treeView.expand();
-        treeView.display();
-        treeView.disable();
+        Demoshop.Category.treeView.drawTree(data, parentNode);
+        Demoshop.Category.treeView.expand();
+        Demoshop.Category.treeView.display();
+        Demoshop.Category.treeView.disable();
     }
 
     /**
@@ -123,7 +147,7 @@ class TreeView {
             spanNode.appendChild(name);
             spanNode.id = data[i]['id'];
 
-            if (data[i]['nodes'].length > 0) {
+            if (data[i]['nodes']) {
                 spanNode.className = 'root';
                 childNode.appendChild(spanNode);
                 let newNode = document.createElement("UL");
@@ -167,7 +191,7 @@ class TreeView {
         for (i = 0; i < nodes.length; i++) {
             if(nodes[i]['id']) {
                 nodes[i].addEventListener("click", function () {
-                    treeView.displayCategory(this['id']);
+                    Demoshop.Category.treeView.displayCategory(this['id']);
                 });
             }
         }
@@ -210,7 +234,6 @@ class TreeView {
         document.getElementById("treeViewDiv").classList.add("disable");
     }
 
-}
+};
 
-treeView = new TreeView();
-window.onload = treeView.listCategory;
+window.Demoshop.Category.treeView = new Demoshop.Category.TreeView();

@@ -8,7 +8,7 @@ use Demoshop\Controllers\AdminController;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\JSONResponse;
 use Demoshop\HTTP\Request;
-use Demoshop\Services\CategoryService;
+use Demoshop\ServiceRegistry\ServiceRegistry;
 
 /**
  * Class CategoryController
@@ -36,8 +36,8 @@ class CategoryController extends AdminController
      */
     public function listCategories(Request $request): JSONResponse
     {
-        $myArray = CategoryService::getRootCategories();
-        $formattedArray = CategoryService::getFormattedArray($myArray);
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $formattedArray = $categoryService->getFormattedArray();
 
         return new JSONResponse($formattedArray);
     }
@@ -50,10 +50,10 @@ class CategoryController extends AdminController
      */
     public function listAllCategories(Request $request): JSONResponse
     {
-        $myArray = CategoryService::getAllCategories();
-        $formattedArray = CategoryService::getFormattedCategories($myArray);
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $myArray = $categoryService->getAllCategories();
 
-        return new JSONResponse($formattedArray);
+        return new JSONResponse($myArray);
     }
 
     /**
@@ -64,8 +64,8 @@ class CategoryController extends AdminController
      */
     public function displayCategory(Request $request): JSONResponse
     {
-        $data = CategoryService::getCategoryById($request->getGetData()['id']);
-        $data = CategoryService::getFormattedCategory($data);
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $data = $categoryService->getCategoryById($request->getGetData()['id']);
 
         return new JSONResponse($data);
     }
@@ -76,23 +76,20 @@ class CategoryController extends AdminController
      * @param Request $request
      * @return JSONResponse
      */
-    public function deleteOK(Request $request): JSONResponse
+    public function delete(Request $request): JSONResponse
     {
-        $data = CategoryService::deleteOK($request->getGetData()['id']);
+        $categoryService = ServiceRegistry::get('CategoryService');
 
-        if ($data) {
-            $result = CategoryService::deleteCategoryById($request->getGetData()['id']);
-            if ($result) {
-                $myArray = CategoryService::getRootCategories();
-                $formattedArray = CategoryService::getFormattedArray($myArray);
-
-                return new JSONResponse($formattedArray);
-            }
+        $result = $categoryService->deleteCategoryById($request->getGetData()['id']);
+        if (!$result) {
+            $formattedArray['message'] = 'Category contains products.';
+            $json = new JSONResponse($formattedArray);
+            $json->setStatus(400);
+            return $json;
         }
-        $formattedArray['message'] = 'Category contains products.';
-        $json = new JSONResponse($formattedArray);
-        $json->setStatus(400);
-        return $json;
+
+        $formattedArray = $categoryService->getFormattedArray();
+        return new JSONResponse($formattedArray);
     }
 
     /**
@@ -103,18 +100,17 @@ class CategoryController extends AdminController
      */
     public function addNewCategory(Request $request): JSONResponse
     {
-        $v = json_decode(stripslashes(file_get_contents('php://input')),
-            true, 512, JSON_THROW_ON_ERROR);
-        if (CategoryService::addNewCategory($v)) {
-            $myArray = CategoryService::getRootCategories();
-            $formattedArray = CategoryService::getFormattedArray($myArray);
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $v = json_decode($request->getPostData()['jsonString'], true, 512, JSON_THROW_ON_ERROR);
 
-            return new JSONResponse($formattedArray);
+        if (!$categoryService->addNewCategory($v)) {
+            $json = new JSONResponse(['Failed to insert new category.']);
+            $json->setStatus(400);
+            return $json;
         }
 
-        $json = new JSONResponse(['Failed to insert new category.']);
-        $json->setStatus(400);
-        return $json;
+        $formattedArray = $categoryService->getFormattedArray();
+        return new JSONResponse($formattedArray);
     }
 
     /**
@@ -125,17 +121,15 @@ class CategoryController extends AdminController
      */
     public function updateCategory(Request $request): JSONResponse
     {
-        $data = json_decode(stripslashes(file_get_contents('php://input')),
-            true, 512, JSON_THROW_ON_ERROR);
-        if (CategoryService::updateCategory($data)) {
-            $myArray = CategoryService::getRootCategories();
-            $formattedArray = CategoryService::getFormattedArray($myArray);
-
-            return new JSONResponse($formattedArray);
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $data = json_decode($request->getGetData()['jsonString'], true, 512, JSON_THROW_ON_ERROR);
+        if (!$categoryService->updateCategory($data)) {
+            $json = new JSONResponse(['Failed to update category.']);
+            $json->setStatus(400);
+            return $json;
         }
 
-        $json = new JSONResponse(['Failed to update category.']);
-        $json->setStatus(400);
-        return $json;
+        $formattedArray = $categoryService->getFormattedArray();
+        return new JSONResponse($formattedArray);
     }
 }

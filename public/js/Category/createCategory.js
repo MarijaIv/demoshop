@@ -1,38 +1,60 @@
-class CreateCategory {
+var Demoshop = Demoshop || {};
+Demoshop.Category = Demoshop.Category || {};
+
+Demoshop.Category.CreateCategory = class {
 
     /**
      * Add new root category.
+     *
+     * add => addOrCancel = true;
+     * cancel => addOrCancel = false;
+     *
+     * @param {boolean} addOrCancel
      */
-    addRootCategory() {
-        treeView.setEmpty();
-        treeView.treeViewDisable();
+    displayOrCancelAddCategory(addOrCancel) {
+        Demoshop.Category.treeView.setEmpty();
+        document.getElementById("parentCategoryInput").hidden = addOrCancel;
+        document.getElementById("parentCategory").hidden = !addOrCancel;
+        document.getElementById("deleteBtn").hidden = addOrCancel;
+        document.getElementById("editBtn").hidden = addOrCancel;
+        document.getElementById("cancelBtn").hidden = !addOrCancel;
+        document.getElementById("okBtn").hidden = !addOrCancel;
 
-        document.getElementById("header").innerText = "Create category";
-
-        document.getElementById("parentCategoryInput").hidden = true;
-        document.getElementById("parentCategory").hidden = false;
-        document.getElementById("parentCategory").disabled = true;
-        document.getElementById("parentCategory").options[0] = new Option("root");
-        document.getElementById("parentCategory").options[0].selected = true;
-
-        document.getElementById("title").disabled = false;
-        document.getElementById("code").disabled = false;
-        document.getElementById("description").disabled = false;
-
-        document.getElementById("deleteBtn").hidden = true;
-        document.getElementById("editBtn").hidden = true;
-        document.getElementById("cancelBtn").hidden = false;
-        document.getElementById("okBtn").hidden = false;
+        if(addOrCancel) {
+            Demoshop.Category.treeView.treeViewDisable();
+            document.getElementById("header").innerText = "Create category";
+            document.getElementById("parentCategory").disabled = true;
+            document.getElementById("parentCategory").options[0] = new Option("root");
+            document.getElementById("parentCategory").options[0].selected = true;
+            document.getElementById("title").disabled = false;
+            document.getElementById("code").disabled = false;
+            document.getElementById("description").disabled = false;
+        } else {
+            Demoshop.Category.treeView.disable();
+            Demoshop.Category.treeView.treeViewEnable();
+            document.getElementById("header").innerText = "Selected category";
+            Demoshop.CategoryPopups.popup.removePopups();
+            Demoshop.Category.treeView.displayCategory("");
+        }
     }
 
     /**
      * Add new subcategory.
      */
     addSubcategory() {
-        createCategory.addRootCategory();
+        Demoshop.Category.createCategory.displayOrCancelAddCategory(true);
         document.getElementById("parentCategory").disabled = false;
-        let p = new CategoryService();
-        p.listAllCategories().then(this.addOptionsToSelect, message.displayError);
+        let p = Demoshop.Service.categoryService;
+        p.listAllCategories().then(this.addOptionsToSelect, this.displayError);
+    }
+
+    /**
+     * Call Messages.displayError.
+     *
+     * @param {object} data
+     */
+    displayError(data) {
+        Demoshop.CategoryMessages.messages.displayError(data);
     }
 
     /**
@@ -49,29 +71,7 @@ class CreateCategory {
             parent.options[i].value = data[i]['id'];
         }
 
-        document.getElementById("parentCategory").value = treeView.id;
-    }
-
-    /**
-     * Cancel adding new category or subcategory.
-     */
-    cancelAddCategory() {
-        popup.removePopups();
-        treeView.displayCategory("");
-
-        document.getElementById("header").innerText = "Selected category";
-
-        document.getElementById("parentCategory").hidden = true;
-        document.getElementById("parentCategoryInput").hidden = false;
-
-        document.getElementById("cancelBtn").hidden = true;
-        document.getElementById("okBtn").hidden = true;
-        document.getElementById("editBtn").hidden = false;
-        document.getElementById("deleteBtn").hidden = false;
-
-        treeView.setEmpty();
-        treeView.disable();
-        treeView.treeViewEnable();
+        document.getElementById("parentCategory").value = Demoshop.Category.treeView.id;
     }
 
     /**
@@ -83,10 +83,10 @@ class CreateCategory {
         let code = document.getElementById("code").value;
         let description = document.getElementById("description").value;
         if (title !== "" && code !== "" && description !== "") {
-            let p = new CategoryService();
-            p.addNewCategory(title, parentCategory, code, description).then(this.categoryAdded, message.displayError);
+            let p = Demoshop.Service.categoryService;
+            p.addNewCategory(title, parentCategory, code, description).then(this.categoryAdded, this.displayError);
         } else {
-            popup.addPopups();
+            Demoshop.CategoryPopups.popup.addPopups();
         }
     }
 
@@ -97,12 +97,12 @@ class CreateCategory {
      */
     categoryAdded(data) {
         document.getElementById("tree").innerHTML = "";
-        treeView.drawTree(data, document.getElementById("tree"));
-        treeView.expand();
-        treeView.display();
-        message.displayInfo("CategoryService added.");
-        createCategory.cancelAddCategory();
+        Demoshop.Category.treeView.drawTree(data, document.getElementById("tree"));
+        Demoshop.Category.treeView.expand();
+        Demoshop.Category.treeView.display();
+        Demoshop.CategoryMessages.messages.displayInfo("CategoryService added.");
+        Demoshop.Category.createCategory.displayOrCancelAddCategory(false);
     }
-}
+};
 
-createCategory = new CreateCategory();
+window.Demoshop.Category.createCategory = new Demoshop.Category.CreateCategory();

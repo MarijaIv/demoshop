@@ -1,5 +1,7 @@
-class Popup {
+var Demoshop = Demoshop || {};
+Demoshop.CategoryPopups = Demoshop.CategoryPopups || {};
 
+Demoshop.CategoryPopups.Popup = class {
     /**
      * Remove all displayed popups.
      */
@@ -42,12 +44,6 @@ class Popup {
             if (!document.getElementById("popupRequiredTitle").classList.contains("show")) {
                 document.getElementById("popupRequiredTitle").classList.toggle("show");
             }
-        } else {
-            if(document.getElementById("title").classList.contains("required")) {
-                document.getElementById("title").classList.remove("required");
-                document.getElementById("title").classList.add("input-right");
-                document.getElementById("popupRequiredTitle").classList.toggle("show");
-            }
         }
 
         if (document.getElementById("code").value === "") {
@@ -56,24 +52,12 @@ class Popup {
             if (!document.getElementById("popupRequiredCode").classList.contains("show")) {
                 document.getElementById("popupRequiredCode").classList.toggle("show");
             }
-        } else {
-            if(document.getElementById("code").classList.contains("required")) {
-                document.getElementById("code").classList.remove("required");
-                document.getElementById("code").classList.add("input-right");
-                document.getElementById("popupRequiredCode").classList.toggle("show");
-            }
         }
 
         if (document.getElementById("description").value === "") {
             document.getElementById("description").classList.remove("ta-right");
             document.getElementById("description").classList.add("ta-required");
             if (!document.getElementById("popupRequiredDesc").classList.contains("show")) {
-                document.getElementById("popupRequiredDesc").classList.toggle("show");
-            }
-        } else {
-            if(document.getElementById("description").classList.contains("ta-required")) {
-                document.getElementById("description").classList.remove("ta-required");
-                document.getElementById("description").classList.add("ta-right");
                 document.getElementById("popupRequiredDesc").classList.toggle("show");
             }
         }
@@ -103,6 +87,6 @@ class Popup {
             focusedElement.classList.add("ta-right");
         }
     }
-}
+};
 
-popup = new Popup();
+window.Demoshop.CategoryPopups.popup = new Demoshop.CategoryPopups.Popup();

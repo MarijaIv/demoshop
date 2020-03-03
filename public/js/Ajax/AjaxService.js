@@ -8,8 +8,7 @@ class AjaxService {
      * @return Promise
      */
     get(url) {
-        let ajaxService = new AjaxService();
-        return ajaxService.call(url, {}, 'GET');
+        return this.call(url, {}, 'GET');
     }
 
     /**
@@ -21,8 +20,7 @@ class AjaxService {
      * @return Promise
      */
     put(url, data) {
-        let ajaxService = new AjaxService();
-        return ajaxService.call(url, data, 'PUT');
+        return this.call(url, data, 'PUT');
     }
 
     /**
@@ -34,8 +32,7 @@ class AjaxService {
      * @return Promise
      */
     post(url, data) {
-        let ajaxService = new AjaxService();
-        return ajaxService.call(url, data, 'POST');
+        return this.call(url, data, 'POST');
     }
 
     /**
@@ -46,8 +43,7 @@ class AjaxService {
      * @return Promise
      */
     delete(url) {
-        let ajaxService = new AjaxService();
-        return ajaxService.call(url, {}, 'DELETE');
+        return this.call(url, {}, 'DELETE');
     }
 
     /**
@@ -60,11 +56,11 @@ class AjaxService {
      * @return Promise
      */
     call(url, data, method) {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             let xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function () {
                 if (this.readyState === 4) {
-                    if(this.status >= 200 && this.status < 300) {
+                    if (this.status >= 200 && this.status < 300) {
                         resolve(JSON.parse(this.responseText || '{}'));
                     } else {
                         reject(JSON.parse(this.responseText || '{}'));
@@ -74,11 +70,11 @@ class AjaxService {
 
             xmlHttp.open(method, url, true);
 
-            if(method === 'GET' || method === 'DELETE') {
+            if (method === 'GET' || method === 'DELETE') {
                 xmlHttp.send();
             } else {
-                xmlHttp.setRequestHeader("Content-Type", "application/json");
-                xmlHttp.send(JSON.stringify(data));
+                xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xmlHttp.send("jsonString=" + JSON.stringify(data));
             }
         });
     }

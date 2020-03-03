@@ -2,22 +2,32 @@
 
 namespace Demoshop\Services;
 
-use Demoshop\Repositories\StatisticsRepository;
+use Demoshop\ServiceRegistry\ServiceRegistry;
 
 /**
  * Class StatisticsService
  */
 class StatisticsService
 {
+    public $statisticsRepository;
+
+    /**
+     * StatisticsService constructor.
+     */
+    public function __construct()
+    {
+        $this->statisticsRepository = ServiceRegistry::get('StatisticsRepository');
+    }
+
+
     /**
      * Get total amount of visiting visitors landing page.
      *
      * @return int
      */
-    public static function getTotalHomeViewCount(): int
+    public function getTotalHomeViewCount(): int
     {
-        $statistic = new StatisticsRepository();
-        return $statistic->getStatistics();
+        return $this->statisticsRepository->getStatistics();
     }
 
     /**
@@ -26,10 +36,9 @@ class StatisticsService
      * @param int $count
      * @return void
      */
-    public static function increaseHomeViewCount(int $count = 1): void
+    public function increaseHomeViewCount(int $count = 1): void
     {
-        $statistic = new StatisticsRepository();
-        $statistic->increaseHomeViewCount($count);
+        $this->statisticsRepository->increaseHomeViewCount($count);
     }
 
 }

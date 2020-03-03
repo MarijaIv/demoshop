@@ -38,7 +38,7 @@ class AdminRepository
             ->where('username', '=', $username)
             ->first();
 
-        if(!$admin) {
+        if (!$admin) {
             return false;
         }
 

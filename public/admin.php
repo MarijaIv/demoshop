@@ -4,7 +4,7 @@ use Demoshop\AuthorizationMiddleware\Authorization;
 use Demoshop\AuthorizationMiddleware\Exceptions\ControllerOrActionNotFoundException;
 use Demoshop\AuthorizationMiddleware\Exceptions\HttpUnauthorizedException;
 use Demoshop\AuthorizationMiddleware\Exceptions\InvalidControllerOrActionException;
-use Demoshop\Controllers\AdminControllers\{DashboardController, ProductController};
+use Demoshop\Controllers\AdminControllers\{DashboardController};
 use Demoshop\HTTP\RedirectResponse;
 use Demoshop\Router;
 
@@ -13,12 +13,8 @@ require_once __DIR__ . '/../bootstrap.php';
 try {
     Authorization::handle($request);
 
-    if ($request->getGetData()['controller'] === null) {
-        if (!$request->getPostData()) {
-            $response = (new DashboardController())->index($request);
-        } else {
-            $response = (new ProductController())->createNewProduct($request);
-        }
+    if (empty($request->getGetData()['controller']) && empty($request->getPostData()['controller'])) {
+        $response = (new DashboardController())->index($request);
     } else {
         $router = new Router();
         $response = $router->route($request);
