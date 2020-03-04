@@ -4,6 +4,7 @@ namespace Demoshop\Services;
 
 use Demoshop\Repositories\CategoryRepository;
 use Demoshop\Repositories\ProductsRepository;
+use Demoshop\ServiceRegistry\ServiceRegistry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -27,7 +28,7 @@ class ProductService
      */
     public function __construct()
     {
-        $this->productsRepository = new ProductsRepository();
+        $this->productsRepository = ServiceRegistry::get('ProductsRepository');
     }
 
     /**
@@ -207,21 +208,6 @@ class ProductService
     }
 
     /**
-     * Get product by sku.
-     *
-     * @param string $sku
-     * @return Builder|Model|null
-     */
-    public function getProductBySku(string $sku): Model
-    {
-        if (!$this->productsRepository->productSkuExists($sku)) {
-            return null;
-        }
-
-        return $this->productsRepository->getProductBySku($sku);
-    }
-
-    /**
      * Update product.
      *
      * @param array $data
@@ -247,23 +233,41 @@ class ProductService
             return false;
         }
 
-        self::setEnabledAndFeaturedValue($data);
-        $data['price'] = (float)$data['price'];
-        $data['category'] = (int)$data['category'];
-
-        self::saveFile($file);
-
-        $fileName = __DIR__ . '/../../public/img/' . $file['name'];
-        $content = fopen($fileName, 'rb');
-        $content = fread($content, filesize($fileName));
-
         if (!$this->productsRepository->getProductBySku($data['oldSku'])) {
             return false;
         }
 
+        self::setEnabledAndFeaturedValue($data);
+        $data['price'] = (float)$data['price'];
+        $data['category'] = (int)$data['category'];
+
+        if ($file['tmp_name'] === '' && $product = $this->getProductBySku($data['oldSku'])) {
+            $content = $product['image'];
+        } else {
+            self::saveFile($file);
+            $fileName = __DIR__ . '/../../public/img/' . $file['name'];
+            $content = fopen($fileName, 'rb');
+            $content = fread($content, filesize($fileName));
+            unlink($fileName);
+        }
+
         $this->productsRepository->updateProduct($data, $content);
-        unlink($fileName);
         return true;
+    }
+
+    /**
+     * Get product by sku.
+     *
+     * @param string $sku
+     * @return Builder|Model|null
+     */
+    public function getProductBySku(string $sku): Model
+    {
+        if (!$this->productsRepository->productSkuExists($sku)) {
+            return null;
+        }
+
+        return $this->productsRepository->getProductBySku($sku);
     }
 
     /**
@@ -361,5 +365,21 @@ class ProductService
     public function getNumberOfPages(): int
     {
         return ceil($this->productsRepository->getNumberOfProducts() / self::RECORDS_PER_PAGE) ?: 1;
+    }
+
+    /**
+     * Get all featured products.
+     *
+     * @return Collection
+     */
+    public function getFeaturedProducts(): Collection
+    {
+        $products = $this->productsRepository->getFeaturedProducts();
+
+        foreach ($products as $item) {
+            $item['image'] = base64_encode($item['image']);
+        }
+
+        return $products;
     }
 }

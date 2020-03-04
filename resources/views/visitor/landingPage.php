@@ -1,0 +1,47 @@
+<?php
+/**
+ * @var array $categories
+ * @var array $products
+ */
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/css/visitor/categoryMenu.css">
+    <link rel="stylesheet" href="/css/visitor/landing.css">
+    <title>Demoshop</title>
+</head>
+<body>
+<h1>Demo shop</h1>
+<div class="menu">
+    <form class="search-box" action="/index.php" method="get">
+        <label for="search"></label>
+        <input type="text" id="search" name="search" value="Search product..." class="search-field">
+        <input type="hidden" name="controller" value="productSearch">
+        <input type="hidden" name="action" value="index">
+        <input type="submit" value="OK" class="search-ok">
+    </form>
+    <?php
+    require_once __DIR__ . '/categoryMenu.php';
+    ?>
+</div>
+<div class="all-products">
+    <?php
+    foreach ($products as $item) {
+        echo '<a href="/index.php?controller=frontProduct&action=index&id=' . $item['id'] . '" class="product-link">';
+        echo '<div class="product"><label class="product-details">' . $item['price'] . ' rsd</label>';
+
+        if(!$item['image']) {
+            echo '<img src="/img/index.png" alt="Upload image." class="product-image" id="imgPlaceHolder">';
+        } else {
+            echo '<img src="data:image/png;base64,' . $item['image'] . '" alt="Product image." class="product-image">';
+        }
+
+        echo '<label class="product-details">Featured</label>
+        <label class="product-details">' . $item['title'] . '</label>
+        </div>';
+        echo '</a>';
+    }
+    ?>
+</div>
+</body>

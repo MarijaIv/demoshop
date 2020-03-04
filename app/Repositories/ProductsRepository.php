@@ -211,4 +211,14 @@ class ProductsRepository
                 ]
             );
     }
+
+    /**
+     * Get all featured products.
+     *
+     * @return Collection
+     */
+    public function getFeaturedProducts(): Collection
+    {
+        return Product::query()->where('featured', '=', 1)->get();
+    }
 }

@@ -11,8 +11,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/admin/dashboard.css">
+    <link rel="stylesheet" href="/css/admin/products.css">
     <script type="text/javascript" src="/js/Category/messages.js"></script>
     <script type="text/javascript" src="/js/Products/productsTable.js"></script>
     <script type="text/javascript" src="/js/Products/addEditProduct.js"></script>

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/treeview.css">
-    <link rel="stylesheet" href="/css/category.css">
-    <link rel="stylesheet" href="/css/popup.css">
+    <link rel="stylesheet" href="/css/admin/dashboard.css">
+    <link rel="stylesheet" href="/css/admin/treeview.css">
+    <link rel="stylesheet" href="/css/admin/category.css">
+    <link rel="stylesheet" href="/css/admin/popup.css">
     <script type="text/javascript" src="/js/Ajax/AjaxService.js"></script>
     <script type="text/javascript" src="/js/CategoryService/CategoryService.js"></script>
     <script type="text/javascript" src="/js/Category/treeview.js"></script>

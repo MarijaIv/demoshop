@@ -13,7 +13,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/admin/dashboard.css">
     <title>Dashboard</title>
     <meta charset="utf-8">
 </head>

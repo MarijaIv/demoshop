@@ -23,9 +23,9 @@ if($sku) {
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/products.css">
-    <link rel="stylesheet" href="/css/addEditProduct.css">
+    <link rel="stylesheet" href="/css/admin/dashboard.css">
+    <link rel="stylesheet" href="/css/admin/products.css">
+    <link rel="stylesheet" href="/css/admin/addEditProduct.css">
     <script type="text/javascript" src="/js/Category/messages.js"></script>
     <script type="text/javascript" src="/js/Products/addEditProduct.js"></script>
     <title>Products</title>

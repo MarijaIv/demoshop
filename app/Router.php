@@ -36,14 +36,18 @@ class Router
         $controllerName = $getData ? ucfirst($getData['controller']) : ucfirst($postData['controller']);
         $action = $getData ? $getData['action'] : $postData['action'];
 
-        $controllerName = 'Demoshop\Controllers\AdminControllers\\' . $controllerName
+        $adminControllerName = 'Demoshop\Controllers\AdminControllers\\' . $controllerName
             . 'Controller';
 
-        if (!class_exists($controllerName, true)) {
+        $frontControllerName = 'Demoshop\Controllers\FrontControllers\\' . $controllerName
+            . 'Controller';
+
+        if (!class_exists($adminControllerName, true) && !class_exists($frontControllerName, true)) {
             throw new ControllerOrActionNotFoundException();
         }
 
-        $controller = new $controllerName();
+        $controller = class_exists($adminControllerName, true) ?
+            new $adminControllerName() : new $frontControllerName();
 
         if (!is_callable($action, true)) {
             throw new ControllerOrActionNotFoundException();

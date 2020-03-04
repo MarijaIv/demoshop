@@ -1,0 +1,16 @@
+html, body {
+    height: 100%;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    float: left;
+    border: 1px solid #ccc;
+    border-right: 3px solid darkgreen;
+    background-color: #f1f1f1;
+    width: 20%;
+    height: 100%;
+    padding-top: 20px;
+}
