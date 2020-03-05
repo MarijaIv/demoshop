@@ -31,7 +31,7 @@ class CategoryDTO
     /**
      * @var array
      */
-    public $children;
+    public $nodes;
 
     /**
      * CategoryDTO constructor.
@@ -130,17 +130,17 @@ class CategoryDTO
     /**
      * @return array
      */
-    public function getChildren(): array
+    public function getNodes(): array
     {
-        return $this->children;
+        return $this->nodes;
     }
 
     /**
-     * @param array $children
+     * @param array $nodes
      */
-    public function setChildren(array $children): void
+    public function setNodes(array $nodes): void
     {
-        $this->children = $children;
+        $this->nodes = $nodes;
     }
 
     /**
@@ -152,7 +152,7 @@ class CategoryDTO
     {
         $formattedChildren = [];
 
-        foreach ($this->children as $child) {
+        foreach ($this->nodes as $child) {
             $formattedChildren[] = $child->toArray();
         }
 
@@ -174,6 +174,6 @@ class CategoryDTO
     public function addChild(object $child): void
     {
         $child = new CategoryDTO($child);
-        $this->children[] = $child;
+        $this->nodes[] = $child;
     }
 }

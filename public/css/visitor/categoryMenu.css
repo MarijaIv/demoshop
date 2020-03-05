@@ -14,3 +14,56 @@ html, body {
     height: 100%;
     padding-top: 20px;
 }
+
+.root:before {
+    content: "\00b1";
+}
+
+.root {
+    display: inline-block;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    font: 20px Serif;
+    color: black;
+    padding-top: 5px;
+    width: 100%;
+}
+
+span:hover {
+    background-color: #22B14C;
+}
+
+.child {
+    display: none;
+}
+
+.active {
+    display: flex;
+    flex-direction: column;
+    font: 20px Serif;
+    background-color: inherit;
+    padding-left: 30px;
+}
+
+.menu-links {
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+    padding-top: 5px;
+}
+
+.no-subcategories {
+    display: inline-block;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    font: 20px Serif;
+    color: black;
+    padding-top: 5px;
+    width: 100%;
+}

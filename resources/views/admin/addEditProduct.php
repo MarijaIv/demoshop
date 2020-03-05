@@ -15,7 +15,7 @@
  * @var array $image
  *
  */
-if($sku) {
+if ($sku) {
     $oldSku = $sku;
 }
 ?>
@@ -60,8 +60,13 @@ if($sku) {
                     <select id="category" class="details" name="category">
                         <?php
                         foreach ($categories as $item) {
-                            echo '<option value="' . $item->id
-                                . '" >' . $item->title . '</option>';
+                            if ($category === $item->id) {
+                                echo '<option selected value="' . $item->id
+                                    . '" >' . $item->title . '</option>';
+                            } else {
+                                echo '<option value="' . $item->id
+                                    . '" >' . $item->title . '</option>';
+                            }
                         }
                         ?>
                     </select>
@@ -106,7 +111,7 @@ if($sku) {
                     ?>
                 </label>
                 <input type="file" id="img" name="img" accept="image/*"
-                       onchange="addEditProduct.loadImage(this);" class="custom-file-input" <?php if(!$oldSku) {
+                       onchange="addEditProduct.loadImage(this);" class="custom-file-input" <?php if (!$oldSku) {
                     echo 'required';
                 } ?>>
             </div>

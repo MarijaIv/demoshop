@@ -5,6 +5,10 @@
     border: 2px solid darkgreen;
 }
 
+.product:hover {
+    background-color: #e7e7e7;
+}
+
 .all-products {
     display: flex;
     flex-direction: row;
@@ -58,8 +62,4 @@ h1 {
     cursor: pointer;
     padding-left: 60px;
     margin-bottom: 30px;
-}
-
-.product-link:hover {
-    background-color: #e7e7e7;
 }

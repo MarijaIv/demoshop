@@ -2,6 +2,7 @@
 
 namespace Demoshop\Services;
 
+use Demoshop\DTO\ProductDTO;
 use Demoshop\Repositories\CategoryRepository;
 use Demoshop\Repositories\ProductsRepository;
 use Demoshop\ServiceRegistry\ServiceRegistry;
@@ -69,17 +70,6 @@ class ProductService
     public function getMostViewedProductId(): int
     {
         return $this->productsRepository->getMostViewedProductId();
-    }
-
-    /**
-     * Get products by category id.
-     *
-     * @param int $id
-     * @return Collection
-     */
-    public function getProductsByCategoryId(int $id): Collection
-    {
-        return $this->productsRepository->getProductsByCategoryId($id);
     }
 
     /**
@@ -381,5 +371,51 @@ class ProductService
         }
 
         return $products;
+    }
+
+    /**
+     * Get products for category display.
+     *
+     * @param int $id
+     * @return array
+     */
+    public function getProductsForCategoryDisplay(int $id): array
+    {
+        $formattedProducts = [];
+
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $category = $categoryService->getCategoryById($id);
+
+        if ($category['parentId']) {
+            $products = $this->getProductsByCategoryId($id);
+            foreach ($products as $item) {
+                $formattedProducts[] = new ProductDTO($item);
+            }
+        } else {
+            $products = $this->getProductsByCategoryId($id);
+            foreach ($products as $item) {
+                $formattedProducts[] = new ProductDTO($item);
+            }
+            $children = $categoryService->getCategoriesForParent($id);
+            foreach ($children as $child) {
+                $products = $this->getProductsForCategoryDisplay($child['id']);
+                foreach ($products as $product) {
+                    $formattedProducts[] = $product;
+                }
+            }
+        }
+
+        return $formattedProducts;
+    }
+
+    /**
+     * Get products by category id.
+     *
+     * @param int $id
+     * @return Collection
+     */
+    public function getProductsByCategoryId(int $id): Collection
+    {
+        return $this->productsRepository->getProductsByCategoryId($id);
     }
 }

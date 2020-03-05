@@ -1,7 +1,7 @@
 var Demoshop = Demoshop || {};
 Demoshop.Category = Demoshop.Category || {};
 
-Demoshop.Category.TreeView = class{
+Demoshop.Category.TreeView = class {
 
     /**
      * @type {number}
@@ -18,18 +18,18 @@ Demoshop.Category.TreeView = class{
         for (i = 0; i < toggler.length; i++) {
             if (toggler[i].classList.contains("selected")) {
                 toggler[i].classList.remove("selected");
-                toggler[i].classList.toggle("active");
+                toggler[i].classList.add("active");
             }
         }
 
-        if(id !== "") {
+        if (id !== "") {
             Demoshop.Category.treeView.id = parseInt(id);
         } else {
             id = "" + Demoshop.Category.treeView.id;
         }
 
-        if(Demoshop.Category.treeView.id) {
-            document.getElementById("" + id).classList.toggle("selected");
+        if (Demoshop.Category.treeView.id) {
+            document.getElementById("" + id).classList.add("selected");
             let p = Demoshop.Service.categoryService;
             p.displayCategory(parseInt(id))
                 .then(Demoshop.Category.treeView.displayCategoryDetails, this.displayError);
@@ -172,13 +172,34 @@ Demoshop.Category.TreeView = class{
                 let child = this.parentElement.querySelector(".child");
 
                 if (child.querySelector(".child") &&
-                    child.querySelector(".child").classList.contains("active")) {
-                    child.querySelector(".child").classList.toggle("active");
-                    child.querySelector("SPAN").classList.toggle("child-down");
-                }
+                    (child.querySelector(".child").classList.contains("active")
+                        || child.querySelector(".child").classList.contains("selected"))) {
+                    let selectedChildren = child.parentElement.getElementsByClassName("selected");
 
-                this.classList.toggle("child-down");
-                child.classList.toggle("active");
+                    for(i = selectedChildren.length - 1; i >= 0; i--) {
+                        if (selectedChildren[i].tagName === 'SPAN') {
+                            selectedChildren[i].classList.remove("child-down");
+                        }
+                        selectedChildren[i].classList.remove("active");
+                    }
+
+                    let activeChildren = child.parentElement.getElementsByClassName("active");
+
+                    for (i = activeChildren.length - 1; i >= 0; i--) {
+                        if (activeChildren[i].tagName === 'SPAN') {
+                            activeChildren[i].classList.remove("child-down");
+                        }
+                        activeChildren[i].classList.remove("active");
+                    }
+                } else {
+                    if(child.classList.contains("active")) {
+                        this.classList.remove("child-down");
+                        child.classList.remove("active");
+                    } else {
+                        this.classList.add("child-down");
+                        child.classList.add("active");
+                    }
+                }
             });
         }
     }
@@ -189,7 +210,7 @@ Demoshop.Category.TreeView = class{
     display() {
         let nodes = document.getElementsByTagName("SPAN"), i;
         for (i = 0; i < nodes.length; i++) {
-            if(nodes[i]['id']) {
+            if (nodes[i]['id']) {
                 nodes[i].addEventListener("click", function () {
                     Demoshop.Category.treeView.displayCategory(this['id']);
                 });
