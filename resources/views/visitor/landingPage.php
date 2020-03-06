@@ -15,19 +15,11 @@
 <body>
 <h1>Demo shop</h1>
 <div class="menu">
-    <form class="search-box" action="/index.php" method="get">
-        <label for="search"></label>
-        <input type="text" id="search" name="search" value="Search product..." class="search-field">
-        <input type="hidden" name="controller" value="productSearch">
-        <input type="hidden" name="action" value="index">
-        <input type="submit" value="OK" class="search-ok">
-    </form>
     <div class="menu-links">
         <?php
         require_once __DIR__ . '/categoryMenu.php';
         ?>
     </div>
-
 </div>
 <div class="all-products">
     <?php

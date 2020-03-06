@@ -4,15 +4,15 @@
 namespace Demoshop\Controllers\FrontControllers;
 
 
+use Demoshop\Controllers\FrontController;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
-use Demoshop\ServiceRegistry\ServiceRegistry;
 
 /**
  * Class FrontProductController
  * @package Demoshop\Controllers\FrontControllers
  */
-class FrontProductController
+class FrontProductController extends FrontController
 {
     /**
      * Render productDetails.php page.
@@ -33,16 +33,21 @@ class FrontProductController
      */
     public function listProducts(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
-        $products = $productService->getProductsForCategoryDisplay($request->getGetData()['id']);
+        $productService = $this->getProductService();
+        $dataForCategoryDisplay = $productService->getDataForCategoryDisplay($request->getGetData());
 
-        $categoryService = ServiceRegistry::get('CategoryService');
-        $categories = $categoryService->getFormattedArray();
+        $categoryService = $this->getCategoryService();
+        $categories = $categoryService->getRootCategories();
+        $categories = $categoryService->formatCategoriesForTreeView($categories);
 
-        $myObj = [
-            'products' => $products,
+        $categoryDisplayArguments = [
+            'products' => $dataForCategoryDisplay['products'],
+            'currentPage' => $dataForCategoryDisplay['currentPage'],
+            'numberOfPages' => $dataForCategoryDisplay['numberOfPages'],
+            'sorting' => $dataForCategoryDisplay['sorting'],
+            'productsPerPage' => $dataForCategoryDisplay['productsPerPage'],
             'categories' => $categories,
         ];
-        return new HTMLResponse('/views/visitor/categoryDisplay.php', $myObj);
+        return new HTMLResponse('/views/visitor/categoryDisplay.php', $categoryDisplayArguments);
     }
 }

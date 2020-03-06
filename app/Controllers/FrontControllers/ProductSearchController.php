@@ -4,6 +4,7 @@
 namespace Demoshop\Controllers\FrontControllers;
 
 
+use Demoshop\Controllers\FrontController;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
 
@@ -11,7 +12,7 @@ use Demoshop\HTTP\Request;
  * Class ProductSearchController
  * @package Demoshop\Controllers\FrontControllers
  */
-class ProductSearchController
+class ProductSearchController extends FrontController
 {
     /**
      * Render searchResult.php page.
@@ -21,6 +22,6 @@ class ProductSearchController
      */
     public function index(Request $request) : HTMLResponse
     {
-        return new HTMLResponse('/views/visitor/searchResult.php');
+        return new HTMLResponse('/views/visitor/categoryDisplay.php');
     }
 }

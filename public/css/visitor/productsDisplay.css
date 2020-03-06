@@ -1,0 +1,40 @@
+.products-display {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-top: 30px;
+}
+
+.sort-by {
+    font: 20px Serif;
+    margin-top: 20px;
+}
+
+.options {
+    font: 18px Serif;
+    width: 210px;
+}
+
+.per-page {
+    font: 20px Serif;
+    margin-top: 20px;
+}
+
+.display-buttons {
+    font: 20px Serif;
+    margin-top: 20px;
+}
+
+.page-button {
+    font: 18px Serif;
+    color: black;
+    background-color: white;
+    border: none;
+    width: 40px;
+    height: 30px;
+    border-radius: 2px;
+}
+
+.page-button:hover {
+    background-color: #22B14C;
+}

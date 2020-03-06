@@ -4,15 +4,15 @@
 namespace Demoshop\Controllers\FrontControllers;
 
 
+use Demoshop\Controllers\FrontController;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
-use Demoshop\ServiceRegistry\ServiceRegistry;
 
 /**
  * Class HomeController
  * @package Demoshop\Controllers\FrontControllers
  */
-class HomeController
+class HomeController extends FrontController
 {
     /**
      * Render landingPage.php
@@ -22,17 +22,18 @@ class HomeController
      */
     public function index(Request $request): HTMLResponse
     {
-        $categoryService = ServiceRegistry::get('CategoryService');
-        $productService = ServiceRegistry::get('ProductsService');
+        $categoryService = $this->getCategoryService();
+        $productService = $this->getProductService();
 
-        $categories = $categoryService->getFormattedArray();
+        $categories = $categoryService->getRootCategories();
+        $categories = $categoryService->formatCategoriesForTreeView($categories);
         $products = $productService->getFeaturedProducts();
 
-        $data = [
+        $homePageArguments = [
             'categories' => $categories,
             'products' => $products,
         ];
 
-        return new HTMLResponse('/views/visitor/landingPage.php', $data);
+        return new HTMLResponse('/views/visitor/landingPage.php', $homePageArguments);
     }
 }
