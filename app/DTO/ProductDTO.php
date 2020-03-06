@@ -271,4 +271,21 @@ class ProductDTO
     {
         $this->viewCount = $viewCount;
     }
+
+    public function toArray(ProductDTO $product): array
+    {
+        return [
+            'id' => $product->id,
+            'sku' => $product->sku,
+            'title' => $product->title,
+            'brand' => $product->brand,
+            'category' => $product->categoryId,
+            'price' => $product->price,
+            'shortDesc' => $product->shortDescription,
+            'description' => $product->description,
+            'enabled' => $product->enabled,
+            'featured' => $product->featured,
+            'image' => $product->image,
+        ];
+    }
 }

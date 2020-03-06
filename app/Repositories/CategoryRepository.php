@@ -5,7 +5,6 @@ namespace Demoshop\Repositories;
 
 
 use Demoshop\Model\Category;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,7 +27,7 @@ class CategoryRepository
     /**
      * Get all root categories.
      *
-     * @return Builder[]|Collection
+     * @return Collection
      */
     public function getRootCategories(): Collection
     {
@@ -39,7 +38,7 @@ class CategoryRepository
      * Get subcategories for category.
      *
      * @param int $id
-     * @return Builder[]|Collection
+     * @return Collection
      */
     public function getCategoriesForParent(int $id): Collection
     {
@@ -47,26 +46,25 @@ class CategoryRepository
     }
 
     /**
+     * Check if category has subcategories.
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function categoryHasSubcategories(int $id): bool
+    {
+        return Category::query()->where('parent_id', '=', $id)->exists();
+    }
+
+    /**
      * Get category by id.
      *
      * @param int $id
-     * @return Builder|Model
+     * @return Category
      */
     public function getCategoryById(int $id): Model
     {
         return Category::query()->where('id', '=', $id)->first();
-    }
-
-    /**
-     * Get category by code
-     *
-     * @param string $code
-     *
-     * @return Model
-     */
-    public function getCategoryByCode(string $code): Model
-    {
-        return Category::query()->where('code', '=', $code)->first();
     }
 
     /**

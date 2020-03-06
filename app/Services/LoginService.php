@@ -18,10 +18,11 @@ class LoginService
 
     /**
      * LoginService constructor.
+     * @param AdminRepository $adminRepository
      */
-    public function __construct()
+    public function __construct(AdminRepository $adminRepository)
     {
-        $this->adminRepository = ServiceRegistry::get('AdminRepository');
+        $this->adminRepository = $adminRepository;
     }
 
     /**

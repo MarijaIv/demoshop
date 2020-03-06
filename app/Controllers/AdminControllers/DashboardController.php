@@ -23,9 +23,9 @@ class DashboardController extends AdminController
      */
     public function index(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
-        $categoryService = ServiceRegistry::get('CategoryService');
-        $statisticsService = ServiceRegistry::get('StatisticsService');
+        $productService = $this->getProductService();
+        $categoryService = $this->getCategoryService();
+        $statisticsService = $this->getStatisticsService();
 
         $myObj = [
             'amountOfProducts' => $productService->getNumberOfProducts(),

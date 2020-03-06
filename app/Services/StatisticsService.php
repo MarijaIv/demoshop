@@ -2,6 +2,7 @@
 
 namespace Demoshop\Services;
 
+use Demoshop\Repositories\StatisticsRepository;
 use Demoshop\ServiceRegistry\ServiceRegistry;
 
 /**
@@ -9,14 +10,18 @@ use Demoshop\ServiceRegistry\ServiceRegistry;
  */
 class StatisticsService
 {
-    public $statisticsRepository;
+    /**
+     * @var StatisticsRepository
+     */
+    private $statisticsRepository;
 
     /**
      * StatisticsService constructor.
+     * @param StatisticsRepository $statisticsRepository
      */
-    public function __construct()
+    public function __construct(StatisticsRepository $statisticsRepository)
     {
-        $this->statisticsRepository = ServiceRegistry::get('StatisticsRepository');
+        $this->statisticsRepository = $statisticsRepository;
     }
 
 

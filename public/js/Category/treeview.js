@@ -46,7 +46,7 @@ Demoshop.Category.TreeView = class {
         Demoshop.Category.treeView.id = data['id'];
         document.getElementById("title").value = data['title'];
         document.getElementById("parentCategoryInput").value =
-            (data['parentId'] ? data['parentId'] : "No parent category");
+            (data['parentCode'] ? data['parentCode'] : "No parent category");
         document.getElementById("code").value = data['code'];
         document.getElementById("description").value = data['description'];
         document.getElementById("editBtn").disabled = false;
@@ -147,12 +147,12 @@ Demoshop.Category.TreeView = class {
             spanNode.appendChild(name);
             spanNode.id = data[i]['id'];
 
-            if (data[i]['nodes']) {
+            if (data[i]['children'].length > 0) {
                 spanNode.className = 'root';
                 childNode.appendChild(spanNode);
                 let newNode = document.createElement("UL");
                 newNode.className = 'child';
-                this.drawTree(data[i]['nodes'], newNode);
+                this.drawTree(data[i]['children'], newNode);
                 childNode.appendChild(newNode);
             } else {
                 childNode.appendChild(spanNode);

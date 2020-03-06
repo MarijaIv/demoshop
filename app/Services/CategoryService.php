@@ -4,10 +4,9 @@ namespace Demoshop\Services;
 
 
 use Demoshop\DTO\CategoryDTO;
+use Demoshop\Model\Category;
 use Demoshop\Repositories\CategoryRepository;
 use Demoshop\Repositories\ProductsRepository;
-use Demoshop\ServiceRegistry\ServiceRegistry;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,14 +19,15 @@ class CategoryService
     /**
      * @var CategoryRepository
      */
-    public $categoryRepository;
+    private $categoryRepository;
 
     /**
      * CategoryService constructor.
+     * @param CategoryRepository $categoryRepository
      */
-    public function __construct()
+    public function __construct(CategoryRepository $categoryRepository)
     {
-        $this->categoryRepository = ServiceRegistry::get('CategoryRepository');
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -44,12 +44,11 @@ class CategoryService
      * Get category by id.
      *
      * @param int $id
-     * @return array
+     * @return Category
      */
-    public function getCategoryById(int $id): array
+    public function getCategoryById(int $id): Category
     {
-        $category = $this->categoryRepository->getCategoryById($id);
-        return $this->getFormattedCategory($category);
+        return $this->categoryRepository->getCategoryById($id);
     }
 
     /**
@@ -64,9 +63,9 @@ class CategoryService
 
         if ($category->parent_id) {
             $parent = $this->categoryRepository->getCategoryById($category->parent_id);
-            $formattedCategory['parentId'] = ($parent ? $parent->code : '');
+            $formattedCategory['parentCode'] = ($parent ? $parent->code : '');
         } else {
-            $formattedCategory['parentId'] = '';
+            $formattedCategory['parentCode'] = '';
         }
 
         $formattedCategory['title'] = $category->title;
@@ -79,20 +78,23 @@ class CategoryService
     /**
      * Format array for JSON encoding (for treeview).
      *
+     * @param Collection $rootCategories
      * @return array
      */
-    public function getFormattedArray(): array
+    public function formatCategoriesForTreeView(Collection $rootCategories): array
     {
-        $myArray = $this->getAllCategories();
-        $flat = [];
+        $unvisitedCategories = $rootCategories;
         $tree = [];
+        $visitedCategories = [];
 
-        foreach ($myArray as $item) {
-            $flat[$item->id] = $item;
-            if (NULL === $item->parentId) {
-                $tree[] = &$flat[$item->id];
+        while ($category = $unvisitedCategories->shift()) {
+            $visitedCategories[$category['id']] = (new CategoryDTO($category))->toArray();
+            $unvisitedCategories = $unvisitedCategories->merge($this->getCategoriesForParent($category['id']));
+
+            if ($category['parent_id'] === NULL) {
+                $tree[] = &$visitedCategories[$category['id']];
             } else {
-                $flat[$item->parentId]->nodes[] = &$flat[$item->id];
+                $visitedCategories[$category['parent_id']]['children'][] = &$visitedCategories[$category['id']];
             }
         }
 
@@ -100,52 +102,51 @@ class CategoryService
     }
 
     /**
+     * Get subcategories for parent.
+     *
+     * @param int $id
+     * @return Collection
+     */
+    public function getCategoriesForParent(int $id): Collection
+    {
+        return $this->categoryRepository->getCategoriesForParent($id);
+    }
+
+    /**
      * Get all categories.
      *
-     * @return array
+     * @return Collection
      */
-    public function getAllCategories(): array
+    public function getAllCategories(): Collection
     {
-        $categories = $this->categoryRepository->getAllCategories();
-        return $this->getFormattedCategories($categories);
+        return $this->categoryRepository->getAllCategories();
     }
 
     /**
      * Format categories for JSON encoding.
      *
-     * @param $myArray
+     * @param $categories
      * @return array
      */
-    public function getFormattedCategories($myArray): array
+    public function getFormattedCategories($categories): array
     {
-        $formattedArray = [];
+        $formattedCategories = [];
 
-        foreach ($myArray as $item) {
-            $formattedArray[] = new CategoryDTO($item);
+        foreach ($categories as $item) {
+            $formattedCategories[] = new CategoryDTO($item);
         }
 
-        return $formattedArray;
+        return $formattedCategories;
     }
 
     /**
      * Get root categories.
      *
-     * @return Builder[]|Collection
+     * @return Collection
      */
     public function getRootCategories(): Collection
     {
         return $this->categoryRepository->getRootCategories();
-    }
-
-    /**
-     * Get subcategories for parent.
-     *
-     * @param int $id
-     * @return Builder[]|Collection
-     */
-    public function getCategoriesForParent(int $id): Collection
-    {
-        return $this->categoryRepository->getCategoriesForParent($id);
     }
 
     /**
@@ -175,12 +176,12 @@ class CategoryService
     {
         $category = $this->categoryRepository->getCategoryById($id);
         if ($category) {
-            $children = $this->categoryRepository->getCategoriesForParent($category->id);
+            $children = $this->categoryRepository->categoryHasSubcategories($category->id);
 
             $productRepository = new ProductsRepository();
-            $products = $productRepository->getProductsByCategoryId($category->id);
+            $products = $productRepository->categoryHasProducts($category->id);
 
-            return !($children->count() || $products->count());
+            return !($children || $products);
         }
 
         return false;
@@ -194,7 +195,7 @@ class CategoryService
      */
     public function addNewCategory($data): bool
     {
-        if ($this->isRequestDataEmpty($data)) {
+        if ($this->isRequestDataValid($data)) {
             return false;
         }
 
@@ -211,7 +212,7 @@ class CategoryService
      * @param array $data
      * @return bool
      */
-    public function isRequestDataEmpty(array $data): bool
+    public function isRequestDataValid(array $data): bool
     {
         return empty($data['title']) || empty($data['code']) || empty($data['description']);
     }
@@ -224,7 +225,7 @@ class CategoryService
      */
     public function updateCategory($data): bool
     {
-        if ($this->isRequestDataEmpty($data)) {
+        if ($this->isRequestDataValid($data)) {
             return false;
         }
 

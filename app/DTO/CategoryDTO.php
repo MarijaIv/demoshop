@@ -2,6 +2,9 @@
 
 namespace Demoshop\DTO;
 
+use Demoshop\Model\Category;
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * Class CategoryDTO
  * @package Demoshop\DTO
@@ -31,13 +34,13 @@ class CategoryDTO
     /**
      * @var array
      */
-    public $nodes;
+    public $children;
 
     /**
      * CategoryDTO constructor.
-     * @param object $data
+     * @param Category $data
      */
-    public function __construct(object $data)
+    public function __construct(Category $data)
     {
         $this->id = $data['id'];
         $this->parentId = $data['parent_id'];
@@ -130,17 +133,17 @@ class CategoryDTO
     /**
      * @return array
      */
-    public function getNodes(): array
+    public function getChildren(): array
     {
-        return $this->nodes;
+        return $this->children;
     }
 
     /**
-     * @param array $nodes
+     * @param array $children
      */
-    public function setNodes(array $nodes): void
+    public function setChildren(array $children): void
     {
-        $this->nodes = $nodes;
+        $this->children = $children;
     }
 
     /**
@@ -152,7 +155,7 @@ class CategoryDTO
     {
         $formattedChildren = [];
 
-        foreach ($this->nodes as $child) {
+        foreach ($this->children as $child) {
             $formattedChildren[] = $child->toArray();
         }
 
@@ -162,18 +165,18 @@ class CategoryDTO
             'code' => $this->code,
             'title' => $this->title,
             'description' => $this->description,
-            'nodes' => $formattedChildren,
+            'children' => $formattedChildren,
         ];
     }
 
     /**
      * Add child to children array.
      *
-     * @param object $child
+     * @param Category $child
      */
-    public function addChild(object $child): void
+    public function addChild(Category $child): void
     {
-        $child = new CategoryDTO($child);
-        $this->nodes[] = $child;
+        $newChild = new CategoryDTO($child);
+        $this->children[] = $newChild;
     }
 }

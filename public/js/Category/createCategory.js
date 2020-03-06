@@ -100,7 +100,7 @@ Demoshop.Category.CreateCategory = class {
         Demoshop.Category.treeView.drawTree(data, document.getElementById("tree"));
         Demoshop.Category.treeView.expand();
         Demoshop.Category.treeView.display();
-        Demoshop.CategoryMessages.messages.displayInfo("CategoryService added.");
+        Demoshop.CategoryMessages.messages.displayInfo("Category added.");
         Demoshop.Category.createCategory.displayOrCancelAddCategory(false);
     }
 };

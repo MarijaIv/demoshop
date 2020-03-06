@@ -7,7 +7,6 @@ namespace Demoshop\Controllers\AdminControllers;
 use Demoshop\Controllers\AdminController;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
-use Demoshop\ServiceRegistry\ServiceRegistry;
 
 /**
  * Class ProductController
@@ -23,7 +22,7 @@ class ProductController extends AdminController
      */
     public function index(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
         $products = [
             'products' => $productService->getAllProductsFormatted(1),
             'currentPage' => 1,
@@ -41,16 +40,17 @@ class ProductController extends AdminController
      */
     public function addEditProduct(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
         $response = new HTMLResponse('/views/admin/addEditProduct.php');
-        $categoryService = ServiceRegistry::get('CategoryService');
+        $categoryService = $this->getCategoryService();
         $categories = $categoryService->getAllCategories();
+        $categories = $categoryService->getFormattedCategories($categories);
 
         if (isset($request->getGetData()['sku'])) {
             $product = $productService->getProductBySku($request->getGetData()['sku']);
 
             if (!$product) {
-                $myObj = [
+                $addEditViewArguments = [
                     'message' => 'Error! Product with given sku not found.',
                     'products' => $productService->getAllProductsFormatted(1),
                     'currentPage' => 1,
@@ -58,28 +58,16 @@ class ProductController extends AdminController
                 ];
                 $response = new HTMLResponse('/views/admin/product.php');
             } else {
-                $myObj = [
-                    'id' => $product['id'],
-                    'categories' => $categories,
-                    'sku' => $product['sku'],
-                    'title' => $product['title'],
-                    'brand' => $product['brand'],
-                    'category' => $product['category_id'],
-                    'price' => $product['price'],
-                    'shortDesc' => $product['short_description'],
-                    'description' => $product['description'],
-                    'enabled' => $product['enabled'],
-                    'featured' => $product['featured'],
-                    'image' => base64_encode($product['image']),
-                ];
+                $addEditViewArguments = $productService->formatProduct($product);
+                $addEditViewArguments['categories'] = $categories;
             }
         } else {
-            $myObj = [
+            $addEditViewArguments = [
                 'categories' => $categories,
             ];
         }
 
-        $response->setViewArguments($myObj);
+        $response->setViewArguments($addEditViewArguments);
         return $response;
     }
 
@@ -91,14 +79,14 @@ class ProductController extends AdminController
      */
     public function createNewProduct(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
-        $categoryService = ServiceRegistry::get('CategoryService');
+        $productService = $this->getProductService();
+        $categoryService = $this->getCategoryService();
         $response = new HTMLResponse('/views/admin/product.php');
 
         $file = $request->getFile('img');
 
         if ($productService->createNewProduct($request->getPostData(), $file)) {
-            $myObj = [
+            $createProgramViewArguments = [
                 'message' => 'Product insert successful.',
                 'products' => $productService->getAllProductsFormatted(1),
                 'currentPage' => 1,
@@ -106,7 +94,8 @@ class ProductController extends AdminController
             ];
         } else {
             $categories = $categoryService->getAllCategories();
-            $myObj = [
+            $categories = $categoryService->getFormattedCategories($categories);
+            $createProgramViewArguments = [
                 'message' => 'Product insert failed',
                 'categories' => $categories,
             ];
@@ -114,7 +103,7 @@ class ProductController extends AdminController
             $response = new HTMLResponse('/views/admin/addEditProduct.php');
         }
 
-        $response->setViewArguments($myObj);
+        $response->setViewArguments($createProgramViewArguments);
         return $response;
     }
 
@@ -126,42 +115,31 @@ class ProductController extends AdminController
      */
     public function updateProduct(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
-        $categoryService = ServiceRegistry::get('CategoryService');
+        $productService = $this->getProductService();
+        $categoryService = $this->getCategoryService();
         $response = new HTMLResponse('/views/admin/product.php');
 
         $file = $request->getFile('img');
 
         if (!$productService->updateProduct($request->getPostData(), $file)) {
             $categories = $categoryService->getAllCategories();
+            $categories = $categoryService->getFormattedCategories($categories);
             $product = $productService->getProductBySku($request->getPostData()['oldSku']);
 
             if (!$product) {
-                $myObj = [
+                $updateProductViewArguments = [
                     'message' => 'Product update failed.',
                     'categories' => $categories,
                 ];
             } else {
-                $myObj = [
-                    'message' => 'Product update failed.',
-                    'categories' => $categories,
-                    'id' => $product['id'],
-                    'sku' => $product['sku'],
-                    'title' => $product['title'],
-                    'brand' => $product['brand'],
-                    'category' => $product['category_id'],
-                    'price' => $product['price'],
-                    'shortDesc' => $product['short_description'],
-                    'description' => $product['description'],
-                    'enabled' => $product['enabled'],
-                    'featured' => $product['featured'],
-                    'image' => base64_encode($product['image']),
-                ];
+                $updateProductViewArguments = $productService->formatProduct($product);
+                $updateProductViewArguments['message'] = 'Product update failed.';
+                $updateProductViewArguments['categories'] = $categories;
             }
 
             $response = new HTMLResponse('/views/admin/addEditProduct.php');
         } else {
-            $myObj = [
+            $updateProductViewArguments = [
                 'message' => 'Product update successful.',
                 'products' => $productService->getAllProductsFormatted(1),
                 'currentPage' => 1,
@@ -169,7 +147,7 @@ class ProductController extends AdminController
             ];
         }
 
-        $response->setViewArguments($myObj);
+        $response->setViewArguments($updateProductViewArguments);
         return $response;
     }
 
@@ -181,26 +159,26 @@ class ProductController extends AdminController
      */
     public function deleteProduct(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
         $response = new HTMLResponse('/views/admin/product.php');
-        $myObj = [
+        $deleteViewArguments = [
             'message' => 'Product deleted.',
         ];
         $currentPage = $request->getGetData()['currentPage'];
 
         if (!$productService->deleteProduct($request->getGetData()['sku'])) {
-            $myObj['failMessage'] = 'Failed to delete product.';
-            unset($myObj['message']);
+            $deleteViewArguments['failMessage'] = 'Failed to delete product.';
+            unset($deleteViewArguments['message']);
         }
 
         if ($currentPage > $productService->getNumberOfPages()) {
             $currentPage = $productService->getNumberOfPages();
         }
 
-        $myObj['products'] = $productService->getAllProductsFormatted($currentPage);
-        $myObj['currentPage'] = $currentPage;
-        $myObj['numberOfPages'] = $productService->getNumberOfPages();
-        $response->setViewArguments($myObj);
+        $deleteViewArguments['products'] = $productService->getAllProductsFormatted($currentPage);
+        $deleteViewArguments['currentPage'] = $currentPage;
+        $deleteViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $response->setViewArguments($deleteViewArguments);
 
         return $response;
     }
@@ -213,17 +191,17 @@ class ProductController extends AdminController
      */
     public function deleteMultiple(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
         $response = new HTMLResponse('/views/admin/product.php');
         $currentPage = $request->getGetData()['currentPage'];
 
-        if(!empty($request->getPostData())) {
+        if (!empty($request->getPostData())) {
             if (!$productService->deleteMultipleProducts($request->getPostData())) {
-                $myObj = [
+                $deleteViewArguments = [
                     'failMessage' => 'Failed to delete products.',
                 ];
             } else {
-                $myObj = [
+                $deleteViewArguments = [
                     'message' => 'Products deleted.',
                 ];
             }
@@ -233,10 +211,10 @@ class ProductController extends AdminController
             $currentPage = $productService->getNumberOfPages();
         }
 
-        $myObj['products'] = $productService->getAllProductsFormatted($currentPage);
-        $myObj['currentPage'] = $currentPage;
-        $myObj['numberOfPages'] = $productService->getNumberOfPages();
-        $response->setViewArguments($myObj);
+        $deleteViewArguments['products'] = $productService->getAllProductsFormatted($currentPage);
+        $deleteViewArguments['currentPage'] = $currentPage;
+        $deleteViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $response->setViewArguments($deleteViewArguments);
 
         return $response;
     }
@@ -249,19 +227,20 @@ class ProductController extends AdminController
      */
     public function enableSelected(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
         $response = new HTMLResponse('/views/admin/product.php');
 
         if (!$productService->enableProducts($request->getPostData())) {
-            $myObj = [
+            $enableViewArguments = [
                 'failMessage' => 'Failed to enable products.',
             ];
         }
 
-        $myObj['products'] = $productService->getAllProductsFormatted($request->getGetData()['currentPage']);
-        $myObj['currentPage'] = $request->getGetData()['currentPage'];
-        $myObj['numberOfPages'] = $productService->getNumberOfPages();
-        $response->setViewArguments($myObj);
+        $enableViewArguments['products'] =
+            $productService->getAllProductsFormatted($request->getGetData()['currentPage']);
+        $enableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
+        $enableViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $response->setViewArguments($enableViewArguments);
 
         return $response;
     }
@@ -274,19 +253,20 @@ class ProductController extends AdminController
      */
     public function disableSelected(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
         $response = new HTMLResponse('/views/admin/product.php');
 
         if (!$productService->disableProducts($request->getPostData())) {
-            $myObj = [
+            $disableViewArguments = [
                 'failMessage' => 'Failed to disable products.',
             ];
         }
 
-        $myObj['products'] = $productService->getAllProductsFormatted($request->getGetData()['currentPage']);
-        $myObj['currentPage'] = $request->getGetData()['currentPage'];
-        $myObj['numberOfPages'] = $productService->getNumberOfPages();
-        $response->setViewArguments($myObj);
+        $disableViewArguments['products'] =
+            $productService->getAllProductsFormatted($request->getGetData()['currentPage']);
+        $disableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
+        $disableViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $response->setViewArguments($disableViewArguments);
 
         return $response;
     }
@@ -299,19 +279,20 @@ class ProductController extends AdminController
      */
     public function enableOrDisableProduct(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
         $response = new HTMLResponse('/views/admin/product.php');
 
         if (!$productService->enableOrDisableProduct($request->getGetData()['sku'])) {
-            $myObj = [
+            $enableDisableViewArguments = [
                 'failMessage' => 'Failed to change enable.',
             ];
         }
 
-        $myObj['products'] = $productService->getAllProductsFormatted($request->getGetData()['currentPage']);
-        $myObj['currentPage'] = $request->getGetData()['currentPage'];
-        $myObj['numberOfPages'] = $productService->getNumberOfPages();
-        $response->setViewArguments($myObj);
+        $enableDisableViewArguments['products'] =
+            $productService->getAllProductsFormatted($request->getGetData()['currentPage']);
+        $enableDisableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
+        $enableDisableViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $response->setViewArguments($enableDisableViewArguments);
 
         return $response;
     }
@@ -324,14 +305,14 @@ class ProductController extends AdminController
      */
     public function firstPage(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
-        $myObj = [
+        $productService = $this->getProductService();
+        $firstPageViewArguments = [
             'products' => $productService->getAllProductsFormatted(1),
             'currentPage' => 1,
             'numberOfPages' => $productService->getNumberOfPages(),
         ];
 
-        return new HTMLResponse('/views/admin/product.php', $myObj);
+        return new HTMLResponse('/views/admin/product.php', $firstPageViewArguments);
     }
 
     /**
@@ -342,7 +323,7 @@ class ProductController extends AdminController
      */
     public function nextPage(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
 
         if ($request->getGetData()['currentPage'] >= $productService->getNumberOfPages()) {
             $currentPage = $productService->getNumberOfPages();
@@ -350,13 +331,13 @@ class ProductController extends AdminController
             $currentPage = $request->getGetData()['currentPage'] + 1;
         }
 
-        $myObj = [
+        $nextPageViewArguments = [
             'products' => $productService->getAllProductsFormatted($currentPage),
             'currentPage' => $currentPage,
             'numberOfPages' => $productService->getNumberOfPages(),
         ];
 
-        return new HTMLResponse('/views/admin/product.php', $myObj);
+        return new HTMLResponse('/views/admin/product.php', $nextPageViewArguments);
     }
 
     /**
@@ -367,14 +348,14 @@ class ProductController extends AdminController
      */
     public function lastPage(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
-        $myObj = [
+        $productService = $this->getProductService();
+        $lastPageViewArguments = [
             'products' => $productService->getAllProductsFormatted($productService->getNumberOfPages()),
             'currentPage' => $productService->getNumberOfPages(),
             'numberOfPages' => $productService->getNumberOfPages(),
         ];
 
-        return new HTMLResponse('/views/admin/product.php', $myObj);
+        return new HTMLResponse('/views/admin/product.php', $lastPageViewArguments);
     }
 
     /**
@@ -385,7 +366,7 @@ class ProductController extends AdminController
      */
     public function prevPage(Request $request): HTMLResponse
     {
-        $productService = ServiceRegistry::get('ProductsService');
+        $productService = $this->getProductService();
 
         if ($request->getGetData()['currentPage'] === '1') {
             $currentPage = 1;
@@ -393,12 +374,12 @@ class ProductController extends AdminController
             $currentPage = $request->getGetData()['currentPage'] - 1;
         }
 
-        $myObj = [
+        $prevPageViewArguments = [
             'products' => $productService->getAllProductsFormatted($currentPage),
             'currentPage' => $currentPage,
             'numberOfPages' => $productService->getNumberOfPages(),
         ];
 
-        return new HTMLResponse('/views/admin/product.php', $myObj);
+        return new HTMLResponse('/views/admin/product.php', $prevPageViewArguments);
     }
 }

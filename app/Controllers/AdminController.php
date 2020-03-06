@@ -8,7 +8,7 @@ namespace Demoshop\Controllers;
  * Class AdminController
  * @package Demoshop\Controllers
  */
-abstract class AdminController
+abstract class AdminController extends BaseController
 {
 
 }

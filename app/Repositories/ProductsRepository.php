@@ -70,6 +70,17 @@ class ProductsRepository
     }
 
     /**
+     * Check if category has products.
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function categoryHasProducts(int $id): bool
+    {
+        return Product::query()->where('category_id', '=', $id)->exists();
+    }
+
+    /**
      * Get products for current page.
      *
      * @param int $offset

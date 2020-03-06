@@ -26,10 +26,11 @@ class ProductService
 
     /**
      * ProductService constructor.
+     * @param ProductsRepository $productsRepository
      */
-    public function __construct()
+    public function __construct(ProductsRepository $productsRepository)
     {
-        $this->productsRepository = ServiceRegistry::get('ProductsRepository');
+        $this->productsRepository = $productsRepository;
     }
 
     /**
@@ -260,6 +261,12 @@ class ProductService
         return $this->productsRepository->getProductBySku($sku);
     }
 
+    public function formatProduct(Model $product): array
+    {
+        $productDto = new ProductDTO($product);
+        return $productDto->toArray($productDto);
+    }
+
     /**
      * Delete product by sku.
      *
@@ -376,29 +383,99 @@ class ProductService
     /**
      * Get products for category display.
      *
+     * @param array $data
+     * @return array
+     */
+    public function getDataForCategoryDisplay(array $data): array
+    {
+        $categoryService = ServiceRegistry::get('CategoryService');
+
+        if (!$data['id']) {
+            return [];
+        }
+
+        if (!$categoryService->getCategoryById($data['id'])) {
+            return [];
+        }
+
+        $products = $this->getProductsForCategory($data['id']);
+
+        if (!$data['sorting']) {
+            $data['sorting'] = 'priceDesc';
+        }
+
+        $products = $this->sortProducts($products, $data['sorting']);
+
+        if (!$data['productsPerPage']) {
+            $data['productsPerPage'] = 5;
+        }
+
+        $numberOfPages = ceil(count($products) / $data['productsPerPage']) ?: 1;
+
+        if (!$data['currentPage']) {
+            $data['currentPage'] = 1;
+        }
+
+        if($data['pagination'] === '<<') {
+            $data['currentPage'] = 1;
+        }
+
+        if (($data['pagination'] === '<') && $data['currentPage'] !== '1') {
+            $data['currentPage']--;
+        }
+
+        if($data['pagination'] === '>>') {
+            $data['currentPage'] = $numberOfPages;
+        }
+
+        if (($data['pagination'] === '>') && $data['currentPage'] !== (string)$numberOfPages) {
+            $data['currentPage']++;
+        }
+
+        $offset = ($data['currentPage'] - 1) * $data['productsPerPage'];
+
+        $products = array_slice($products, $offset, $data['productsPerPage']);
+
+        return [
+            'products' => $products,
+            'currentPage' => $data['currentPage'],
+            'numberOfPages' => $numberOfPages,
+            'sorting' => $data['sorting'],
+            'productsPerPage' => $data['productsPerPage'],
+        ];
+    }
+
+    /**
+     * Get products for category and it's subcategories.
+     *
      * @param int $id
      * @return array
      */
-    public function getProductsForCategoryDisplay(int $id): array
+    public function getProductsForCategory(int $id): array
     {
         $formattedProducts = [];
 
         $categoryService = ServiceRegistry::get('CategoryService');
-        $category = $categoryService->getCategoryById($id);
 
-        if ($category['parentId']) {
-            $products = $this->getProductsByCategoryId($id);
-            foreach ($products as $item) {
-                $formattedProducts[] = new ProductDTO($item);
-            }
-        } else {
-            $products = $this->getProductsByCategoryId($id);
-            foreach ($products as $item) {
-                $formattedProducts[] = new ProductDTO($item);
-            }
+        $products = $this->getProductsByCategoryId($id);
+        foreach ($products as $item) {
+            $formattedProducts[] = [
+                'id' => $item['id'],
+                'categoryId' => $item['category_id'],
+                'sku' => $item['sku'],
+                'title' => $item['title'],
+                'brand' => $item['brand'],
+                'price' => $item['price'],
+                'shortDescription' => $item['short_description'],
+                'description' => $item['description'],
+                'image' => base64_encode($item['image']),
+            ];
+        }
+
+        if ($categoryService->getCategoriesForParent($id)) {
             $children = $categoryService->getCategoriesForParent($id);
             foreach ($children as $child) {
-                $products = $this->getProductsForCategoryDisplay($child['id']);
+                $products = $this->getProductsForCategory($child['id']);
                 foreach ($products as $product) {
                     $formattedProducts[] = $product;
                 }
@@ -414,8 +491,48 @@ class ProductService
      * @param int $id
      * @return Collection
      */
-    public function getProductsByCategoryId(int $id): Collection
+    public
+    function getProductsByCategoryId(int $id): Collection
     {
         return $this->productsRepository->getProductsByCategoryId($id);
+    }
+
+    /**
+     * Sort products by sort order.
+     *
+     * @param array $products
+     * @param string $sortOrder
+     * @return array
+     */
+    public
+    function sortProducts(array $products, string $sortOrder): array
+    {
+        if ($sortOrder === 'priceDesc') {
+            usort($products, static function ($a, $b) {
+                return $a['price'] < $b['price'];
+            });
+        } else if ($sortOrder === 'priceAsc') {
+            usort($products, static function ($a, $b) {
+                return $a['price'] > $b['price'];
+            });
+        } else if ($sortOrder === 'titleDesc') {
+            usort($products, static function ($a, $b) {
+                return $a['title'] < $b['title'];
+            });
+        } else if ($sortOrder === 'titleAsc') {
+            usort($products, static function ($a, $b) {
+                return $a['title'] > $b['title'];
+            });
+        } else if ($sortOrder === 'brandDesc') {
+            usort($products, static function ($a, $b) {
+                return $a['brand'] < $b['brand'];
+            });
+        } else if ($sortOrder === 'brandAsc') {
+            usort($products, static function ($a, $b) {
+                return $a['brand'] > $b['brand'];
+            });
+        }
+
+        return $products;
     }
 }

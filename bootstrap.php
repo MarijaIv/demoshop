@@ -28,18 +28,6 @@ try {
     ServiceRegistry::register('Cookie', static function () {
         return new CookieManager();
     });
-    ServiceRegistry::register('CategoryService', static function () {
-        return new CategoryService();
-    });
-    ServiceRegistry::register('LoginService', static function () {
-        return new LoginService();
-    });
-    ServiceRegistry::register('ProductsService', static function () {
-        return new ProductService();
-    });
-    ServiceRegistry::register('StatisticsService', static function () {
-        return new StatisticsService();
-    });
     ServiceRegistry::register('AdminRepository', static function () {
         return new AdminRepository();
     });
@@ -51,6 +39,18 @@ try {
     });
     ServiceRegistry::register('StatisticsRepository', static function () {
         return new StatisticsRepository();
+    });
+    ServiceRegistry::register('CategoryService', static function () {
+        return new CategoryService(Demoshop\ServiceRegistry\ServiceRegistry::get('CategoryRepository'));
+    });
+    ServiceRegistry::register('LoginService', static function () {
+        return new LoginService(Demoshop\ServiceRegistry\ServiceRegistry::get('AdminRepository'));
+    });
+    ServiceRegistry::register('ProductsService', static function () {
+        return new ProductService(Demoshop\ServiceRegistry\ServiceRegistry::get('ProductsRepository'));
+    });
+    ServiceRegistry::register('StatisticsService', static function () {
+        return new StatisticsService(Demoshop\ServiceRegistry\ServiceRegistry::get('StatisticsRepository'));
     });
 } catch (ServiceAlreadyRegisteredException $e) {
     echo "<h1 style=\"color:red\">{$e->getMessage()}</h1>";
