@@ -160,45 +160,6 @@ class ProductService
     }
 
     /**
-     * @param array $data
-     */
-    private static function setEnabledAndFeaturedValue(array &$data): void
-    {
-        $data['enabled'] = $data['enabled'] === 'on' ? 1 : 0;
-        $data['featured'] = $data['featured'] === 'on' ? 1 : 0;
-    }
-
-    /**
-     * Check image characteristics.
-     *
-     * @param array $file
-     * @return bool
-     */
-    private static function checkImageCharacteristics(array $file): bool
-    {
-        $imageSize = getimagesize($file['tmp_name']);
-
-        if ($imageSize[0] < 600) {
-            return false;
-        }
-
-        $heightWidthRatio = $imageSize[0] / $imageSize[1];
-
-        return !($heightWidthRatio < self::MIN_HEIGHT_WIDTH_RATIO || $heightWidthRatio > self::MAX_HEIGHT_WIDTH_RATIO);
-    }
-
-    /**
-     * Save image to /img directory.
-     *
-     * @param array $file
-     */
-    private static function saveFile(array $file): void
-    {
-        $targetFile = __DIR__ . '/../../public/img/' . basename($file['name']);
-        move_uploaded_file($file['tmp_name'], $targetFile);
-    }
-
-    /**
      * Update product.
      *
      * @param array $data
@@ -264,7 +225,7 @@ class ProductService
     public function formatProduct(Model $product): array
     {
         $productDto = new ProductDTO($product);
-        return $productDto->toArray($productDto);
+        return $productDto->toArray();
     }
 
     /**
@@ -400,48 +361,14 @@ class ProductService
 
         $products = $this->getProductsForCategory($data['id']);
 
-        if (!$data['sorting']) {
-            $data['sorting'] = 'priceDesc';
-        }
-
-        $products = $this->sortProducts($products, $data['sorting']);
-
-        if (!$data['productsPerPage']) {
-            $data['productsPerPage'] = 5;
-        }
-
-        $numberOfPages = ceil(count($products) / $data['productsPerPage']) ?: 1;
-
-        if (!$data['currentPage']) {
-            $data['currentPage'] = 1;
-        }
-
-        if($data['pagination'] === '<<') {
-            $data['currentPage'] = 1;
-        }
-
-        if (($data['pagination'] === '<') && $data['currentPage'] !== '1') {
-            $data['currentPage']--;
-        }
-
-        if($data['pagination'] === '>>') {
-            $data['currentPage'] = $numberOfPages;
-        }
-
-        if (($data['pagination'] === '>') && $data['currentPage'] !== (string)$numberOfPages) {
-            $data['currentPage']++;
-        }
-
-        $offset = ($data['currentPage'] - 1) * $data['productsPerPage'];
-
-        $products = array_slice($products, $offset, $data['productsPerPage']);
+        $formattedData = $this->formatProducts($products, $data);
 
         return [
-            'products' => $products,
-            'currentPage' => $data['currentPage'],
-            'numberOfPages' => $numberOfPages,
-            'sorting' => $data['sorting'],
-            'productsPerPage' => $data['productsPerPage'],
+            'products' => $formattedData['products'],
+            'currentPage' => $formattedData['currentPage'],
+            'numberOfPages' => $formattedData['numberOfPages'],
+            'sorting' => $formattedData['sorting'],
+            'productsPerPage' => $formattedData['productsPerPage'],
         ];
     }
 
@@ -498,14 +425,55 @@ class ProductService
     }
 
     /**
+     * Format products for category or search display.
+     *
+     * @param array $products
+     * @param array $data
+     * @return array
+     */
+    public function formatProducts(array $products, array $data): array
+    {
+        if (!$data['sorting']) {
+            $data['sorting'] = 'priceDesc';
+        }
+
+        if ($data['sorting'] !== 'relevance') {
+            $products = $this->sortProducts($products, $data['sorting']);
+        }
+
+        if (!$data['productsPerPage']) {
+            $data['productsPerPage'] = 5;
+        }
+
+        $numberOfPages = ceil(count($products) / $data['productsPerPage']) ?: 1;
+
+        if (!$data['currentPage']) {
+            $data['currentPage'] = 1;
+        }
+
+        $currentPage = $this->setPage($data, $numberOfPages);
+
+        $offset = ($currentPage - 1) * $data['productsPerPage'];
+
+        $products = array_slice($products, $offset, $data['productsPerPage']);
+
+        return [
+            'products' => $products,
+            'numberOfPages' => $numberOfPages,
+            'currentPage' => $currentPage,
+            'sorting' => $data['sorting'],
+            'productsPerPage' => $data['productsPerPage'],
+        ];
+    }
+
+    /**
      * Sort products by sort order.
      *
      * @param array $products
      * @param string $sortOrder
      * @return array
      */
-    public
-    function sortProducts(array $products, string $sortOrder): array
+    public function sortProducts(array $products, string $sortOrder): array
     {
         if ($sortOrder === 'priceDesc') {
             usort($products, static function ($a, $b) {
@@ -517,22 +485,201 @@ class ProductService
             });
         } else if ($sortOrder === 'titleDesc') {
             usort($products, static function ($a, $b) {
-                return $a['title'] < $b['title'];
+                return strtolower($a['title']) < strtolower($b['title']);
             });
         } else if ($sortOrder === 'titleAsc') {
             usort($products, static function ($a, $b) {
-                return $a['title'] > $b['title'];
+                return strtolower($a['title']) > strtolower($b['title']);
             });
         } else if ($sortOrder === 'brandDesc') {
             usort($products, static function ($a, $b) {
-                return $a['brand'] < $b['brand'];
+                return strtolower($a['brand']) < strtolower($b['brand']);
             });
         } else if ($sortOrder === 'brandAsc') {
             usort($products, static function ($a, $b) {
-                return $a['brand'] > $b['brand'];
+                return strtolower($a['brand']) > strtolower($b['brand']);
             });
         }
 
         return $products;
     }
+
+    /**
+     * Set current page.
+     *
+     * @param array $data
+     * @param int $numberOfPages
+     * @return int
+     */
+    public function setPage(array $data, int $numberOfPages): int
+    {
+        if ($data['pagination'] === '<<') {
+            $data['currentPage'] = 1;
+        }
+
+        if (($data['pagination'] === '<') && $data['currentPage'] !== '1') {
+            $data['currentPage']--;
+        }
+
+        if ($data['pagination'] === '>>') {
+            $data['currentPage'] = $numberOfPages;
+        }
+
+        if (($data['pagination'] === '>') && $data['currentPage'] !== (string)$numberOfPages) {
+            $data['currentPage']++;
+        }
+
+        if($data['currentPage'] > $numberOfPages) {
+            $data['currentPage'] = 1;
+        }
+
+        return $data['currentPage'];
+    }
+
+    /**
+     * Search products.
+     *
+     * @param array $data
+     * @return array
+     */
+    public function searchProducts(array $data): array
+    {
+        $formattedProducts = [];
+        $products = [];
+
+        if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
+                && empty($data['maxPrice']) && empty($data['minPrice']))) {
+            $products = $this->getProductsByKeyword($data['search']);
+
+            foreach ($products as $product) {
+                $formattedProducts[] = (new ProductDTO($product))->toArray();
+            }
+
+            if (empty($data['sorting'])) {
+                $data['sorting'] = 'relevance';
+            }
+
+            $formattedData = $this->formatProducts($formattedProducts, $data);
+        } else {
+            if (!empty($data['keyword'])) {
+                $products = $this->getProductsByKeyword($data['keyword']);
+            }
+
+            if(!empty($data['category'])) {
+                if(empty($products)) {
+                    $products = $this->productsRepository->getProductsByCategoryId($data['category']);
+                } else {
+                    foreach($products as $productKey => $product) {
+                        if((string)$product['category_id'] !== $data['category']) {
+                            unset($products[$productKey]);
+                        }
+                    }
+                }
+            }
+
+            if(!empty($data['maxPrice'])) {
+                if(empty($products)) {
+                    $products = $this->productsRepository->getProductsMaxPrice($data['maxPrice']);
+                } else {
+                    foreach ($products as $productKey => $product) {
+                        if($product['price'] > $data['maxPrice']) {
+                            unset($products[$productKey]);
+                        }
+                    }
+                }
+            }
+
+            if(!empty($data['minPrice'])) {
+                if(empty($products)) {
+                    $products = $this->productsRepository->getProductsMinPrice($data['minPrice']);
+                } else {
+                    foreach ($products as $productKey => $product) {
+                        if($product['price'] < $data['minPrice']) {
+                            unset($products[$productKey]);
+                        }
+                    }
+                }
+            }
+
+            foreach ($products as $product) {
+                $formattedProducts[] = (new ProductDTO($product))->toArray();
+            }
+
+            $formattedData = $this->formatProducts($formattedProducts, $data);
+        }
+
+        return [
+            'products' => $formattedData['products'],
+            'numberOfPages' => $formattedData['numberOfPages'],
+            'currentPage' => $formattedData['currentPage'],
+            'sorting' => $formattedData['sorting'],
+            'productsPerPage' => $formattedData['productsPerPage'],
+        ];
+    }
+
+    /**
+     * Get products by keyword.
+     *
+     * @param string $keyword
+     * @return Collection
+     */
+    public function getProductsByKeyword(string $keyword): Collection
+    {
+        $products = $this->productsRepository->getProductsByTitle($keyword);
+        $products = $products->merge($this->productsRepository->getProductsByBrand($keyword));
+        /** @var CategoryService $categoryService */
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $categories = $categoryService->getCategoriesByTitle($keyword);
+
+        foreach ($categories as $category) {
+            $products = $products->merge($this->productsRepository->getProductsByCategoryId($category['id']));
+        }
+
+        $products = $products->merge($this->productsRepository->getProductsByShortDesc($keyword));
+        $products = $products->merge($this->productsRepository->getProductsByDescription($keyword));
+
+        return $products;
+    }
+
+    /**
+     * Set product enable and featured value.
+     *
+     * @param array $data
+     */
+    private static function setEnabledAndFeaturedValue(array &$data): void
+    {
+        $data['enabled'] = $data['enabled'] === 'on' ? 1 : 0;
+        $data['featured'] = $data['featured'] === 'on' ? 1 : 0;
+    }
+
+    /**
+     * Check image characteristics.
+     *
+     * @param array $file
+     * @return bool
+     */
+    private static function checkImageCharacteristics(array $file): bool
+    {
+        $imageSize = getimagesize($file['tmp_name']);
+
+        if ($imageSize[0] < 600) {
+            return false;
+        }
+
+        $heightWidthRatio = $imageSize[0] / $imageSize[1];
+
+        return !($heightWidthRatio < self::MIN_HEIGHT_WIDTH_RATIO || $heightWidthRatio > self::MAX_HEIGHT_WIDTH_RATIO);
+    }
+
+    /**
+     * Save image to /img directory.
+     *
+     * @param array $file
+     */
+    private static function saveFile(array $file): void
+    {
+        $targetFile = __DIR__ . '/../../public/img/' . basename($file['name']);
+        move_uploaded_file($file['tmp_name'], $targetFile);
+    }
+
 }

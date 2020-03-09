@@ -232,4 +232,70 @@ class ProductsRepository
     {
         return Product::query()->where('featured', '=', 1)->get();
     }
+
+    /**
+     * Get products where title is like keyword.
+     *
+     * @param string $keyword
+     * @return Collection
+     */
+    public function getProductsByTitle(string $keyword): Collection
+    {
+        return Product::query()->where('title', 'like', '%' . $keyword . '%')->get();
+    }
+
+    /**
+     * Get products where brand contains keyword.
+     *
+     * @param string $keyword
+     * @return Collection
+     */
+    public function getProductsByBrand(string $keyword): Collection
+    {
+        return Product::query()->where('brand', 'like', '%' . $keyword . '%')->get();
+    }
+
+    /**
+     * Get products where short description contains keyword.
+     *
+     * @param string $keyword
+     * @return Collection
+     */
+    public function getProductsByShortDesc(string $keyword): Collection
+    {
+        return Product::query()->where('short_description', 'like', '%' . $keyword . '%')->get();
+    }
+
+    /**
+     * Get products where description contains keyword.
+     *
+     * @param string $keyword
+     * @return Collection
+     */
+    public function getProductsByDescription(string $keyword): Collection
+    {
+        return Product::query()->where('description', 'like', '%' . $keyword . '%')->get();
+    }
+
+    /**
+     * Get products where price is less then maxPrice.
+     *
+     * @param float $maxPrice
+     * @return Collection
+     */
+    public function getProductsMaxPrice(float $maxPrice): Collection
+    {
+        return Product::query()->where('price', '<', $maxPrice)->get();
+    }
+
+    /**
+     * Get products where price is greater then minPrice.
+     *
+     * @param float $minPrice
+     * @return Collection
+     */
+    public function getProductsMinPrice(float $minPrice): Collection
+    {
+        return Product::query()->where('price', '>', $minPrice)->get();
+    }
 }

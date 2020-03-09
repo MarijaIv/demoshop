@@ -117,9 +117,9 @@ class CategoryService
      *
      * @return Collection
      */
-    public function getAllCategories(): Collection
+    public function getCategories(): Collection
     {
-        return $this->categoryRepository->getAllCategories();
+        return $this->categoryRepository->getCategories();
     }
 
     /**
@@ -235,5 +235,16 @@ class CategoryService
 
         $this->categoryRepository->updateCategory($data);
         return true;
+    }
+
+    /**
+     * Get categories where title contains keyword.
+     *
+     * @param string $keyword
+     * @return Collection
+     */
+    public function getCategoriesByTitle(string $keyword): Collection
+    {
+        return $this->categoryRepository->getCategoriesByTitle($keyword);
     }
 }

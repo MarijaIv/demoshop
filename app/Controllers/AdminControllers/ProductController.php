@@ -43,7 +43,7 @@ class ProductController extends AdminController
         $productService = $this->getProductService();
         $response = new HTMLResponse('/views/admin/addEditProduct.php');
         $categoryService = $this->getCategoryService();
-        $categories = $categoryService->getAllCategories();
+        $categories = $categoryService->getCategories();
         $categories = $categoryService->getFormattedCategories($categories);
 
         if (isset($request->getGetData()['sku'])) {
@@ -93,7 +93,7 @@ class ProductController extends AdminController
                 'numberOfPages' => $productService->getNumberOfPages(),
             ];
         } else {
-            $categories = $categoryService->getAllCategories();
+            $categories = $categoryService->getCategories();
             $categories = $categoryService->getFormattedCategories($categories);
             $createProgramViewArguments = [
                 'message' => 'Product insert failed',
@@ -122,7 +122,7 @@ class ProductController extends AdminController
         $file = $request->getFile('img');
 
         if (!$productService->updateProduct($request->getPostData(), $file)) {
-            $categories = $categoryService->getAllCategories();
+            $categories = $categoryService->getCategories();
             $categories = $categoryService->getFormattedCategories($categories);
             $product = $productService->getProductBySku($request->getPostData()['oldSku']);
 

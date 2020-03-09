@@ -6,6 +6,15 @@
  * @var string $sorting
  * @var int $productsPerPage
  * @var array $products
+ * @var bool $searchOrCategory
+ * @var array $optionCategories
+ * @var int $id
+ * @var string $search
+ * @var string $keyword
+ * @var string $maxPrice
+ * @var string $minPrice
+ * @var string $selectedCategory
+ * @var string $message
  */
 ?>
 <!DOCTYPE html>
@@ -29,20 +38,30 @@
     </div>
 </div>
 <div class="content">
-    <form method="get" action="/index.php" class="products-display">
+    <div class="products-configurations">
         <?php
-        if (!empty($products)) {
-            echo '<input type="hidden" name="controller" value="frontProduct">
+        if (!$searchOrCategory) {
+            echo '<form method="get" action="/index.php" class="products-display">
+                <input type="hidden" name="controller" value="frontProduct">
                 <input type="hidden" name="action" value="listProducts">
-                <input type="hidden" name="id" value="' . $products[0]['categoryId'] . '">';
+                <input type="hidden" name="id" value="' . $id . '">';
             require_once __DIR__ . '/configuration.php';
+            echo '</form>';
+        } else {
+            echo '<form method="get" action="/index.php" class="search-criteria">
+                <input type="hidden" name="controller" value="productSearch">
+                <input type="hidden" name="action" value="index">
+                <input type="hidden" name="search" value="' . $search . '">';
+            require_once __DIR__ . '/searchCriteria.php';
+            require_once __DIR__ . '/configuration.php';
+            echo '</form>';
         }
         ?>
-    </form>
+    </div>
     <div class="all-products">
         <?php
         if (empty($products)) {
-            echo '<label class="empty-message">This category is empty.</label>';
+            echo '<label class="empty-message">'. $message . '</label>';
         }
 
         foreach ($products as $item) {

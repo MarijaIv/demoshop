@@ -1,9 +1,9 @@
 <form class="search-box" action="/index.php" method="get">
     <label for="search"></label>
-    <input type="search" id="search" name="search" value="Search product..." class="search-field">
+    <input type="search" id="search" name="search" placeholder="Search product..." class="search-field">
     <input type="hidden" name="controller" value="productSearch">
     <input type="hidden" name="action" value="index">
-    <input type="submit" value="OK" class="search-ok">
+    <input type="submit" value="&#x1f50d" class="search-ok">
 </form>
 
 <?php

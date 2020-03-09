@@ -4,6 +4,8 @@
 namespace Demoshop\DTO;
 
 
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * Class ProductDTO
  * @package Demoshop\DTO
@@ -61,9 +63,9 @@ class ProductDTO
 
     /**
      * ProductDTO constructor.
-     * @param object $data
+     * @param Model $data
      */
-    public function __construct(object $data)
+    public function __construct(Model $data)
     {
         $this->id = $data['id'];
         $this->categoryId = $data['category_id'];
@@ -272,20 +274,20 @@ class ProductDTO
         $this->viewCount = $viewCount;
     }
 
-    public function toArray(ProductDTO $product): array
+    public function toArray(): array
     {
         return [
-            'id' => $product->id,
-            'sku' => $product->sku,
-            'title' => $product->title,
-            'brand' => $product->brand,
-            'category' => $product->categoryId,
-            'price' => $product->price,
-            'shortDesc' => $product->shortDescription,
-            'description' => $product->description,
-            'enabled' => $product->enabled,
-            'featured' => $product->featured,
-            'image' => $product->image,
+            'id' => $this->id,
+            'sku' => $this->sku,
+            'title' => $this->title,
+            'brand' => $this->brand,
+            'category' => $this->categoryId,
+            'price' => $this->price,
+            'shortDescription' => $this->shortDescription,
+            'description' => $this->description,
+            'enabled' => $this->enabled,
+            'featured' => $this->featured,
+            'image' => $this->image,
         ];
     }
 }

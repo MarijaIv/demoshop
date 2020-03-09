@@ -15,13 +15,40 @@ use Demoshop\HTTP\Request;
 class ProductSearchController extends FrontController
 {
     /**
-     * Render searchResult.php page.
+     * Render search results.
      *
      * @param Request $request
      * @return HTMLResponse
      */
-    public function index(Request $request) : HTMLResponse
+    public function index(Request $request): HTMLResponse
     {
-        return new HTMLResponse('/views/visitor/categoryDisplay.php');
+        $productService = $this->getProductService();
+        $categoryService = $this->getCategoryService();
+        $categories = $categoryService->getRootCategories();
+        $categories = $categoryService->formatCategoriesForTreeView($categories);
+        $optionCategories = $categoryService->getCategories();
+        $optionCategories = $categoryService->getFormattedCategories($optionCategories);
+
+        $searchProducts = $productService->searchProducts($request->getGetData());
+
+        $searchArguments = [
+            'optionCategories' => $optionCategories,
+            'categories' => $categories,
+            'searchOrCategory' => 1,
+            'products' => $searchProducts['products'],
+            'numberOfPages' => $searchProducts['numberOfPages'],
+            'currentPage' => $searchProducts['currentPage'],
+            'sorting' => $searchProducts['sorting'],
+            'productsPerPage' => $searchProducts['productsPerPage'],
+            'id' => $request->getGetData()['id'],
+            'search' => $request->getGetData()['search'],
+            'keyword' => $request->getGetData()['keyword'],
+            'maxPrice' => $request->getGetData()['maxPrice'],
+            'minPrice' => $request->getGetData()['minPrice'],
+            'selectedCategory' => $request->getGetData()['category'],
+            'message' => 'No search results.',
+        ];
+
+        return new HTMLResponse('/views/visitor/categoryDisplay.php', $searchArguments);
     }
 }

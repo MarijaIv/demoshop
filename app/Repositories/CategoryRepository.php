@@ -83,7 +83,7 @@ class CategoryRepository
      *
      * @return Collection
      */
-    public function getAllCategories(): Collection
+    public function getCategories(): Collection
     {
         return Category::query()->get();
     }
@@ -146,5 +146,16 @@ class CategoryRepository
     public function categoryExistsCode(string $code): bool
     {
         return Category::query()->where('code', '=', $code)->exists();
+    }
+
+    /**
+     * Get categories where title contains keyword.
+     *
+     * @param string $keyword
+     * @return Collection
+     */
+    public function getCategoriesByTitle(string $keyword): Collection
+    {
+        return Category::query()->where('title', 'like', '%'. $keyword . '%')->get();
     }
 }

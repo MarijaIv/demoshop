@@ -51,7 +51,7 @@ class CategoryController extends AdminController
     public function listAllCategories(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
-        $categories = $categoryService->getAllCategories();
+        $categories = $categoryService->getCategories();
         $categories = $categoryService->getFormattedCategories($categories);
 
         return new JSONResponse($categories);
@@ -104,7 +104,8 @@ class CategoryController extends AdminController
     public function addNewCategory(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
-        $category = json_decode($request->getPostData()['jsonString'], true, 512, JSON_THROW_ON_ERROR);
+        $category = json_decode(file_get_contents('php://input'), true,
+            512, JSON_THROW_ON_ERROR);
 
         if (!$categoryService->addNewCategory($category)) {
             $json = new JSONResponse(['message' => 'Failed to insert new category.']);
@@ -127,7 +128,8 @@ class CategoryController extends AdminController
     {
         $categoryService = $this->getCategoryService();
 
-        $category = json_decode($request->getGetData()['jsonString'], true, 512, JSON_THROW_ON_ERROR);
+        $category = json_decode(file_get_contents('php://input'), true,
+            512, JSON_THROW_ON_ERROR);
         if (!$categoryService->updateCategory($category)) {
             $json = new JSONResponse(['Failed to update category.']);
             $json->setStatus(400);

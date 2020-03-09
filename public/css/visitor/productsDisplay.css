@@ -1,8 +1,14 @@
 .products-display {
     display: flex;
     flex-direction: row;
+    width: 100%;
     justify-content: space-evenly;
     margin-top: 30px;
+}
+
+.products-configurations {
+    display: flex;
+    flex-direction: column;
 }
 
 .sort-by {
@@ -37,4 +43,25 @@
 
 .page-button:hover {
     background-color: #22B14C;
+}
+
+.search-criteria {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 30px;
+    border-bottom: 3px solid darkgreen;
+}
+
+h2 {
+    padding-left: 40px;
+    font: 30px bold Serif;
+}
+
+.search-criteria-labels {
+    font: 18px Serif;
+}
+
+.search-criteria-input {
+    font: 18px Serif;
+    width: 200px
 }

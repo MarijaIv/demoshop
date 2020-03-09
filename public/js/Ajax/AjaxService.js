@@ -73,8 +73,8 @@ class AjaxService {
             if (method === 'GET' || method === 'DELETE') {
                 xmlHttp.send();
             } else {
-                xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xmlHttp.send("jsonString=" + JSON.stringify(data));
+                xmlHttp.setRequestHeader("Content-Type", "application/json");
+                xmlHttp.send(JSON.stringify(data));
             }
         });
     }

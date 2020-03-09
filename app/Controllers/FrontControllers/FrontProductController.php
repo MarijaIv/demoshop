@@ -47,6 +47,9 @@ class FrontProductController extends FrontController
             'sorting' => $dataForCategoryDisplay['sorting'],
             'productsPerPage' => $dataForCategoryDisplay['productsPerPage'],
             'categories' => $categories,
+            'searchOrCategory' => 0,
+            'id' => $request->getGetData()['id'],
+            'message' => 'This category is empty.',
         ];
         return new HTMLResponse('/views/visitor/categoryDisplay.php', $categoryDisplayArguments);
     }
