@@ -1,14 +1,16 @@
 <?php
 
+
 namespace Demoshop\AuthorizationMiddleware\Exceptions;
+
 
 use Exception;
 
 /**
- * Class HttpUnauthorizedException
+ * Class RouteAlreadyRegisteredException
  * @package Demoshop\AuthorizationMiddleware\Exceptions
  */
-class HttpUnauthorizedException extends Exception
+class RouteAlreadyRegisteredException extends Exception
 {
 
 }
