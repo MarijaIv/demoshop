@@ -17,6 +17,10 @@ use Illuminate\Database\Eloquent\Model;
 class Statistic extends Model
 {
     /**
+     * @var bool
+     */
+    public $timestamps = false;
+    /**
      * @var string
      */
     protected $table = 'statistics';

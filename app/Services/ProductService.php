@@ -74,6 +74,21 @@ class ProductService
     }
 
     /**
+     * Increase product view count.
+     *
+     * @param string $sku
+     * @return bool
+     */
+    public function increaseProductViewCount(string $sku): bool
+    {
+        if(!$this->productsRepository->productSkuExists($sku)) {
+            return false;
+        }
+
+        return $this->productsRepository->increaseViewCount($sku);
+    }
+
+    /**
      * Get all products for current page.
      *
      * @param int $currentPage

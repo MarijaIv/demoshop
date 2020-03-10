@@ -27,6 +27,7 @@ class FrontProductController extends FrontController
         if ($product) {
             $product = $productService->formatProduct($product);
         }
+        $productService->increaseProductViewCount($request->getGetData()['sku']);
 
         $categoryService = $this->getCategoryService();
         $categories = $categoryService->getRootCategories();

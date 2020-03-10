@@ -24,7 +24,9 @@ class HomeController extends FrontController
     {
         $categoryService = $this->getCategoryService();
         $productService = $this->getProductService();
+        $statisticsService = $this->getStatisticsService();
 
+        $statisticsService->increaseHomeViewCount();
         $categories = $categoryService->getRootCategories();
         $categories = $categoryService->formatCategoriesForTreeView($categories);
         $products = $productService->getFeaturedProducts();

@@ -48,7 +48,7 @@
             require_once __DIR__ . '/configuration.php';
             echo '</form>';
         } else {
-            echo '<form method="get" action="/index.php" class="search-criteria">
+            echo '<form method="get" action="/index.php" class="search-configuration">
                 <input type="hidden" name="controller" value="productSearch">
                 <input type="hidden" name="action" value="index">
                 <input type="hidden" name="search" value="' . $search . '">';

@@ -52,6 +52,12 @@
     border-bottom: 3px solid darkgreen;
 }
 
+.search-configuration {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 30px;
+}
+
 h2 {
     padding-left: 40px;
     font: 30px bold Serif;

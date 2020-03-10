@@ -57,6 +57,22 @@ class ProductsRepository
         return Product::query()->max('view_count');
     }
 
+    /**
+     * Increase product view count.
+     *
+     * @param string $sku
+     * @return bool
+     */
+    public function increaseViewCount(string $sku): bool
+    {
+        $product = Product::query()->where('sku', '=', $sku)->first();
+        if($product) {
+            ++$product->view_count;
+            return $product->save();
+        }
+
+        return false;
+    }
 
     /**
      * Get products by category id.
