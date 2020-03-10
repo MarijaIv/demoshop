@@ -222,6 +222,12 @@ class ProductService
         return $this->productsRepository->getProductBySku($sku);
     }
 
+    /**
+     * Format product.
+     *
+     * @param Model $product
+     * @return array
+     */
     public function formatProduct(Model $product): array
     {
         $productDto = new ProductDTO($product);

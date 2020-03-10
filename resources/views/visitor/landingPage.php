@@ -24,7 +24,7 @@
 <div class="all-products">
     <?php
     foreach ($products as $item) {
-        echo '<a href="/index.php?controller=frontProduct&action=index&id=' . $item['id'] . '" class="product-link">';
+        echo '<a href="/index.php?controller=frontProduct&action=index&sku=' . $item['sku'] . '" class="product-link">';
         echo '<div class="product"><label class="product-details">' . $item['price'] . ' rsd</label>';
 
         if (!$item['image']) {

@@ -22,7 +22,22 @@ class FrontProductController extends FrontController
      */
     public function index(Request $request): HTMLResponse
     {
-        return new HTMLResponse('/views/visitor/productDetails.php');
+        $productService = $this->getProductService();
+        $product = $productService->getProductBySku($request->getGetData()['sku']);
+        if ($product) {
+            $product = $productService->formatProduct($product);
+        }
+
+        $categoryService = $this->getCategoryService();
+        $categories = $categoryService->getRootCategories();
+        $categories = $categoryService->formatCategoriesForTreeView($categories);
+
+        $productDetails = [
+            'product' => $product,
+            'categories' => $categories,
+        ];
+
+        return new HTMLResponse('/views/visitor/productDetails.php', $productDetails);
     }
 
     /**

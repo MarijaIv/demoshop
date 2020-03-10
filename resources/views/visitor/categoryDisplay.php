@@ -65,7 +65,7 @@
         }
 
         foreach ($products as $item) {
-            echo '<a href="/index.php?controller=frontProduct&action=index&id=' . $item['id'] .
+            echo '<a href="/index.php?controller=frontProduct&action=index&sku=' . $item['sku'] .
                 '" class="product-display-link">';
             echo '<div class="product-display"><label class="product-details">' . $item['title'] . '</label>';
 
