@@ -105,7 +105,7 @@
                     ?>
                 </label>
                 <input type="file" id="img" name="img" accept="image/*"
-                       onchange="addEditProduct.loadImage(this);" class="custom-file-input" <?php if (!$oldSku) {
+                       onchange="addEditProduct.loadImage(this);" class="custom-file-input" <?php if (!$image) {
                     echo 'required';
                 } ?>>
             </div>

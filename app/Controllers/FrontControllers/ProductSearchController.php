@@ -5,6 +5,7 @@ namespace Demoshop\Controllers\FrontControllers;
 
 
 use Demoshop\Controllers\FrontController;
+use Demoshop\Formatters\ProductFormatter;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
 
@@ -24,6 +25,7 @@ class ProductSearchController extends FrontController
     {
         $productService = $this->getProductService();
         $categoryService = $this->getCategoryService();
+        $formatter = new ProductFormatter();
 
         $categories = $categoryService->getRootCategories();
         $categories = $categoryService->formatCategoriesForTreeView($categories);
@@ -32,6 +34,7 @@ class ProductSearchController extends FrontController
         $optionCategories = $categoryService->getFormattedCategories($optionCategories);
 
         $searchProducts = $productService->searchProducts($request->getGetData());
+        $searchProducts = $formatter->formatProductsForVisitor($searchProducts, $request->getGetData());
 
         $searchArguments = [
             'optionCategories' => $optionCategories,

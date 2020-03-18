@@ -5,6 +5,7 @@ namespace Demoshop\Controllers\FrontControllers;
 
 
 use Demoshop\Controllers\FrontController;
+use Demoshop\Formatters\ProductFormatter;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
 
@@ -18,20 +19,29 @@ class FrontProductController extends FrontController
      * Render productDetails.php page.
      *
      * @param Request $request
+     * @param string $sku
      * @return HTMLResponse
      */
     public function index(Request $request, string $sku): HTMLResponse
     {
         $productService = $this->getProductService();
+        $formatter = new ProductFormatter();
         $product = $productService->getProductBySku($sku);
-        if ($product) {
-            $product = $productService->formatProduct($product);
-        }
-        $productService->increaseProductViewCount($sku);
 
         $categoryService = $this->getCategoryService();
         $categories = $categoryService->getRootCategories();
         $categories = $categoryService->formatCategoriesForTreeView($categories);
+
+        if (!$product) {
+            $landingPageViewArguments = [
+                'categories' => $categories,
+                'products' => $productService->getFeaturedProducts(),
+            ];
+            return new HTMLResponse('/views/visitor/landingPage.php', $landingPageViewArguments);
+        }
+
+        $product = $formatter->formatProduct($product);
+        $productService->increaseProductViewCount($sku);
 
         $productDetails = [
             'product' => $product,
@@ -51,7 +61,10 @@ class FrontProductController extends FrontController
     public function listProducts(Request $request, string $code): HTMLResponse
     {
         $productService = $this->getProductService();
-        $dataForCategoryDisplay = $productService->getDataForCategoryDisplay($code, $request->getGetData());
+        $formatter = new ProductFormatter();
+
+        $dataForCategoryDisplay = $productService->getDataForCategoryDisplay($code);
+        $dataForCategoryDisplay = $formatter->formatProductsForVisitor($dataForCategoryDisplay, $request->getGetData());
 
         $categoryService = $this->getCategoryService();
         $categories = $categoryService->getRootCategories();

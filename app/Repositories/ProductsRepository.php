@@ -261,7 +261,10 @@ class ProductsRepository
      */
     public function getProductsByTitle(string $keyword): Collection
     {
-        return Product::query()->where('title', 'like', '%' . $keyword . '%')->get();
+        return Product::query()
+            ->where('title', 'like', '%' . $keyword . '%')
+            ->where('enabled', '=', 1)
+            ->get();
     }
 
     /**
@@ -272,7 +275,10 @@ class ProductsRepository
      */
     public function getProductsByBrand(string $keyword): Collection
     {
-        return Product::query()->where('brand', 'like', '%' . $keyword . '%')->get();
+        return Product::query()
+            ->where('brand', 'like', '%' . $keyword . '%')
+            ->where('enabled', '=', 1)
+            ->get();
     }
 
     /**
@@ -283,7 +289,10 @@ class ProductsRepository
      */
     public function getProductsByShortDesc(string $keyword): Collection
     {
-        return Product::query()->where('short_description', 'like', '%' . $keyword . '%')->get();
+        return Product::query()
+            ->where('short_description', 'like', '%' . $keyword . '%')
+            ->where('enabled', '=', 1)
+            ->get();
     }
 
     /**
@@ -294,7 +303,10 @@ class ProductsRepository
      */
     public function getProductsByDescription(string $keyword): Collection
     {
-        return Product::query()->where('description', 'like', '%' . $keyword . '%')->get();
+        return Product::query()
+            ->where('description', 'like', '%' . $keyword . '%')
+            ->where('enabled', '=', 1)
+            ->get();
     }
 
     /**
@@ -305,7 +317,10 @@ class ProductsRepository
      */
     public function getProductsMaxPrice(float $maxPrice): Collection
     {
-        return Product::query()->where('price', '<', $maxPrice)->get();
+        return Product::query()
+            ->where('price', '<', $maxPrice)
+            ->where('enabled', '=', 1)
+            ->get();
     }
 
     /**
@@ -316,6 +331,9 @@ class ProductsRepository
      */
     public function getProductsMinPrice(float $minPrice): Collection
     {
-        return Product::query()->where('price', '>', $minPrice)->get();
+        return Product::query()
+            ->where('price', '>', $minPrice)
+            ->where('enabled', '=', 1)
+            ->get();
     }
 }

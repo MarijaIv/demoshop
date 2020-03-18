@@ -2,8 +2,6 @@
 
 namespace Demoshop\Services;
 
-use Demoshop\DTO\ProductDTO;
-use Demoshop\Repositories\CategoryRepository;
 use Demoshop\Repositories\ProductsRepository;
 use Demoshop\ServiceRegistry\ServiceRegistry;
 use Illuminate\Database\Eloquent\Builder;
@@ -81,10 +79,6 @@ class ProductService
      */
     public function increaseProductViewCount(string $sku): bool
     {
-        if (!$this->productsRepository->productSkuExists($sku)) {
-            return false;
-        }
-
         return $this->productsRepository->increaseViewCount($sku);
     }
 
@@ -92,46 +86,12 @@ class ProductService
      * Get all products for current page.
      *
      * @param int $currentPage
-     * @return array
+     * @return Collection
      */
-    public function getAllProductsFormatted(int $currentPage): array
+    public function getProductsForCurrentPage(int $currentPage): Collection
     {
         $offset = ($currentPage - 1) * self::RECORDS_PER_PAGE;
-        $products = $this->productsRepository->getProductsForCurrentPage($offset, self::RECORDS_PER_PAGE);
-        $categoryRepository = new CategoryRepository();
-        $formattedProducts = [];
-        $i = 0;
-
-        foreach ($products as $product) {
-            $formattedProducts[$i]['id'] = $product->id;
-
-            $category = $categoryRepository->getCategoryById($product->category_id);
-
-            $formattedProducts[$i]['category'] = $category->title;
-
-            if ($category->parent_id !== null) {
-                $parent = $categoryRepository->getCategoryById($category->parent_id);
-                $formattedProducts[$i]['category'] = $parent->title . ' > ' . $formattedProducts[$i]['category'];
-                while ($parent->parent_id) {
-                    $parent = $categoryRepository->getCategoryById($parent->parent_id);
-                    $formattedProducts[$i]['category'] = $parent->title
-                        . ' > ' . $formattedProducts[$i]['category'];
-                }
-            }
-
-            $formattedProducts[$i]['sku'] = $product->sku;
-            $formattedProducts[$i]['title'] = $product->title;
-            $formattedProducts[$i]['brand'] = $product->brand;
-            $formattedProducts[$i]['price'] = $product->price;
-            $formattedProducts[$i]['shortDesc'] = $product->short_description;
-            $formattedProducts[$i]['description'] = $product->description;
-            $formattedProducts[$i]['enabled'] = $product->enabled;
-            $formattedProducts[$i]['featured'] = $product->featured;
-            $formattedProducts[$i]['viewCount'] = $product->view_count;
-            $i++;
-        }
-
-        return $formattedProducts;
+        return $this->productsRepository->getProductsForCurrentPage($offset, self::RECORDS_PER_PAGE);
     }
 
     /**
@@ -242,10 +202,6 @@ class ProductService
             return false;
         }
 
-        if (!$this->productsRepository->getProductBySku($oldSku)) {
-            return false;
-        }
-
         self::setEnabledAndFeaturedValue($data);
         $data['price'] = (float)$data['price'];
         $data['category'] = (int)$data['category'];
@@ -270,25 +226,9 @@ class ProductService
      * @param string $sku
      * @return Builder|Model|null
      */
-    public function getProductBySku(string $sku): Model
+    public function getProductBySku(string $sku): ?Model
     {
-        if (!$this->productsRepository->productSkuExists($sku)) {
-            return null;
-        }
-
         return $this->productsRepository->getProductBySku($sku);
-    }
-
-    /**
-     * Format product.
-     *
-     * @param Model $product
-     * @return array
-     */
-    public function formatProduct(Model $product): array
-    {
-        $productDto = new ProductDTO($product);
-        return $productDto->toArray();
     }
 
     /**
@@ -299,12 +239,7 @@ class ProductService
      */
     public function deleteProduct(string $sku): bool
     {
-        if (!$this->productsRepository->productSkuExists($sku)) {
-            return false;
-        }
-
-        $this->productsRepository->deleteProduct($sku);
-        return true;
+        return $this->productsRepository->deleteProduct($sku);
     }
 
     /**
@@ -316,9 +251,7 @@ class ProductService
     public function deleteMultipleProducts(array $skuArray): bool
     {
         foreach ($skuArray as $sku) {
-            if (!$this->productsRepository->deleteProduct($sku)) {
-                return false;
-            }
+            $this->productsRepository->deleteProduct($sku);
         }
 
         return true;
@@ -333,10 +266,7 @@ class ProductService
     public function enableProducts(array $skuArray): bool
     {
         foreach ($skuArray as $sku) {
-            $product = $this->productsRepository->getProductBySku($sku);
-            if (!$product->enabled) {
-                $this->productsRepository->enableProduct($sku);
-            }
+            $this->productsRepository->enableProduct($sku);
         }
 
         return true;
@@ -351,10 +281,7 @@ class ProductService
     public function disableProducts(array $skuArray): bool
     {
         foreach ($skuArray as $sku) {
-            $product = $this->productsRepository->getProductBySku($sku);
-            if ($product->enabled) {
-                $this->productsRepository->disableProduct($sku);
-            }
+            $this->productsRepository->disableProduct($sku);
         }
 
         return true;
@@ -409,73 +336,43 @@ class ProductService
      *
      * @param string $code
      * @param array $data
-     * @return array
+     * @return Collection
      */
-    public function getDataForCategoryDisplay(string $code, array $data): array
+    public function getDataForCategoryDisplay(string $code): Collection
     {
         $categoryService = ServiceRegistry::get('CategoryService');
 
         if (!$code) {
-            return [];
+            return null;
         }
 
         $category = $categoryService->getCategoryByCode($code);
 
         if (!$category) {
-            return [];
+            return null;
         }
 
-        $products = $this->getProductsForCategory($category->id);
-
-        $formattedData = $this->formatProducts($products, $data);
-
-        return [
-            'products' => $formattedData['products'],
-            'currentPage' => $formattedData['currentPage'],
-            'numberOfPages' => $formattedData['numberOfPages'],
-            'sorting' => $formattedData['sorting'],
-            'productsPerPage' => $formattedData['productsPerPage'],
-        ];
+        return $this->getProductsForCategory($category->id);
     }
 
     /**
      * Get products for category and it's subcategories.
      *
      * @param int $id
-     * @return array
+     * @return Collection
      */
-    public function getProductsForCategory(int $id): array
+    public function getProductsForCategory(int $id): Collection
     {
-        $formattedProducts = [];
-
+        /** @var CategoryService $categoryService */
         $categoryService = ServiceRegistry::get('CategoryService');
 
         $products = $this->getProductsByCategoryId($id);
-        foreach ($products as $item) {
-            $formattedProducts[] = [
-                'id' => $item['id'],
-                'categoryId' => $item['category_id'],
-                'sku' => $item['sku'],
-                'title' => $item['title'],
-                'brand' => $item['brand'],
-                'price' => $item['price'],
-                'shortDescription' => $item['short_description'],
-                'description' => $item['description'],
-                'image' => base64_encode($item['image']),
-            ];
+        $children = $categoryService->getCategoriesForParent($id);
+        foreach ($children as $child) {
+            $products->merge($this->getProductsForCategory($child['id']));
         }
 
-        if ($categoryService->getCategoriesForParent($id)) {
-            $children = $categoryService->getCategoriesForParent($id);
-            foreach ($children as $child) {
-                $products = $this->getProductsForCategory($child['id']);
-                foreach ($products as $product) {
-                    $formattedProducts[] = $product;
-                }
-            }
-        }
-
-        return $formattedProducts;
+        return $products;
     }
 
     /**
@@ -484,155 +381,32 @@ class ProductService
      * @param int $id
      * @return Collection
      */
-    public
-    function getProductsByCategoryId(int $id): Collection
+    public function getProductsByCategoryId(int $id): Collection
     {
         return $this->productsRepository->getEnabledProductsByCategoryId($id);
-    }
-
-    /**
-     * Format products for category or search display.
-     *
-     * @param array $products
-     * @param array $data
-     * @return array
-     */
-    public function formatProducts(array $products, array $data): array
-    {
-        if (!$data['sorting']) {
-            $data['sorting'] = 'priceDesc';
-        }
-
-        if ($data['sorting'] !== 'relevance') {
-            $products = $this->sortProducts($products, $data['sorting']);
-        }
-
-        if (!$data['productsPerPage']) {
-            $data['productsPerPage'] = 5;
-        }
-
-        $numberOfPages = ceil(count($products) / $data['productsPerPage']) ?: 1;
-
-        if (!$data['currentPage']) {
-            $data['currentPage'] = 1;
-        }
-
-        $currentPage = $this->setPage($data, $numberOfPages);
-
-        $offset = ($currentPage - 1) * $data['productsPerPage'];
-
-        $products = array_slice($products, $offset, $data['productsPerPage']);
-
-        return [
-            'products' => $products,
-            'numberOfPages' => $numberOfPages,
-            'currentPage' => $currentPage,
-            'sorting' => $data['sorting'],
-            'productsPerPage' => $data['productsPerPage'],
-        ];
-    }
-
-    /**
-     * Sort products by sort order.
-     *
-     * @param array $products
-     * @param string $sortOrder
-     * @return array
-     */
-    public function sortProducts(array $products, string $sortOrder): array
-    {
-        if ($sortOrder === 'priceDesc') {
-            usort($products, static function ($a, $b) {
-                return $a['price'] < $b['price'];
-            });
-        } else if ($sortOrder === 'priceAsc') {
-            usort($products, static function ($a, $b) {
-                return $a['price'] > $b['price'];
-            });
-        } else if ($sortOrder === 'titleDesc') {
-            usort($products, static function ($a, $b) {
-                return strtolower($a['title']) < strtolower($b['title']);
-            });
-        } else if ($sortOrder === 'titleAsc') {
-            usort($products, static function ($a, $b) {
-                return strtolower($a['title']) > strtolower($b['title']);
-            });
-        } else if ($sortOrder === 'brandDesc') {
-            usort($products, static function ($a, $b) {
-                return strtolower($a['brand']) < strtolower($b['brand']);
-            });
-        } else if ($sortOrder === 'brandAsc') {
-            usort($products, static function ($a, $b) {
-                return strtolower($a['brand']) > strtolower($b['brand']);
-            });
-        }
-
-        return $products;
-    }
-
-    /**
-     * Set current page.
-     *
-     * @param array $data
-     * @param int $numberOfPages
-     * @return int
-     */
-    public function setPage(array $data, int $numberOfPages): int
-    {
-        if ($data['pagination'] === 'firstPage') {
-            $data['currentPage'] = 1;
-        }
-
-        if (($data['pagination'] === 'prevPage') && $data['currentPage'] !== '1') {
-            $data['currentPage']--;
-        }
-
-        if ($data['pagination'] === 'lastPage') {
-            $data['currentPage'] = $numberOfPages;
-        }
-
-        if (($data['pagination'] === 'nextPage') && $data['currentPage'] !== (string)$numberOfPages) {
-            $data['currentPage']++;
-        }
-
-        if ($data['currentPage'] > $numberOfPages) {
-            $data['currentPage'] = 1;
-        }
-
-        return $data['currentPage'];
     }
 
     /**
      * Search products.
      *
      * @param array $data
-     * @return array
+     * @return Collection
      */
-    public function searchProducts(array $data): array
+    public function searchProducts(array $data): Collection
     {
-        $formattedProducts = [];
-        $products = [];
-
         if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
                 && empty($data['maxPrice']) && empty($data['minPrice']))) {
             $products = $this->getProductsByKeyword($data['search']);
-
-            foreach ($products as $product) {
-                $formattedProducts[] = (new ProductDTO($product))->toArray();
-            }
-
             if (empty($data['sorting'])) {
                 $data['sorting'] = 'relevance';
             }
-
-            $formattedData = $this->formatProducts($formattedProducts, $data);
         } else {
             if (!empty($data['keyword'])) {
                 $products = $this->getProductsByKeyword($data['keyword']);
             }
 
             if (!empty($data['category'])) {
-                if (empty($products)) {
+                if ($products === null) {
                     $products = $this->productsRepository->getEnabledProductsByCategoryId($data['category']);
                 } else {
                     foreach ($products as $productKey => $product) {
@@ -644,7 +418,7 @@ class ProductService
             }
 
             if (!empty($data['maxPrice'])) {
-                if (empty($products)) {
+                if ($products === null) {
                     $products = $this->productsRepository->getProductsMaxPrice($data['maxPrice']);
                 } else {
                     foreach ($products as $productKey => $product) {
@@ -656,7 +430,7 @@ class ProductService
             }
 
             if (!empty($data['minPrice'])) {
-                if (empty($products)) {
+                if ($products === null) {
                     $products = $this->productsRepository->getProductsMinPrice($data['minPrice']);
                 } else {
                     foreach ($products as $productKey => $product) {
@@ -666,21 +440,9 @@ class ProductService
                     }
                 }
             }
-
-            foreach ($products as $product) {
-                $formattedProducts[] = (new ProductDTO($product))->toArray();
-            }
-
-            $formattedData = $this->formatProducts($formattedProducts, $data);
         }
 
-        return [
-            'products' => $formattedData['products'],
-            'numberOfPages' => $formattedData['numberOfPages'],
-            'currentPage' => $formattedData['currentPage'],
-            'sorting' => $formattedData['sorting'],
-            'productsPerPage' => $formattedData['productsPerPage'],
-        ];
+        return $products;
     }
 
     /**
@@ -693,6 +455,7 @@ class ProductService
     {
         $products = $this->productsRepository->getProductsByTitle($keyword);
         $products = $products->merge($this->productsRepository->getProductsByBrand($keyword));
+
         /** @var CategoryService $categoryService */
         $categoryService = ServiceRegistry::get('CategoryService');
         $categories = $categoryService->getCategoriesByTitle($keyword);
@@ -706,5 +469,4 @@ class ProductService
 
         return $products;
     }
-
 }
