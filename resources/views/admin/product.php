@@ -30,19 +30,15 @@
         } else {
             echo '<output class="message-fail">' . $failMessage . '</output>';
         } ?>
-        <form action="/admin.php" method="post" id="productsTable" class="products-table">
+        <form action="/admin/products" method="post" id="productsTable" class="products-table">
             <div>
-                <input type="submit" value="Add new product" class="products-btn"
-                       formaction="/admin.php?controller=product&action=addEditProduct">
+                <a href="/admin/products/create" class="products-btn-add"> Add new product</a>
                 <input type="submit" value="Delete selected" class="products-btn"
-                       formaction="/admin.php?controller=product&action=deleteMultiple&currentPage=
-                       <?php echo $currentPage; ?>">
+                       formaction="/admin/products/deleteMultiple?currentPage=<?php echo $currentPage; ?>">
                 <input type="submit" value="Enable selected" class="products-btn"
-                       formaction="/admin.php?controller=product&action=enableSelected&currentPage=
-                       <?php echo $currentPage; ?>">
+                       formaction="/admin/products/enableSelected?currentPage=<?php echo $currentPage; ?>">
                 <input type="submit" value="Disable selected" class="products-btn"
-                       formaction="/admin.php?controller=product&action=disableSelected&currentPage=
-                       <?php echo $currentPage; ?>">
+                       formaction="/admin/products/disableSelected?currentPage=<?php echo $currentPage; ?>">
             </div>
             <table id="products">
                 <?php
@@ -70,7 +66,7 @@
                         <td>' . $product['shortDesc'] . '</td>
                         <td>' . $product['price'] . '</td>
                         <td>
-                            <a href="/admin.php?controller=product&action=enableOrDisableProduct&sku='
+                            <a href="/admin/products/enableDisable?sku='
                         . $product['sku'] . '&currentPage=' . $currentPage . '">';
                     if ($product['enabled']) {
                         echo '<input type="checkbox" checked="checked">';
@@ -80,13 +76,13 @@
                     echo '</a>
                         </td>
                         <td>
-                            <a href="/admin.php?controller=product&action=addEditProduct&sku=' . $product['sku'] . '">
+                            <a href="/admin/products/' . $product['sku'] . '">
                                 <img class="edit" src="/img/icons8-edit-30.png" alt="edit">
                             </a>
                         </td>
                         <td>
                             <input type="submit" class="delete" 
-                            formaction="/admin.php?controller=product&action=deleteProduct&sku=' . $product['sku']
+                            formaction="/admin/products/delete?sku=' . $product['sku']
                         . '&currentPage=' . $currentPage . '">
                         </td>
                       </tr>';
@@ -95,11 +91,11 @@
             </table>
             <ul class="paginator">
                 <li>
-                    <a class="pagination" href="/admin.php?controller=product&action=firstPage"> << </a>
+                    <a class="pagination" href="/admin/products/firstPage"> << </a>
                 </li>
                 <li>
                     <a class="pagination"
-                       href="/admin.php?controller=product&action=prevPage&currentPage=<?php echo $currentPage; ?>">
+                       href="/admin/products/prevPage?currentPage=<?php echo $currentPage; ?>">
                         < </a>
                 </li>
                 <li>
@@ -107,11 +103,11 @@
                 </li>
                 <li>
                     <a class="pagination"
-                       href="/admin.php?controller=product&action=nextPage&currentPage=<?php echo $currentPage; ?>">
+                       href="/admin/products/nextPage?currentPage=<?php echo $currentPage; ?>">
                         > </a>
                 </li>
                 <li>
-                    <a class="pagination" href="/admin.php?controller=product&action=lastPage"> >> </a>
+                    <a class="pagination" href="/admin/products/lastPage"> >> </a>
                 </li>
             </ul>
         </form>

@@ -13,7 +13,7 @@ Demoshop.Service.CategoryService = class {
      * @return Promise
      */
     deleteCategory(id) {
-        return this.ajaxService.get("/admin.php?controller=category&action=delete&id=" + id);
+        return this.ajaxService.delete("/admin/categories?id=" + id);
     }
 
     /**
@@ -22,7 +22,7 @@ Demoshop.Service.CategoryService = class {
      * @return Promise
      */
     listCategory() {
-        return this.ajaxService.get("/admin.php?controller=category&action=listCategories");
+        return this.ajaxService.get("/admin/categories/listCategories");
     }
 
     /**
@@ -33,7 +33,7 @@ Demoshop.Service.CategoryService = class {
      * @return Promise
      */
     displayCategory(id) {
-        return this.ajaxService.get("/admin.php?controller=category&action=displayCategory&id=" + id);
+        return this.ajaxService.get("/admin/categories/displayCategory?id=" + id);
     }
 
     /**
@@ -42,7 +42,7 @@ Demoshop.Service.CategoryService = class {
      * @return Promise
      */
     listAllCategories() {
-        return this.ajaxService.get("/admin.php?controller=category&action=listAllCategories");
+        return this.ajaxService.get("/admin/categories/listAllCategories");
     }
 
     /**
@@ -59,7 +59,7 @@ Demoshop.Service.CategoryService = class {
         let data = {title: title, code: code, description: description};
         data.parentCategory = parentCategory === "root" ? null : parentCategory;
 
-        return this.ajaxService.post("/admin.php?controller=category&action=addNewCategory", data);
+        return this.ajaxService.post("/admin/categories", data);
     }
 
     /**
@@ -77,7 +77,7 @@ Demoshop.Service.CategoryService = class {
         let data = {id: id, title: title, code: code, description: description};
         data.parentCategory = parentCategory === "root" ? null : parentCategory;
 
-        return this.ajaxService.put("/admin.php?controller=category&action=updateCategory&jsonString=" + JSON.stringify(data), data);
+        return this.ajaxService.put("/admin/categories", data);
     }
 };
 

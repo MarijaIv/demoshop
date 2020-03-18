@@ -57,56 +57,6 @@ class Request
     }
 
     /**
-     * Set request method.
-     *
-     * @param string $method
-     */
-    public function setMethod($method): void
-    {
-        $this->method = $method;
-    }
-
-    /**
-     * Set request post data.
-     *
-     * @param array $postData
-     */
-    public function setPostData($postData): void
-    {
-        $this->postData = $postData;
-    }
-
-    /**
-     * Set request get data.
-     *
-     * @param array $getData
-     */
-    public function setGetData($getData): void
-    {
-        $this->getData = $getData;
-    }
-
-    /**
-     * Set request headers.
-     *
-     * @param string $headers
-     */
-    public function setHeaders($headers): void
-    {
-        $this->headers = $headers;
-    }
-
-    /**
-     * Set request URI.
-     *
-     * @param string $requestURI
-     */
-    public function setRequestURI($requestURI): void
-    {
-        $this->requestURI = $requestURI;
-    }
-
-    /**
      * Get request method.
      *
      * @return string
@@ -114,6 +64,16 @@ class Request
     public function getMethod(): string
     {
         return $this->method;
+    }
+
+    /**
+     * Set request method.
+     *
+     * @param string $method
+     */
+    public function setMethod($method): void
+    {
+        $this->method = $method;
     }
 
     /**
@@ -127,6 +87,16 @@ class Request
     }
 
     /**
+     * Set request post data.
+     *
+     * @param array $postData
+     */
+    public function setPostData($postData): void
+    {
+        $this->postData = $postData;
+    }
+
+    /**
      * Get request get data.
      *
      * @return array
@@ -134,6 +104,16 @@ class Request
     public function getGetData(): array
     {
         return $this->getData;
+    }
+
+    /**
+     * Set request get data.
+     *
+     * @param array $getData
+     */
+    public function setGetData($getData): void
+    {
+        $this->getData = $getData;
     }
 
     /**
@@ -147,6 +127,16 @@ class Request
     }
 
     /**
+     * Set request headers.
+     *
+     * @param string $headers
+     */
+    public function setHeaders($headers): void
+    {
+        $this->headers = $headers;
+    }
+
+    /**
      * Get request URI.
      *
      * @return string
@@ -154,5 +144,15 @@ class Request
     public function getRequestURI(): string
     {
         return $this->requestURI;
+    }
+
+    /**
+     * Set request URI.
+     *
+     * @param string $requestURI
+     */
+    public function setRequestURI($requestURI): void
+    {
+        $this->requestURI = $requestURI;
     }
 }

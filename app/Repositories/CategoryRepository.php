@@ -156,6 +156,17 @@ class CategoryRepository
      */
     public function getCategoriesByTitle(string $keyword): Collection
     {
-        return Category::query()->where('title', 'like', '%'. $keyword . '%')->get();
+        return Category::query()->where('title', 'like', '%' . $keyword . '%')->get();
+    }
+
+    /**
+     * Get category by code.
+     *
+     * @param string $code
+     * @return Model
+     */
+    public function getCategoryByCode(string $code): Model
+    {
+        return Category::query()->where('code', '=', $code)->first();
     }
 }

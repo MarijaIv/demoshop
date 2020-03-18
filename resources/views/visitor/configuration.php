@@ -7,6 +7,7 @@
  * @var int $productsPerPage
  * @var array $products
  * @var bool $searchOrCategory
+ * @var array $selectedCategory
  */
 ?>
 
@@ -49,11 +50,11 @@
         </select>
     </label>
     <div class="display-buttons">
-        <input type="submit" name="pagination" value="<<" class="page-button">
-        <input type="submit" name="pagination" value="<" class="page-button">
+        <button type="submit" name="pagination" value="firstPage" class="page-button"> <<</button>
+        <button type="submit" name="pagination" value="prevPage" class="page-button"> <</button>
         <label><?php echo $currentPage . '/' . $numberOfPages; ?></label>
-        <input type="submit" name="pagination" value=">" class="page-button">
-        <input type="submit" name="pagination" value=">>" class="page-button">
+        <button type="submit" name="pagination" value="nextPage" class="page-button"> ></button>
+        <button type="submit" name="pagination" value="lastPage" class="page-button"> >></button>
     </div>
     <label for="productsPerPage" class="per-page">Products per page:
         <select id="productsPerPage" name="productsPerPage" class="options" onchange="this.form.submit()">

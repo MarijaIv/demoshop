@@ -16,7 +16,7 @@ use Demoshop\ServiceRegistry\ServiceRegistry;
 class LoginController extends FrontController
 {
     /**
-     * Function for rendering login.php page.
+     * Function for rendering login page.
      *
      * @param Request $request
      * @return HTMLResponse
@@ -24,7 +24,7 @@ class LoginController extends FrontController
     public function index(Request $request): Response
     {
         if ($this->isLoggedIn()) {
-            return new RedirectResponse('/admin.php');
+            return new RedirectResponse('/admin');
         }
 
         return new HTMLResponse('/views/admin/login.php');
@@ -52,15 +52,15 @@ class LoginController extends FrontController
     public function login(Request $request): Response
     {
         $data = $request->getPostData();
-        $response = new RedirectResponse('/admin.php');
+        $response = new RedirectResponse('/admin');
         $loginService = $this->getLoginService();
 
         if (empty($data['username']) || empty($data['password'])) {
-            $response = new HTMLResponse('/views/admin/login.php');
+            $response = new HTMLResponse('/admin/login.php');
         }
 
         if (!$loginService->login($data['username'], $data['password'], $data['keepLoggedIn'] ?? false)) {
-            $response = new HTMLResponse('/views/admin/login.php');
+            $response = new HTMLResponse('/admin/login.php');
         }
 
         return $response;

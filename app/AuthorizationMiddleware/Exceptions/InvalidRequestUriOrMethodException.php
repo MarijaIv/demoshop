@@ -7,10 +7,10 @@ namespace Demoshop\AuthorizationMiddleware\Exceptions;
 use Exception;
 
 /**
- * Class InvalidControllerOrActionException
+ * Class InvalidRequestUriOrMethodException
  * @package Demoshop\AuthorizationMiddleware\Exceptions
  */
-class InvalidControllerOrActionException extends Exception
+class InvalidRequestUriOrMethodException extends Exception
 {
 
 }

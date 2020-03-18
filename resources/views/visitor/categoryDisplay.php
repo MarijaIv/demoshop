@@ -8,18 +8,18 @@
  * @var array $products
  * @var bool $searchOrCategory
  * @var array $optionCategories
- * @var int $id
  * @var string $search
  * @var string $keyword
  * @var string $maxPrice
  * @var string $minPrice
- * @var string $selectedCategory
+ * @var array $selectedCategory
  * @var string $message
  */
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="/css/visitor/categoryMenu.css">
     <link rel="stylesheet" href="/css/visitor/landing.css">
     <link rel="stylesheet" href="/css/visitor/categoryDisplay.css">
@@ -41,17 +41,11 @@
     <div class="products-configurations">
         <?php
         if (!$searchOrCategory) {
-            echo '<form method="get" action="/index.php" class="products-display">
-                <input type="hidden" name="controller" value="frontProduct">
-                <input type="hidden" name="action" value="listProducts">
-                <input type="hidden" name="id" value="' . $id . '">';
+            echo '<form method="get" action="/' . $selectedCategory['code'] . '" class="products-display">';
             require_once __DIR__ . '/configuration.php';
             echo '</form>';
         } else {
-            echo '<form method="get" action="/index.php" class="search-configuration">
-                <input type="hidden" name="controller" value="productSearch">
-                <input type="hidden" name="action" value="index">
-                <input type="hidden" name="search" value="' . $search . '">';
+            echo '<form method="get" action="/search" class="search-configuration">';
             require_once __DIR__ . '/searchCriteria.php';
             require_once __DIR__ . '/configuration.php';
             echo '</form>';
@@ -61,11 +55,11 @@
     <div class="all-products">
         <?php
         if (empty($products)) {
-            echo '<label class="empty-message">'. $message . '</label>';
+            echo '<label class="empty-message">' . $message . '</label>';
         }
 
         foreach ($products as $item) {
-            echo '<a href="/index.php?controller=frontProduct&action=index&sku=' . $item['sku'] .
+            echo '<a href="/product/' . $item['sku'] .
                 '" class="product-display-link">';
             echo '<div class="product-display"><label class="product-details">' . $item['title'] . '</label>';
 

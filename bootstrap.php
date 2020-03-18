@@ -5,7 +5,6 @@ require_once __DIR__ . '/database/config.php';
 
 use Demoshop\AuthorizationMiddleware\Exceptions\ServiceAlreadyRegisteredException;
 use Demoshop\Cookie\CookieManager;
-use Demoshop\HTTP\RequestInit;
 use Demoshop\Init\DatabaseInit;
 use Demoshop\Repositories\AdminRepository;
 use Demoshop\Repositories\CategoryRepository;
@@ -58,5 +57,3 @@ try {
 
 $session = ServiceRegistry::get('Session');
 $session->start();
-
-$request = RequestInit::init();

@@ -4,13 +4,15 @@
  * @var string $keyword
  * @var string $maxPrice
  * @var string $minPrice
- * @var string $selectedCategory
+ * @var array $selectedCategory
+ * @var string $search
  */
 ?>
 
 <div class="search-criteria">
     <h2>Search criteria</h2>
     <div class="products-display">
+        <input type="hidden" name="search" value="<?php echo $search; ?>">
         <label class="search-criteria-labels">Keyword:
             <input type="text" placeholder="Search..." class="search-criteria-input"
                    name="keyword" value="<?php echo $keyword; ?>">
@@ -21,7 +23,7 @@
                 echo '<option value=""> Any </option>';
                 foreach ($optionCategories as $category) {
                     echo '<option value="' . $category->id . '"';
-                    if ((int)$selectedCategory === $category->id) {
+                    if ($selectedCategory['id'] === $category->id) {
                         echo ' selected ';
                     }
                     echo '>' . $category->title . '</option>';

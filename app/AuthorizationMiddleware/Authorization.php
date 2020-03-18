@@ -16,8 +16,8 @@ use Demoshop\ServiceRegistry\ServiceRegistry;
 class Authorization
 {
     /**
-     * If admin is authenticated, redirect to admin.php page.
-     * If admin is not authenticated, render login.php page.
+     * If admin is authenticated, redirect to dashboard page.
+     * If admin is not authenticated, render login page.
      *
      * @param Request $request
      * @return void

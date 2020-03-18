@@ -31,6 +31,20 @@ class Routes
     }
 
     /**
+     * Get Routes instance.
+     *
+     * @return Routes
+     */
+    public static function getInstance(): Routes
+    {
+        if (self::$routes === null) {
+            self::$routes = new Routes();
+        }
+
+        return self::$routes;
+    }
+
+    /**
      * Add route to the list of routes.
      *
      * @param Route $route
@@ -55,26 +69,35 @@ class Routes
      */
     public static function get(Request $request): ?Route
     {
+        $routeForRequest = null;
+
         foreach (self::$listOfRoutes as $route) {
-            if ($route->getHttpMethod() === $request->getMethod() && $route->getPath() === $request->getRequestURI()) {
-                return $route;
+            if ($route->getHttpMethod() === $request->getMethod()) {
+                $uriSegments = explode('/', parse_url($request->getRequestURI(), PHP_URL_PATH));
+                $routeSegments = explode('/', $route->getPath());
+
+                if (count($uriSegments) !== count($routeSegments)) {
+                    continue;
+                }
+
+                $pathSegments = array_combine($uriSegments, $routeSegments);
+                $sameRoutes = true;
+
+                foreach ($pathSegments as $uriSegment => $routeSegment) {
+                    if ($uriSegment === $routeSegment || ($routeSegment === '%' && $routeForRequest === null)) {
+                        $sameRoutes = true;
+                    } else {
+                        $sameRoutes = false;
+                        break;
+                    }
+                }
+
+                if ($sameRoutes) {
+                    $routeForRequest = $route;
+                }
             }
         }
 
-        return null;
-    }
-
-    /**
-     * Get Routes instance.
-     *
-     * @return Routes
-     */
-    public static function getInstance(): Routes
-    {
-        if (self::$routes === null) {
-            self::$routes = new Routes();
-        }
-
-        return self::$routes;
+        return $routeForRequest;
     }
 }

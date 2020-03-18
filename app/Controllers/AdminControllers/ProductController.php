@@ -46,8 +46,10 @@ class ProductController extends AdminController
         $categories = $categoryService->getCategories();
         $categories = $categoryService->getFormattedCategories($categories);
 
-        if (isset($request->getGetData()['sku'])) {
-            $product = $productService->getProductBySku($request->getGetData()['sku']);
+        if (!preg_match('/create$/', $request->getRequestURI())) {
+            $uriSegments = explode('/', $request->getRequestURI());
+            $sku = end($uriSegments);
+            $product = $productService->getProductBySku($sku);
 
             if (!$product) {
                 $addEditViewArguments = [
@@ -111,9 +113,10 @@ class ProductController extends AdminController
      * Update existing product.
      *
      * @param Request $request
+     * @param string $oldSku
      * @return HTMLResponse
      */
-    public function updateProduct(Request $request): HTMLResponse
+    public function updateProduct(Request $request, string $oldSku): HTMLResponse
     {
         $productService = $this->getProductService();
         $categoryService = $this->getCategoryService();
@@ -121,7 +124,7 @@ class ProductController extends AdminController
 
         $file = $request->getFile('img');
 
-        if (!$productService->updateProduct($request->getPostData(), $file)) {
+        if (!$productService->updateProduct($request->getPostData(), $oldSku, $file)) {
             $categories = $categoryService->getCategories();
             $categories = $categoryService->getFormattedCategories($categories);
             $product = $productService->getProductBySku($request->getPostData()['oldSku']);

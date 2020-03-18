@@ -82,6 +82,11 @@ Demoshop.Category.CreateCategory = class {
         let parentCategory = document.getElementById("parentCategory").value;
         let code = document.getElementById("code").value;
         let description = document.getElementById("description").value;
+
+        if(parentCategory === "") {
+            parentCategory = "root";
+        }
+
         if (title !== "" && code !== "" && description !== "") {
             let p = Demoshop.Service.categoryService;
             p.addNewCategory(title, parentCategory, code, description).then(this.categoryAdded, this.displayError);

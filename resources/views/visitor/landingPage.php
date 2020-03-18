@@ -7,6 +7,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="/css/visitor/categoryMenu.css">
     <link rel="stylesheet" href="/css/visitor/landing.css">
     <script type="text/javascript" src="/js/Visitor/menu.js"></script>
@@ -24,7 +25,7 @@
 <div class="all-products">
     <?php
     foreach ($products as $item) {
-        echo '<a href="/index.php?controller=frontProduct&action=index&sku=' . $item['sku'] . '" class="product-link">';
+        echo '<a href="/products/' . $item['sku'] . '" class="product-link">';
         echo '<div class="product"><label class="product-details">' . $item['price'] . ' rsd</label>';
 
         if (!$item['image']) {

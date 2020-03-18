@@ -20,14 +20,14 @@ class FrontProductController extends FrontController
      * @param Request $request
      * @return HTMLResponse
      */
-    public function index(Request $request): HTMLResponse
+    public function index(Request $request, string $sku): HTMLResponse
     {
         $productService = $this->getProductService();
-        $product = $productService->getProductBySku($request->getGetData()['sku']);
+        $product = $productService->getProductBySku($sku);
         if ($product) {
             $product = $productService->formatProduct($product);
         }
-        $productService->increaseProductViewCount($request->getGetData()['sku']);
+        $productService->increaseProductViewCount($sku);
 
         $categoryService = $this->getCategoryService();
         $categories = $categoryService->getRootCategories();
@@ -45,12 +45,13 @@ class FrontProductController extends FrontController
      * Render categoryDisplay.php page.
      *
      * @param Request $request
+     * @param string $code
      * @return HTMLResponse
      */
-    public function listProducts(Request $request): HTMLResponse
+    public function listProducts(Request $request, string $code): HTMLResponse
     {
         $productService = $this->getProductService();
-        $dataForCategoryDisplay = $productService->getDataForCategoryDisplay($request->getGetData());
+        $dataForCategoryDisplay = $productService->getDataForCategoryDisplay($code, $request->getGetData());
 
         $categoryService = $this->getCategoryService();
         $categories = $categoryService->getRootCategories();
@@ -64,7 +65,7 @@ class FrontProductController extends FrontController
             'productsPerPage' => $dataForCategoryDisplay['productsPerPage'],
             'categories' => $categories,
             'searchOrCategory' => 0,
-            'id' => $request->getGetData()['id'],
+            'selectedCategory' => $categoryService->getCategoryByCode($code),
             'message' => 'This category is empty.',
         ];
         return new HTMLResponse('/views/visitor/categoryDisplay.php', $categoryDisplayArguments);

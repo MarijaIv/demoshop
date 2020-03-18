@@ -1,8 +1,12 @@
 <?php
 
 use Demoshop\AuthorizationMiddleware\Authorization;
+use Demoshop\AuthorizationMiddleware\Exceptions\ControllerOrActionNotFoundException;
+use Demoshop\AuthorizationMiddleware\Exceptions\InvalidRequestUriOrMethodException;
 use Demoshop\AuthorizationMiddleware\Exceptions\RouteAlreadyRegisteredException;
+use Demoshop\HTTP\RequestInit;
 use Demoshop\Routing\Route;
+use Demoshop\Routing\Router;
 use Demoshop\Routing\Routes;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -42,12 +46,14 @@ try {
         'product', 'disableSelected', [Authorization::class]));
     Routes::add(new Route('GET', '/admin/products/enableDisable',
         'product', 'enableOrDisableProduct', [Authorization::class]));
-    Routes::add(new Route('GET', '/admin/products/addEdit',
-        'product', 'addEditProduct', [Authorization::class]));
-    Routes::add(new Route('GET', '/admin/products/{sku}',
-        'product', 'updateProduct', [Authorization::class]));
     Routes::add(new Route('GET', '/admin/products/create',
+        'product', 'addEditProduct', [Authorization::class]));
+    Routes::add(new Route('GET', '/admin/products/%',
+        'product', 'addEditProduct', [Authorization::class]));
+    Routes::add(new Route('POST', '/admin/products/create',
         'product', 'createNewProduct', [Authorization::class]));
+    Routes::add(new Route('POST', '/admin/products/%',
+        'product', 'updateProduct', [Authorization::class]));
     Routes::add(new Route('GET', '/admin/products/firstPage',
         'product', 'firstPage', [Authorization::class]));
     Routes::add(new Route('GET', '/admin/products/nextPage',
@@ -57,12 +63,20 @@ try {
     Routes::add(new Route('GET', '/admin/products/prevPage',
         'product', 'prevPage', [Authorization::class]));
 
-    Routes::add(new Route('GET', '', 'home', 'index', []));
-    Routes::add(new Route('GET', '/{category_code}', 'frontProduct', 'listProducts', []));
+    Routes::add(new Route('GET', '/', 'home', 'index', []));
+    Routes::add(new Route('GET', '/%', 'frontProduct', 'listProducts', []));
     Routes::add(new Route('GET', '/search', 'productSearch', 'index', []));
-    Routes::add(new Route('GET', '/product/{sku}', 'frontProduct', 'index', []));
-
+    Routes::add(new Route('GET', '/product/%', 'frontProduct', 'index', []));
 } catch (RouteAlreadyRegisteredException $e) {
+}
+
+$request = RequestInit::init();
+
+$router = new Router();
+try {
+    $response = $router->route($request);
+} catch (ControllerOrActionNotFoundException $e) {
+} catch (InvalidRequestUriOrMethodException $e) {
 }
 
 $response->render();

@@ -8,16 +8,13 @@
  * @var string $brand
  * @var string $category
  * @var float $price
- * @var string $shortDesc
+ * @var string $shortDescription
  * @var string $description
  * @var bool $enabled
  * @var bool $featured
  * @var array $image
  *
  */
-if ($sku) {
-    $oldSku = $sku;
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,8 +35,12 @@ if ($sku) {
     <div class="products-content">
         <h2 class="products-header">Product details</h2>
         <output class="message"><?php echo $message; ?></output>
-        <form action="/admin.php" method="post" class="products-form"
-              id="addEditTab" enctype="multipart/form-data">
+        <form <?php if (!empty($sku)) {
+            echo 'action="/admin/products/' . $sku . '"';
+        } else {
+            echo 'action="/admin/products/create"';
+        } ?> method="post" class="products-form"
+             id="addEditTab" enctype="multipart/form-data">
             <div class="product-columns">
                 <div class="product-inputs">
                     <label class="details-names" for="sku">SKU:</label>
@@ -51,7 +52,7 @@ if ($sku) {
                     <label class="description" for="description">Description:</label>
                     <label class="details-names" for="enabled">Enabled in shop</label>
                     <label class="details-names" for="featured">Featured</label>
-                    <a href="/admin.php?controller=product&action=index" class="cancel-btn">Cancel</a>
+                    <a href="/admin/products" class="cancel-btn">Cancel</a>
                 </div>
                 <div class="product-inputs">
                     <input type="text" class="details" id="sku" name="sku" required value="<?php echo $sku; ?>">
@@ -72,7 +73,7 @@ if ($sku) {
                     </select>
                     <input type="text" class="details" id="price" name="price" required value="<?php echo $price; ?>">
                     <textarea class="details-ta" id="shortDesc" name="shortDesc"
-                              required><?php echo $shortDesc; ?></textarea>
+                              required><?php echo $shortDescription; ?></textarea>
                     <textarea class="details-ta" id="description" name="description"
                               required><?php echo $description; ?></textarea>
                     <?php if ($enabled) {
@@ -88,13 +89,6 @@ if ($sku) {
                     } else {
                         echo '<input type="checkbox" class="enable-feature" id="featured"
                            name="featured">';
-                    } ?>
-                    <input type="hidden" name="controller" value="product">
-                    <?php if ($sku) {
-                        echo '<input type="hidden" name="action" value="updateProduct">';
-                        echo '<input type="hidden" name="oldSku" value="' . $oldSku . '">';
-                    } else {
-                        echo '<input type="hidden" name="action" value="createNewProduct">';
                     } ?>
                     <input type="submit" value="OK" class="upload-btn">
                 </div>

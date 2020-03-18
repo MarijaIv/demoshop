@@ -66,7 +66,7 @@ class ProductsRepository
     public function increaseViewCount(string $sku): bool
     {
         $product = Product::query()->where('sku', '=', $sku)->first();
-        if($product) {
+        if ($product) {
             ++$product->view_count;
             return $product->save();
         }
@@ -75,14 +75,17 @@ class ProductsRepository
     }
 
     /**
-     * Get products by category id.
+     * Get enabled products by category id.
      *
      * @param int $id
      * @return Collection
      */
-    public function getProductsByCategoryId(int $id): Collection
+    public function getEnabledProductsByCategoryId(int $id): Collection
     {
-        return Product::query()->where('category_id', '=', $id)->get();
+        return Product::query()
+            ->where('category_id', '=', $id)
+            ->where('enabled', '=', 1)
+            ->get();
     }
 
     /**
@@ -171,13 +174,14 @@ class ProductsRepository
      * Update product.
      *
      * @param array $data
+     * @param string $oldSku
      * @param string $image
      * @return int
      */
-    public function updateProduct(array $data, string $image): int
+    public function updateProduct(array $data, string $oldSku, string $image): int
     {
         return Product::query()
-            ->where('sku', '=', $data['oldSku'])
+            ->where('sku', '=', $oldSku)
             ->update(
                 [
                     'category_id' => $data['category'],

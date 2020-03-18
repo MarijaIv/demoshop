@@ -81,7 +81,7 @@ class ProductService
      */
     public function increaseProductViewCount(string $sku): bool
     {
-        if(!$this->productsRepository->productSkuExists($sku)) {
+        if (!$this->productsRepository->productSkuExists($sku)) {
             return false;
         }
 
@@ -175,24 +175,66 @@ class ProductService
     }
 
     /**
-     * Update product.
+     * Set product enable and featured value.
      *
      * @param array $data
+     */
+    private static function setEnabledAndFeaturedValue(array &$data): void
+    {
+        $data['enabled'] = $data['enabled'] === 'on' ? 1 : 0;
+        $data['featured'] = $data['featured'] === 'on' ? 1 : 0;
+    }
+
+    /**
+     * Check image characteristics.
+     *
      * @param array $file
      * @return bool
      */
-    public function updateProduct(array $data, array $file): bool
+    private static function checkImageCharacteristics(array $file): bool
+    {
+        $imageSize = getimagesize($file['tmp_name']);
+
+        if ($imageSize[0] < 600) {
+            return false;
+        }
+
+        $heightWidthRatio = $imageSize[0] / $imageSize[1];
+
+        return !($heightWidthRatio < self::MIN_HEIGHT_WIDTH_RATIO || $heightWidthRatio > self::MAX_HEIGHT_WIDTH_RATIO);
+    }
+
+    /**
+     * Save image to /img directory.
+     *
+     * @param array $file
+     */
+    private static function saveFile(array $file): void
+    {
+        $targetFile = __DIR__ . '/../../public/img/' . basename($file['name']);
+        move_uploaded_file($file['tmp_name'], $targetFile);
+    }
+
+    /**
+     * Update product.
+     *
+     * @param array $data
+     * @param string $oldSku
+     * @param array $file
+     * @return bool
+     */
+    public function updateProduct(array $data, string $oldSku, array $file): bool
     {
         if (!isset($data['sku'], $data['title'], $data['brand'],
             $data['price'], $data['shortDesc'], $data['description'])) {
             return false;
         }
 
-        if (!$this->productsRepository->productSkuExists($data['oldSku'])) {
+        if (!$this->productsRepository->productSkuExists($oldSku)) {
             return false;
         }
 
-        if ($data['oldSku'] !== $data['sku'] && $this->productsRepository->productSkuExists($data['sku'])) {
+        if ($oldSku !== $data['sku'] && $this->productsRepository->productSkuExists($data['sku'])) {
             return false;
         }
 
@@ -200,7 +242,7 @@ class ProductService
             return false;
         }
 
-        if (!$this->productsRepository->getProductBySku($data['oldSku'])) {
+        if (!$this->productsRepository->getProductBySku($oldSku)) {
             return false;
         }
 
@@ -208,7 +250,7 @@ class ProductService
         $data['price'] = (float)$data['price'];
         $data['category'] = (int)$data['category'];
 
-        if ($file['tmp_name'] === '' && $product = $this->getProductBySku($data['oldSku'])) {
+        if ($file['tmp_name'] === '' && $product = $this->getProductBySku($oldSku)) {
             $content = $product['image'];
         } else {
             self::saveFile($file);
@@ -218,7 +260,7 @@ class ProductService
             unlink($fileName);
         }
 
-        $this->productsRepository->updateProduct($data, $content);
+        $this->productsRepository->updateProduct($data, $oldSku, $content);
         return true;
     }
 
@@ -365,22 +407,25 @@ class ProductService
     /**
      * Get products for category display.
      *
+     * @param string $code
      * @param array $data
      * @return array
      */
-    public function getDataForCategoryDisplay(array $data): array
+    public function getDataForCategoryDisplay(string $code, array $data): array
     {
         $categoryService = ServiceRegistry::get('CategoryService');
 
-        if (!$data['id']) {
+        if (!$code) {
             return [];
         }
 
-        if (!$categoryService->getCategoryById($data['id'])) {
+        $category = $categoryService->getCategoryByCode($code);
+
+        if (!$category) {
             return [];
         }
 
-        $products = $this->getProductsForCategory($data['id']);
+        $products = $this->getProductsForCategory($category->id);
 
         $formattedData = $this->formatProducts($products, $data);
 
@@ -442,7 +487,7 @@ class ProductService
     public
     function getProductsByCategoryId(int $id): Collection
     {
-        return $this->productsRepository->getProductsByCategoryId($id);
+        return $this->productsRepository->getEnabledProductsByCategoryId($id);
     }
 
     /**
@@ -534,23 +579,23 @@ class ProductService
      */
     public function setPage(array $data, int $numberOfPages): int
     {
-        if ($data['pagination'] === '<<') {
+        if ($data['pagination'] === 'firstPage') {
             $data['currentPage'] = 1;
         }
 
-        if (($data['pagination'] === '<') && $data['currentPage'] !== '1') {
+        if (($data['pagination'] === 'prevPage') && $data['currentPage'] !== '1') {
             $data['currentPage']--;
         }
 
-        if ($data['pagination'] === '>>') {
+        if ($data['pagination'] === 'lastPage') {
             $data['currentPage'] = $numberOfPages;
         }
 
-        if (($data['pagination'] === '>') && $data['currentPage'] !== (string)$numberOfPages) {
+        if (($data['pagination'] === 'nextPage') && $data['currentPage'] !== (string)$numberOfPages) {
             $data['currentPage']++;
         }
 
-        if($data['currentPage'] > $numberOfPages) {
+        if ($data['currentPage'] > $numberOfPages) {
             $data['currentPage'] = 1;
         }
 
@@ -586,36 +631,36 @@ class ProductService
                 $products = $this->getProductsByKeyword($data['keyword']);
             }
 
-            if(!empty($data['category'])) {
-                if(empty($products)) {
-                    $products = $this->productsRepository->getProductsByCategoryId($data['category']);
+            if (!empty($data['category'])) {
+                if (empty($products)) {
+                    $products = $this->productsRepository->getEnabledProductsByCategoryId($data['category']);
                 } else {
-                    foreach($products as $productKey => $product) {
-                        if((string)$product['category_id'] !== $data['category']) {
+                    foreach ($products as $productKey => $product) {
+                        if ((string)$product['category_id'] !== $data['category']) {
                             unset($products[$productKey]);
                         }
                     }
                 }
             }
 
-            if(!empty($data['maxPrice'])) {
-                if(empty($products)) {
+            if (!empty($data['maxPrice'])) {
+                if (empty($products)) {
                     $products = $this->productsRepository->getProductsMaxPrice($data['maxPrice']);
                 } else {
                     foreach ($products as $productKey => $product) {
-                        if($product['price'] > $data['maxPrice']) {
+                        if ($product['price'] > $data['maxPrice']) {
                             unset($products[$productKey]);
                         }
                     }
                 }
             }
 
-            if(!empty($data['minPrice'])) {
-                if(empty($products)) {
+            if (!empty($data['minPrice'])) {
+                if (empty($products)) {
                     $products = $this->productsRepository->getProductsMinPrice($data['minPrice']);
                 } else {
                     foreach ($products as $productKey => $product) {
-                        if($product['price'] < $data['minPrice']) {
+                        if ($product['price'] < $data['minPrice']) {
                             unset($products[$productKey]);
                         }
                     }
@@ -653,54 +698,13 @@ class ProductService
         $categories = $categoryService->getCategoriesByTitle($keyword);
 
         foreach ($categories as $category) {
-            $products = $products->merge($this->productsRepository->getProductsByCategoryId($category['id']));
+            $products = $products->merge($this->productsRepository->getEnabledProductsByCategoryId($category['id']));
         }
 
         $products = $products->merge($this->productsRepository->getProductsByShortDesc($keyword));
         $products = $products->merge($this->productsRepository->getProductsByDescription($keyword));
 
         return $products;
-    }
-
-    /**
-     * Set product enable and featured value.
-     *
-     * @param array $data
-     */
-    private static function setEnabledAndFeaturedValue(array &$data): void
-    {
-        $data['enabled'] = $data['enabled'] === 'on' ? 1 : 0;
-        $data['featured'] = $data['featured'] === 'on' ? 1 : 0;
-    }
-
-    /**
-     * Check image characteristics.
-     *
-     * @param array $file
-     * @return bool
-     */
-    private static function checkImageCharacteristics(array $file): bool
-    {
-        $imageSize = getimagesize($file['tmp_name']);
-
-        if ($imageSize[0] < 600) {
-            return false;
-        }
-
-        $heightWidthRatio = $imageSize[0] / $imageSize[1];
-
-        return !($heightWidthRatio < self::MIN_HEIGHT_WIDTH_RATIO || $heightWidthRatio > self::MAX_HEIGHT_WIDTH_RATIO);
-    }
-
-    /**
-     * Save image to /img directory.
-     *
-     * @param array $file
-     */
-    private static function saveFile(array $file): void
-    {
-        $targetFile = __DIR__ . '/../../public/img/' . basename($file['name']);
-        move_uploaded_file($file['tmp_name'], $targetFile);
     }
 
 }

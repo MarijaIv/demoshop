@@ -7,6 +7,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="/css/visitor/categoryMenu.css">
     <link rel="stylesheet" href="/css/visitor/landing.css">
     <link rel="stylesheet" href="/css/visitor/categoryDisplay.css">

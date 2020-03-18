@@ -247,4 +247,15 @@ class CategoryService
     {
         return $this->categoryRepository->getCategoriesByTitle($keyword);
     }
+
+    /**
+     * Get category by code.
+     *
+     * @param string $code
+     * @return Model
+     */
+    public function getCategoryByCode(string $code): Model
+    {
+        return $this->categoryRepository->getCategoryByCode($code);
+    }
 }

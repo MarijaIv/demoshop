@@ -24,8 +24,10 @@ class ProductSearchController extends FrontController
     {
         $productService = $this->getProductService();
         $categoryService = $this->getCategoryService();
+
         $categories = $categoryService->getRootCategories();
         $categories = $categoryService->formatCategoriesForTreeView($categories);
+
         $optionCategories = $categoryService->getCategories();
         $optionCategories = $categoryService->getFormattedCategories($optionCategories);
 
@@ -40,12 +42,10 @@ class ProductSearchController extends FrontController
             'currentPage' => $searchProducts['currentPage'],
             'sorting' => $searchProducts['sorting'],
             'productsPerPage' => $searchProducts['productsPerPage'],
-            'id' => $request->getGetData()['id'],
             'search' => $request->getGetData()['search'],
             'keyword' => $request->getGetData()['keyword'],
             'maxPrice' => $request->getGetData()['maxPrice'],
             'minPrice' => $request->getGetData()['minPrice'],
-            'selectedCategory' => $request->getGetData()['category'],
             'message' => 'No search results.',
         ];
 
