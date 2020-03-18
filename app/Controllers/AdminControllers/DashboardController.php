@@ -7,7 +7,6 @@ namespace Demoshop\Controllers\AdminControllers;
 use Demoshop\Controllers\AdminController;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
-use Demoshop\ServiceRegistry\ServiceRegistry;
 
 /**
  * Class DashboardController
@@ -27,13 +26,15 @@ class DashboardController extends AdminController
         $categoryService = $this->getCategoryService();
         $statisticsService = $this->getStatisticsService();
 
+        $mostViewedProduct = $productService->getMostViewedProduct();
+
         $myObj = [
             'amountOfProducts' => $productService->getNumberOfProducts(),
             'amountOfCategories' => $categoryService->getCountOfCategories(),
             'homeViewCount' => $statisticsService->getTotalHomeViewCount(),
-            'mostViewedProductId' => $productService->getMostViewedProductId(),
-            'mostViewedProduct' => $productService->getMostViewedProduct(),
-            'numberOfMostViews' => $productService->getNumberOfMostViews()
+            'mostViewedProductId' => $mostViewedProduct->id,
+            'mostViewedProduct' => $mostViewedProduct->title,
+            'numberOfMostViews' => $mostViewedProduct->view_count,
         ];
 
         return new HTMLResponse('/views/admin/dashboard.php', $myObj);

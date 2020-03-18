@@ -44,31 +44,11 @@ class ProductService
     /**
      * Get product which details page is displayed most often.
      *
-     * @return string
+     * @return Model
      */
-    public function getMostViewedProduct(): string
+    public function getMostViewedProduct(): Model
     {
         return $this->productsRepository->getMostViewedProduct();
-    }
-
-    /**
-     * Get number of most viewed product views.
-     *
-     * @return int
-     */
-    public function getNumberOfMostViews(): int
-    {
-        return $this->productsRepository->getNumberOfMostViews();
-    }
-
-    /**
-     * Get id of most viewed product.
-     *
-     * @return int
-     */
-    public function getMostViewedProductId(): int
-    {
-        return $this->productsRepository->getMostViewedProductId();
     }
 
     /**
