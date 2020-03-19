@@ -52,30 +52,6 @@ class CategoryService
     }
 
     /**
-     * Format category for JSON encoding.
-     *
-     * @param Model $category
-     * @return array
-     */
-    public function getFormattedCategory($category): array
-    {
-        $formattedCategory['id'] = $category->id;
-
-        if ($category->parent_id) {
-            $parent = $this->categoryRepository->getCategoryById($category->parent_id);
-            $formattedCategory['parentCode'] = ($parent ? $parent->code : '');
-        } else {
-            $formattedCategory['parentCode'] = '';
-        }
-
-        $formattedCategory['title'] = $category->title;
-        $formattedCategory['code'] = $category->code;
-        $formattedCategory['description'] = $category->description;
-
-        return $formattedCategory;
-    }
-
-    /**
      * Format array for JSON encoding (for treeview).
      *
      * @param Collection $rootCategories
@@ -120,23 +96,6 @@ class CategoryService
     public function getCategories(): Collection
     {
         return $this->categoryRepository->getCategories();
-    }
-
-    /**
-     * Format categories for JSON encoding.
-     *
-     * @param $categories
-     * @return array
-     */
-    public function getFormattedCategories($categories): array
-    {
-        $formattedCategories = [];
-
-        foreach ($categories as $item) {
-            $formattedCategories[] = new CategoryDTO($item);
-        }
-
-        return $formattedCategories;
     }
 
     /**
@@ -234,6 +193,7 @@ class CategoryService
         }
 
         $this->categoryRepository->updateCategory($data);
+
         return true;
     }
 
@@ -254,7 +214,7 @@ class CategoryService
      * @param string $code
      * @return Model
      */
-    public function getCategoryByCode(string $code): Model
+    public function getCategoryByCode(string $code):? Model
     {
         return $this->categoryRepository->getCategoryByCode($code);
     }

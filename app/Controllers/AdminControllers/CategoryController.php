@@ -5,6 +5,7 @@ namespace Demoshop\Controllers\AdminControllers;
 
 
 use Demoshop\Controllers\AdminController;
+use Demoshop\Formatters\CategoryFormatter;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\JSONResponse;
 use Demoshop\HTTP\Request;
@@ -25,7 +26,6 @@ class CategoryController extends AdminController
     {
         return new HTMLResponse('/views/admin/category.php');
     }
-
 
     /**
      * Get formatted categories in json file.
@@ -51,8 +51,10 @@ class CategoryController extends AdminController
     public function listAllCategories(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
+        $formatter = new CategoryFormatter();
+
         $categories = $categoryService->getCategories();
-        $categories = $categoryService->getFormattedCategories($categories);
+        $categories = $formatter->getFormattedCategories($categories);
 
         return new JSONResponse($categories);
     }
@@ -66,8 +68,15 @@ class CategoryController extends AdminController
     public function displayCategory(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
+        $formatter = new CategoryFormatter();
+
         $category = $categoryService->getCategoryById($request->getGetData()['id']);
-        $category = $categoryService->getFormattedCategory($category);
+        $parent = null;
+        if($category->parent_id) {
+            $parent = $categoryService->getCategoryById($category->parent_id);
+        }
+
+        $category = $formatter->formatCategory($category, $parent);
 
         return new JSONResponse($category);
     }

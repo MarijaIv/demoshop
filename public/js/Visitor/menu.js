@@ -28,6 +28,14 @@ Demoshop.Visitor.Menu = class {
             child.classList.add("child");
         }
     }
+
+    /**
+     * On change submit form.
+     */
+    submitForm() {
+        let form = document.getElementById("configuration");
+        form.submit();
+    }
 };
 
 Demoshop.Visitor.Menu.menu = new Demoshop.Visitor.Menu();

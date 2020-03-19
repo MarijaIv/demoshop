@@ -13,6 +13,10 @@ use Demoshop\HTTP\Response;
 class Router
 {
     /**
+     * Find the Route that belongs to the incoming request.
+     * From retrieved route get controller and action method.
+     * Pass incoming request and any path parameters to the controller's method.
+     *
      * @param Request $request
      * @return Response
      * @throws ControllerOrActionNotFoundException

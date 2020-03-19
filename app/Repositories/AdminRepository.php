@@ -34,15 +34,9 @@ class AdminRepository
      */
     public function adminExists(string $username): bool
     {
-        $admin = Admin::query()
+        return Admin::query()
             ->where('username', '=', $username)
-            ->first();
-
-        if (!$admin) {
-            return false;
-        }
-
-        return true;
+            ->exists();
     }
 
     /**

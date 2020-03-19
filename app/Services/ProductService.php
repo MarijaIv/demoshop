@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 
 /**
  * Class ProductService
+ * @package Demoshop\Services
  */
 class ProductService
 {
@@ -93,13 +94,13 @@ class ProductService
         }
 
         $data['price'] = (float)$data['price'];
-        self::setEnabledAndFeaturedValue($data);
+        $this->setEnabledAndFeaturedValue($data);
 
-        if (!self::checkImageCharacteristics($file)) {
+        if (!$this->checkImageCharacteristics($file)) {
             return false;
         }
 
-        self::saveFile($file);
+        $this->saveFile($file);
 
         $fileName = __DIR__ . '/../../public/img/' . $file['name'];
         $content = fopen($fileName, 'rb');
@@ -119,7 +120,7 @@ class ProductService
      *
      * @param array $data
      */
-    private static function setEnabledAndFeaturedValue(array &$data): void
+    private function setEnabledAndFeaturedValue(array &$data): void
     {
         $data['enabled'] = $data['enabled'] === 'on' ? 1 : 0;
         $data['featured'] = $data['featured'] === 'on' ? 1 : 0;
@@ -131,7 +132,7 @@ class ProductService
      * @param array $file
      * @return bool
      */
-    private static function checkImageCharacteristics(array $file): bool
+    private function checkImageCharacteristics(array $file): bool
     {
         $imageSize = getimagesize($file['tmp_name']);
 
@@ -149,7 +150,7 @@ class ProductService
      *
      * @param array $file
      */
-    private static function saveFile(array $file): void
+    private function saveFile(array $file): void
     {
         $targetFile = __DIR__ . '/../../public/img/' . basename($file['name']);
         move_uploaded_file($file['tmp_name'], $targetFile);
@@ -178,18 +179,18 @@ class ProductService
             return false;
         }
 
-        if ($file['tmp_name'] !== '' && !self::checkImageCharacteristics($file)) {
+        if ($file['tmp_name'] !== '' && !$this->checkImageCharacteristics($file)) {
             return false;
         }
 
-        self::setEnabledAndFeaturedValue($data);
+        $this->setEnabledAndFeaturedValue($data);
         $data['price'] = (float)$data['price'];
         $data['category'] = (int)$data['category'];
 
         if ($file['tmp_name'] === '' && $product = $this->getProductBySku($oldSku)) {
             $content = $product['image'];
         } else {
-            self::saveFile($file);
+            $this->saveFile($file);
             $fileName = __DIR__ . '/../../public/img/' . $file['name'];
             $content = fopen($fileName, 'rb');
             $content = fread($content, filesize($fileName));
@@ -276,6 +277,11 @@ class ProductService
     public function enableOrDisableProduct($sku): bool
     {
         $product = $this->productsRepository->getProductBySku($sku);
+
+        if (!$product) {
+            return false;
+        }
+
         if ($product->enabled) {
             $this->productsRepository->disableProduct($sku);
             return true;
@@ -315,7 +321,6 @@ class ProductService
      * Get products for category display.
      *
      * @param string $code
-     * @param array $data
      * @return Collection
      */
     public function getDataForCategoryDisplay(string $code): Collection
@@ -349,7 +354,7 @@ class ProductService
         $products = $this->getProductsByCategoryId($id);
         $children = $categoryService->getCategoriesForParent($id);
         foreach ($children as $child) {
-            $products->merge($this->getProductsForCategory($child['id']));
+            $products = $products->merge($this->getProductsForCategory($child['id']));
         }
 
         return $products;
@@ -372,15 +377,17 @@ class ProductService
      * @param array $data
      * @return Collection
      */
-    public function searchProducts(array $data): Collection
+    public function searchProducts(array &$data): Collection
     {
+        $products = null;
+
         if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
                 && empty($data['maxPrice']) && empty($data['minPrice']))) {
             $products = $this->getProductsByKeyword($data['search']);
-            if (empty($data['sorting'])) {
-                $data['sorting'] = 'relevance';
-            }
+            $data['sorting'] = 'relevance';
         } else {
+            $data['search'] = '';
+
             if (!empty($data['keyword'])) {
                 $products = $this->getProductsByKeyword($data['keyword']);
             }
@@ -419,6 +426,10 @@ class ProductService
                         }
                     }
                 }
+            }
+
+            if($products === null) {
+                $products = $this->productsRepository->getEnabledProducts();
             }
         }
 

@@ -83,6 +83,8 @@ class ProductDTO
 
 
     /**
+     * Get id.
+     *
      * @return int
      */
     public function getId(): int
@@ -91,6 +93,8 @@ class ProductDTO
     }
 
     /**
+     * Set id.
+     *
      * @param int $id
      */
     public function setId(int $id): void
@@ -99,6 +103,8 @@ class ProductDTO
     }
 
     /**
+     * Get parent category id.
+     *
      * @return int
      */
     public function getCategoryId(): int
@@ -107,6 +113,8 @@ class ProductDTO
     }
 
     /**
+     * Set parent category id.
+     *
      * @param int $categoryId
      */
     public function setCategoryId(int $categoryId): void
@@ -115,6 +123,8 @@ class ProductDTO
     }
 
     /**
+     * Get sku.
+     *
      * @return string
      */
     public function getSku(): string
@@ -123,6 +133,8 @@ class ProductDTO
     }
 
     /**
+     * Set sku.
+     *
      * @param string $sku
      */
     public function setSku(string $sku): void
@@ -131,6 +143,8 @@ class ProductDTO
     }
 
     /**
+     * Get title.
+     *
      * @return string
      */
     public function getTitle(): string
@@ -139,6 +153,8 @@ class ProductDTO
     }
 
     /**
+     * Set title.
+     *
      * @param string $title
      */
     public function setTitle(string $title): void
@@ -147,6 +163,8 @@ class ProductDTO
     }
 
     /**
+     * Get brand.
+     *
      * @return string
      */
     public function getBrand(): string
@@ -155,6 +173,8 @@ class ProductDTO
     }
 
     /**
+     * Set brand.
+     *
      * @param string $brand
      */
     public function setBrand(string $brand): void
@@ -163,6 +183,8 @@ class ProductDTO
     }
 
     /**
+     * Get price.
+     *
      * @return float
      */
     public function getPrice(): float
@@ -171,6 +193,8 @@ class ProductDTO
     }
 
     /**
+     * Set price.
+     *
      * @param float $price
      */
     public function setPrice(float $price): void
@@ -179,6 +203,8 @@ class ProductDTO
     }
 
     /**
+     * Get short description.
+     *
      * @return string
      */
     public function getShortDescription(): string
@@ -187,6 +213,8 @@ class ProductDTO
     }
 
     /**
+     * Set short description.
+     *
      * @param string $shortDescription
      */
     public function setShortDescription(string $shortDescription): void
@@ -195,6 +223,8 @@ class ProductDTO
     }
 
     /**
+     * Get description.
+     *
      * @return string
      */
     public function getDescription(): string
@@ -203,6 +233,8 @@ class ProductDTO
     }
 
     /**
+     * Set description.
+     *
      * @param string $description
      */
     public function setDescription(string $description): void
@@ -211,6 +243,8 @@ class ProductDTO
     }
 
     /**
+     * Get image.
+     *
      * @return string
      */
     public function getImage(): string
@@ -219,6 +253,8 @@ class ProductDTO
     }
 
     /**
+     * Set image.
+     *
      * @param string $image
      */
     public function setImage(string $image): void
@@ -227,6 +263,8 @@ class ProductDTO
     }
 
     /**
+     * Is product enabled.
+     *
      * @return bool
      */
     public function isEnabled(): bool
@@ -235,6 +273,8 @@ class ProductDTO
     }
 
     /**
+     * Set enabled.
+     *
      * @param bool $enabled
      */
     public function setEnabled(bool $enabled): void
@@ -243,6 +283,8 @@ class ProductDTO
     }
 
     /**
+     * Is product featured.
+     *
      * @return bool
      */
     public function isFeatured(): bool
@@ -251,6 +293,8 @@ class ProductDTO
     }
 
     /**
+     * Set featured.
+     *
      * @param bool $featured
      */
     public function setFeatured(bool $featured): void
@@ -259,6 +303,8 @@ class ProductDTO
     }
 
     /**
+     * Get view count.
+     *
      * @return int
      */
     public function getViewCount(): int
@@ -267,6 +313,8 @@ class ProductDTO
     }
 
     /**
+     * Set view count.
+     *
      * @param int $viewCount
      */
     public function setViewCount(int $viewCount): void
@@ -274,6 +322,11 @@ class ProductDTO
         $this->viewCount = $viewCount;
     }
 
+    /**
+     * Format product.
+     *
+     * @return array
+     */
     public function toArray(): array
     {
         return [

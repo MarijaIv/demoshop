@@ -41,11 +41,11 @@
     <div class="products-configurations">
         <?php
         if (!$searchOrCategory) {
-            echo '<form method="get" action="/' . $selectedCategory['code'] . '" class="products-display">';
+            echo '<form id="configuration" method="get" action="/' . $selectedCategory['code'] . '" class="products-display">';
             require_once __DIR__ . '/configuration.php';
             echo '</form>';
         } else {
-            echo '<form method="get" action="/search" class="search-configuration">';
+            echo '<form id="configuration" method="get" action="/search" class="search-configuration">';
             require_once __DIR__ . '/searchCriteria.php';
             require_once __DIR__ . '/configuration.php';
             echo '</form>';

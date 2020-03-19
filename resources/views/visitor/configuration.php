@@ -8,13 +8,19 @@
  * @var array $products
  * @var bool $searchOrCategory
  * @var array $selectedCategory
+ * @var string $search
  */
 ?>
 
 <div class="products-display">
     <input type="hidden" name="currentPage" value="<?php echo $currentPage; ?>">
+    <?php
+    if ($search !== '') {
+        echo '<input type="hidden" name="search" value="' . $search . '">';
+    }
+    ?>
     <label for="sorting" class="sort-by">Sort by:
-        <select id="sorting" name="sorting" class="options" onchange="this.form.submit()">
+        <select id="sorting" name="sorting" class="options" onchange="Demoshop.Visitor.Menu.menu.submitForm()">
             <?php if ($searchOrCategory) {
                 echo '<option value="relevance"';
                 if ($sorting === 'relevance') {
@@ -57,7 +63,8 @@
         <button type="submit" name="pagination" value="lastPage" class="page-button"> >></button>
     </div>
     <label for="productsPerPage" class="per-page">Products per page:
-        <select id="productsPerPage" name="productsPerPage" class="options" onchange="this.form.submit()">
+        <select id="productsPerPage" name="productsPerPage" class="options"
+                onchange="Demoshop.Visitor.Menu.menu.submitForm()">
             <option value="5" <?php if ($productsPerPage === '5') {
                 echo 'selected';
             } ?>>5

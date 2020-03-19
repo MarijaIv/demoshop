@@ -15,24 +15,21 @@
 
 .tab-link:link {
     color: black;
-    display: block;
+    display: inline-block;
     margin-left: 10px;
     text-align: left;
     text-decoration: none;
     font-size: 25px;
+    margin-bottom: 15px;
 }
 
 .tab-link:visited {
     color: green;
-    display: block;
-    alignment: center;
     text-decoration: none;
 }
 
 .tab-link:hover {
     text-decoration: underline;
-    display: block;
-    alignment: center;
 }
 
 .tabcontent {

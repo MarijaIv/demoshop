@@ -5,6 +5,7 @@ namespace Demoshop\Controllers\AdminControllers;
 
 
 use Demoshop\Controllers\AdminController;
+use Demoshop\Formatters\CategoryFormatter;
 use Demoshop\Formatters\ProductFormatter;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
@@ -47,12 +48,13 @@ class ProductController extends AdminController
     public function addEditProduct(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
+        $productFormatter = new ProductFormatter();
+        $categoryFormatter = new CategoryFormatter();
 
         $response = new HTMLResponse('/views/admin/addEditProduct.php');
         $categoryService = $this->getCategoryService();
         $categories = $categoryService->getCategories();
-        $categories = $categoryService->getFormattedCategories($categories);
+        $categories = $categoryFormatter->getFormattedCategories($categories);
 
         if (!preg_match('/create$/', $request->getRequestURI())) {
             $uriSegments = explode('/', $request->getRequestURI());
@@ -61,7 +63,7 @@ class ProductController extends AdminController
 
             if (!$product) {
                 $products = $productService->getProductsForCurrentPage(1);
-                $products = $formatter->formatProductsForTable($products);
+                $products = $productFormatter->formatProductsForTable($products);
 
                 $addEditViewArguments = [
                     'message' => 'Error! Product with given sku not found.',
@@ -71,7 +73,7 @@ class ProductController extends AdminController
                 ];
                 $response = new HTMLResponse('/views/admin/product.php');
             } else {
-                $addEditViewArguments = $formatter->formatProduct($product);
+                $addEditViewArguments = $productFormatter->formatProduct($product);
                 $addEditViewArguments['categories'] = $categories;
             }
         } else {
@@ -95,6 +97,7 @@ class ProductController extends AdminController
         $productService = $this->getProductService();
         $categoryService = $this->getCategoryService();
         $formatter = new ProductFormatter();
+        $categoryFormatter = new CategoryFormatter();
 
         $response = new HTMLResponse('/views/admin/product.php');
 
@@ -112,7 +115,7 @@ class ProductController extends AdminController
             ];
         } else {
             $categories = $categoryService->getCategories();
-            $categories = $categoryService->getFormattedCategories($categories);
+            $categories = $categoryFormatter->getFormattedCategories($categories);
             $createProgramViewArguments = [
                 'message' => 'Product insert failed',
                 'categories' => $categories,
@@ -137,6 +140,7 @@ class ProductController extends AdminController
         $productService = $this->getProductService();
         $categoryService = $this->getCategoryService();
         $formatter = new ProductFormatter();
+        $categoryFormatter = new CategoryFormatter();
 
         $response = new HTMLResponse('/views/admin/product.php');
 
@@ -144,7 +148,7 @@ class ProductController extends AdminController
 
         if (!$productService->updateProduct($request->getPostData(), $oldSku, $file)) {
             $categories = $categoryService->getCategories();
-            $categories = $categoryService->getFormattedCategories($categories);
+            $categories = $categoryFormatter->getFormattedCategories($categories);
             $product = $productService->getProductBySku($request->getPostData()['oldSku']);
 
             if (!$product) {

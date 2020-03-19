@@ -131,10 +131,7 @@ class ProductsRepository
      */
     public function productSkuExists(string $sku): bool
     {
-        if (!Product::query()->where('sku', '=', $sku)->first()) {
-            return false;
-        }
-        return true;
+        return Product::query()->where('sku', '=', $sku)->exists();
     }
 
     /**
@@ -143,7 +140,7 @@ class ProductsRepository
      * @param string $sku
      * @return Builder|Model
      */
-    public function getProductBySku(string $sku): Model
+    public function getProductBySku(string $sku): ?Model
     {
         return Product::query()->where('sku', '=', $sku)->first();
     }
@@ -313,5 +310,15 @@ class ProductsRepository
             ->where('price', '>', $minPrice)
             ->where('enabled', '=', 1)
             ->get();
+    }
+
+    /**
+     * Get all enabled products.
+     *
+     * @return Collection
+     */
+    public function getEnabledProducts(): Collection
+    {
+        return Product::query()->where('enabled', '=', 1)->get();
     }
 }

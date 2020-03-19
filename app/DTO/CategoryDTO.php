@@ -51,6 +51,8 @@ class CategoryDTO
 
 
     /**
+     * Get id.
+     *
      * @return int
      */
     public function getId(): int
@@ -59,6 +61,8 @@ class CategoryDTO
     }
 
     /**
+     * Set id.
+     *
      * @param int $id
      */
     public function setId(int $id): void
@@ -67,6 +71,8 @@ class CategoryDTO
     }
 
     /**
+     * Get parent id.
+     *
      * @return int
      */
     public function getParentId(): int
@@ -75,6 +81,8 @@ class CategoryDTO
     }
 
     /**
+     * Set parent id.
+     *
      * @param int $parentId
      */
     public function setParentId(int $parentId): void
@@ -83,6 +91,8 @@ class CategoryDTO
     }
 
     /**
+     * Get code.
+     *
      * @return string
      */
     public function getCode(): string
@@ -91,6 +101,8 @@ class CategoryDTO
     }
 
     /**
+     * Set code.
+     *
      * @param string $code
      */
     public function setCode(string $code): void
@@ -99,6 +111,8 @@ class CategoryDTO
     }
 
     /**
+     * Get title.
+     *
      * @return string
      */
     public function getTitle(): string
@@ -107,6 +121,8 @@ class CategoryDTO
     }
 
     /**
+     * Set title.
+     *
      * @param string $title
      */
     public function setTitle(string $title): void
@@ -115,6 +131,8 @@ class CategoryDTO
     }
 
     /**
+     * Get description.
+     *
      * @return string
      */
     public function getDescription(): string
@@ -123,6 +141,8 @@ class CategoryDTO
     }
 
     /**
+     * Set description.
+     *
      * @param string $description
      */
     public function setDescription(string $description): void
@@ -131,6 +151,8 @@ class CategoryDTO
     }
 
     /**
+     * Get children.
+     *
      * @return array
      */
     public function getChildren(): array
@@ -139,6 +161,8 @@ class CategoryDTO
     }
 
     /**
+     * Set children.
+     *
      * @param array $children
      */
     public function setChildren(array $children): void

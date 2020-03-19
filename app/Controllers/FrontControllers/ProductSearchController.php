@@ -5,6 +5,7 @@ namespace Demoshop\Controllers\FrontControllers;
 
 
 use Demoshop\Controllers\FrontController;
+use Demoshop\Formatters\CategoryFormatter;
 use Demoshop\Formatters\ProductFormatter;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
@@ -26,15 +27,18 @@ class ProductSearchController extends FrontController
         $productService = $this->getProductService();
         $categoryService = $this->getCategoryService();
         $formatter = new ProductFormatter();
+        $categoryFormatter = new CategoryFormatter();
+
+        $getData = $request->getGetData();
 
         $categories = $categoryService->getRootCategories();
         $categories = $categoryService->formatCategoriesForTreeView($categories);
 
         $optionCategories = $categoryService->getCategories();
-        $optionCategories = $categoryService->getFormattedCategories($optionCategories);
+        $optionCategories = $categoryFormatter->getFormattedCategories($optionCategories);
 
-        $searchProducts = $productService->searchProducts($request->getGetData());
-        $searchProducts = $formatter->formatProductsForVisitor($searchProducts, $request->getGetData());
+        $searchProducts = $productService->searchProducts($getData);
+        $searchProducts = $formatter->formatProductsForVisitor($searchProducts, $getData);
 
         $searchArguments = [
             'optionCategories' => $optionCategories,
@@ -45,10 +49,11 @@ class ProductSearchController extends FrontController
             'currentPage' => $searchProducts['currentPage'],
             'sorting' => $searchProducts['sorting'],
             'productsPerPage' => $searchProducts['productsPerPage'],
-            'search' => $request->getGetData()['search'],
-            'keyword' => $request->getGetData()['keyword'],
-            'maxPrice' => $request->getGetData()['maxPrice'],
-            'minPrice' => $request->getGetData()['minPrice'],
+            'search' => $getData['search'],
+            'keyword' => $getData['keyword'],
+            'maxPrice' => $getData['maxPrice'],
+            'minPrice' => $getData['minPrice'],
+            'selectedCategory' => $getData['category'],
             'message' => 'No search results.',
         ];
 
