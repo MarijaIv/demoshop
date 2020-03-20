@@ -8,7 +8,7 @@ Demoshop.Visitor.Menu = class {
      * @param {int} id
      */
     expand(id) {
-        let parent = document.getElementById(id), i;
+        let parent = document.getElementById('' + id), i;
         let child = parent.parentElement.querySelector(".child, .active");
 
         if (child.classList.contains("child")) {
@@ -37,6 +37,10 @@ Demoshop.Visitor.Menu = class {
         form.submit();
     }
 
+    /**
+     * When submitting search criteria form, set sort order to relevance
+     * and products per page to 10.
+     */
     setConfig() {
         let sorting = document.getElementById("relevance");
         let productsPerPage = document.getElementById("option10");

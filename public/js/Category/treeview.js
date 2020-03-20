@@ -18,7 +18,9 @@ Demoshop.Category.TreeView = class {
         for (i = 0; i < toggler.length; i++) {
             if (toggler[i].classList.contains("selected")) {
                 toggler[i].classList.remove("selected");
-                toggler[i].classList.add("active");
+                if (!toggler[i].classList.contains("root") && toggler[i].classList.length !== 0) {
+                    toggler[i].classList.add("active");
+                }
             }
         }
 
@@ -169,35 +171,30 @@ Demoshop.Category.TreeView = class {
         let toggler = document.getElementsByClassName("root"), i;
         for (i = 0; i < toggler.length; i++) {
             toggler[i].addEventListener("click", function () {
-                let child = this.parentElement.querySelector(".child");
+                let child = this.parentElement.querySelector(".child, .active");
 
-                if (child.querySelector(".child") &&
-                    (child.querySelector(".child").classList.contains("active")
-                        || child.querySelector(".child").classList.contains("selected"))) {
-                    let selectedChildren = child.parentElement.getElementsByClassName("selected");
-
-                    for(i = selectedChildren.length - 1; i >= 0; i--) {
-                        if (selectedChildren[i].tagName === 'SPAN') {
-                            selectedChildren[i].classList.remove("child-down");
-                        }
-                        selectedChildren[i].classList.remove("active");
-                    }
-
-                    let activeChildren = child.parentElement.getElementsByClassName("active");
-
-                    for (i = activeChildren.length - 1; i >= 0; i--) {
-                        if (activeChildren[i].tagName === 'SPAN') {
-                            activeChildren[i].classList.remove("child-down");
-                        }
-                        activeChildren[i].classList.remove("active");
-                    }
+                if (child.classList.contains("child")) {
+                    child.classList.remove("child");
+                    child.classList.add("active");
+                    this.classList.add("child-down");
                 } else {
-                    if(child.classList.contains("active")) {
-                        this.classList.remove("child-down");
+                    if (child.parentElement.querySelector(".active")) {
+                        let activeChildren = child.parentElement.getElementsByClassName("active");
+
+                        for (i = activeChildren.length - 1; i >= 0; i--) {
+                            activeChildren[i].classList.add("child");
+                            activeChildren[i].classList.remove("active");
+                        }
+                        let rootChildren = child.parentElement.getElementsByClassName("root");
+
+                        for (i = rootChildren.length - 1; i >= 0; i--) {
+                            rootChildren[i].classList.remove("child-down");
+                        }
+                    }
+
+                    if (child.classList.contains("active")) {
                         child.classList.remove("active");
-                    } else {
-                        this.classList.add("child-down");
-                        child.classList.add("active");
+                        child.classList.add("child");
                     }
                 }
             });
