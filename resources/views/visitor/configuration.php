@@ -22,34 +22,34 @@
     <label for="sorting" class="sort-by">Sort by:
         <select id="sorting" name="sorting" class="options" onchange="Demoshop.Visitor.Menu.menu.submitForm()">
             <?php if ($searchOrCategory) {
-                echo '<option value="relevance"';
+                echo '<option id="relevance" value="relevance"';
                 if ($sorting === 'relevance') {
                     echo ' selected';
                 }
                 echo '>Relevance</option>';
             }
             ?>
-            <option value="priceDesc" <?php if ($sorting === 'priceDesc') {
+            <option id="priceDesc" value="priceDesc" <?php if ($sorting === 'priceDesc') {
                 echo 'selected';
             } ?>>Price descending
             </option>
-            <option value="priceAsc" <?php if ($sorting === 'priceAsc') {
+            <option id="priceAsc" value="priceAsc" <?php if ($sorting === 'priceAsc') {
                 echo 'selected';
             } ?>>Price ascending
             </option>
-            <option value="titleDesc" <?php if ($sorting === 'titleDesc') {
+            <option id="titleDesc" value="titleDesc" <?php if ($sorting === 'titleDesc') {
                 echo 'selected';
             } ?>>Title descending
             </option>
-            <option value="titleAsc" <?php if ($sorting === 'titleAsc') {
+            <option id="titleAsc" value="titleAsc" <?php if ($sorting === 'titleAsc') {
                 echo 'selected';
             } ?>>Title ascending
             </option>
-            <option value="brandDesc" <?php if ($sorting === 'brandDesc') {
+            <option id="brandDesc" value="brandDesc" <?php if ($sorting === 'brandDesc') {
                 echo 'selected';
             } ?>>Brand descending
             </option>
-            <option value="brandAsc" <?php if ($sorting === 'brandAsc') {
+            <option id="brandAsc" value="brandAsc" <?php if ($sorting === 'brandAsc') {
                 echo 'selected';
             } ?>>Brand ascending
             </option>
@@ -65,27 +65,27 @@
     <label for="productsPerPage" class="per-page">Products per page:
         <select id="productsPerPage" name="productsPerPage" class="options"
                 onchange="Demoshop.Visitor.Menu.menu.submitForm()">
-            <option value="5" <?php if ($productsPerPage === '5') {
+            <option id="option5" value="5" <?php if ($productsPerPage === '5') {
                 echo 'selected';
             } ?>>5
             </option>
-            <option value="10" <?php if ($productsPerPage === '10') {
+            <option id="option10" value="10" <?php if ($productsPerPage === '10') {
                 echo 'selected';
             } ?>>10
             </option>
-            <option value="20" <?php if ($productsPerPage === '20') {
+            <option id="option20" value="20" <?php if ($productsPerPage === '20') {
                 echo 'selected';
             } ?>>20
             </option>
-            <option value="30" <?php if ($productsPerPage === '30') {
+            <option id="option30" value="30" <?php if ($productsPerPage === '30') {
                 echo 'selected';
             } ?>>30
             </option>
-            <option value="50" <?php if ($productsPerPage === '50') {
+            <option id="option50" value="50" <?php if ($productsPerPage === '50') {
                 echo 'selected';
             } ?>>50
             </option>
-            <option value="100" <?php if ($productsPerPage === '100') {
+            <option id="option100" value="100" <?php if ($productsPerPage === '100') {
                 echo 'selected';
             } ?>>100
             </option>

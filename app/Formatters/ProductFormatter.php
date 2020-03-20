@@ -108,7 +108,7 @@ class ProductFormatter
         }
 
         if (!$data['productsPerPage']) {
-            $data['productsPerPage'] = 10;
+            $data['productsPerPage'] = '10';
         }
 
         $numberOfPages = ceil(count($products) / $data['productsPerPage']) ?: 1;

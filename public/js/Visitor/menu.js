@@ -36,6 +36,14 @@ Demoshop.Visitor.Menu = class {
         let form = document.getElementById("configuration");
         form.submit();
     }
+
+    setConfig() {
+        let sorting = document.getElementById("relevance");
+        let productsPerPage = document.getElementById("option10");
+
+        productsPerPage.selected = true;
+        sorting.selected = true;
+    }
 };
 
 Demoshop.Visitor.Menu.menu = new Demoshop.Visitor.Menu();

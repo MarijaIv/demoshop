@@ -45,7 +45,7 @@
             require_once __DIR__ . '/configuration.php';
             echo '</form>';
         } else {
-            echo '<form id="configuration" method="get" action="/search" class="search-configuration">';
+            echo '<form id="configuration" method="get" action="/search" class="search-configuration" onsubmit="Demoshop.Visitor.Menu.menu.setConfig();">';
             require_once __DIR__ . '/searchCriteria.php';
             require_once __DIR__ . '/configuration.php';
             echo '</form>';
