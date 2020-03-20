@@ -55,12 +55,8 @@ class LoginController extends FrontController
         $response = new RedirectResponse('/admin');
         $loginService = $this->getLoginService();
 
-        if (empty($data['username']) || empty($data['password'])) {
-            $response = new HTMLResponse('/admin/login.php');
-        }
-
         if (!$loginService->login($data['username'], $data['password'], $data['keepLoggedIn'] ?? false)) {
-            $response = new HTMLResponse('/admin/login.php');
+            $response = new HTMLResponse('/views/admin/login.php');
         }
 
         return $response;

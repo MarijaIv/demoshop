@@ -4,7 +4,7 @@
  * @var int $currentPage
  * @var int $numberOfPages
  * @var string $sorting
- * @var int $productsPerPage
+ * @var string $productsPerPage
  * @var array $products
  * @var bool $searchOrCategory
  * @var array $selectedCategory

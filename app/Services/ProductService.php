@@ -384,7 +384,9 @@ class ProductService
         if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
                 && empty($data['maxPrice']) && empty($data['minPrice']))) {
             $products = $this->getProductsByKeyword($data['search']);
-            $data['sorting'] = 'relevance';
+            if(empty($data['sorting'])) {
+                $data['sorting'] = 'relevance';
+            }
         } else {
             $data['search'] = '';
 
@@ -430,6 +432,9 @@ class ProductService
 
             if($products === null) {
                 $products = $this->productsRepository->getEnabledProducts();
+                if(empty($data['sorting'])) {
+                    $data['sorting'] = 'relevance';
+                }
             }
         }
 
