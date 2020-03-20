@@ -60,6 +60,21 @@ class CategoryController extends AdminController
     }
 
     /**
+     * @param Request $request
+     * @return JSONResponse
+     */
+    public function getCategoriesForEdit(Request $request):JSONResponse
+    {
+        $categoryService = $this->getCategoryService();
+        $formatter = new CategoryFormatter();
+
+        $categories = $categoryService->getCategoriesForEdit($request->getGetData()['id']);
+        $categories = $formatter->getFormattedCategories($categories);
+
+        return new JSONResponse($categories);
+    }
+
+    /**
      * Get category data for display.
      *
      * @param Request $request

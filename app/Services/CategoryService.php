@@ -89,6 +89,31 @@ class CategoryService
     }
 
     /**
+     * Get categories for category edit.
+     *
+     * @param int $id
+     * @return Collection
+     */
+    public function getCategoriesForEdit(int $id): Collection
+    {
+        $categories = $this->getCategories();
+        $childrenIds[] = $id;
+
+        foreach ($categories as $key => $category) {
+            if (in_array($category->id, $childrenIds, true)) {
+                $categories->forget($key);
+            }
+
+            if (in_array($category->parent_id, $childrenIds, true)) {
+                $childrenIds[] = $category->id;
+                $categories->forget($key);
+            }
+        }
+
+        return $categories;
+    }
+
+    /**
      * Get all categories.
      *
      * @return Collection
@@ -214,7 +239,7 @@ class CategoryService
      * @param string $code
      * @return Model
      */
-    public function getCategoryByCode(string $code):? Model
+    public function getCategoryByCode(string $code): ?Model
     {
         return $this->categoryRepository->getCategoryByCode($code);
     }

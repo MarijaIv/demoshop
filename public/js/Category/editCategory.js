@@ -25,8 +25,10 @@ Demoshop.Category.EditCategory = class {
 
         Demoshop.Category.treeView.treeViewDisable();
 
+        let selected = document.getElementsByClassName("selected");
+
         let p = Demoshop.Service.categoryService;
-        p.listAllCategories().then(this.addOptionsToSelect, this.displayError);
+        p.listCategoriesForEdit(parseInt(selected[0].id)).then(this.addOptionsToSelect, this.displayError);
     }
 
     /**

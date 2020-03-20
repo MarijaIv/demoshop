@@ -25,6 +25,8 @@ try {
         'category', 'listCategories', [Authorization::class]));
     Routes::add(new Route('GET', '/admin/categories/listAllCategories',
         'category', 'listAllCategories', [Authorization::class]));
+    Routes::add(new Route('GET', '/admin/categories/getCategoriesForEdit',
+        'category', 'getCategoriesForEdit', [Authorization::class]));
     Routes::add(new Route('GET', '/admin/categories/displayCategory',
         'category', 'displayCategory', [Authorization::class]));
     Routes::add(new Route('POST', '/admin/categories',

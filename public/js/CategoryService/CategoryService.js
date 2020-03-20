@@ -46,6 +46,16 @@ Demoshop.Service.CategoryService = class {
     }
 
     /**
+     * Get categories for category edit.
+     *
+     * @param {int} id
+     * @return Promise
+     */
+    listCategoriesForEdit(id) {
+        return this.ajaxService.get("/admin/categories/getCategoriesForEdit?id=" + id);
+    }
+
+    /**
      * Add new category.
      *
      * @param {string} title
