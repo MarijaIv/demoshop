@@ -2,7 +2,6 @@ var Demoshop = Demoshop || {};
 Demoshop.Category = Demoshop.Category || {};
 
 Demoshop.Category.TreeView = class {
-
     /**
      * @type {number}
      */

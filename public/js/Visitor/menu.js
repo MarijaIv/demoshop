@@ -2,6 +2,7 @@ var Demoshop = Demoshop || {};
 Demoshop.Visitor = Demoshop.Visitor || {};
 
 Demoshop.Visitor.Menu = class {
+
     /**
      * On click expand category with subcategories.
      *
