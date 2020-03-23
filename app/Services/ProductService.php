@@ -449,20 +449,45 @@ class ProductService
      */
     public function getProductsByKeyword(string $keyword): Collection
     {
-        $products = $this->productsRepository->getProductsByTitle($keyword);
-        $products = $products->merge($this->productsRepository->getProductsByBrand($keyword));
+        $products = $this->productsRepository->getEnabledProducts();
+        $searchedProducts = new \Illuminate\Database\Eloquent\Collection();
+
+        foreach ($products as $product) {
+            $title = strtolower($product->title);
+            if(stripos($title, $keyword) !== false) {
+                $searchedProducts = $searchedProducts->merge([$product]);
+            }
+        }
+
+        foreach ($products as $product) {
+            $brand = strtolower($product->brand);
+            if(strpos($brand, $keyword) !== false && !$searchedProducts->contains($product)) {
+                $searchedProducts = $searchedProducts->concat([$product]);
+            }
+        }
 
         /** @var CategoryService $categoryService */
         $categoryService = ServiceRegistry::get('CategoryService');
         $categories = $categoryService->getCategoriesByTitle($keyword);
 
         foreach ($categories as $category) {
-            $products = $products->merge($this->productsRepository->getEnabledProductsByCategoryId($category['id']));
+            $searchedProducts = $searchedProducts->merge($this->productsRepository->getEnabledProductsByCategoryId($category['id']));
         }
 
-        $products = $products->merge($this->productsRepository->getProductsByShortDesc($keyword));
-        $products = $products->merge($this->productsRepository->getProductsByDescription($keyword));
+        foreach ($products as $product) {
+            $shortDesc = strtolower($product->short_description);
+            if(strpos($shortDesc, $keyword) !== false && !$searchedProducts->contains($product)) {
+                $searchedProducts = $searchedProducts->concat([$product]);
+            }
+        }
 
-        return $products;
+        foreach ($products as $product) {
+            $desc = strtolower($product->description);
+            if(strpos($desc, $keyword) !== false && !$searchedProducts->contains($product)) {
+                $searchedProducts = $searchedProducts->concat([$product]);
+            }
+        }
+
+        return $searchedProducts;
     }
 }
