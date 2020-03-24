@@ -5,6 +5,7 @@ namespace Demoshop\Repositories;
 
 
 use Demoshop\Model\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -144,6 +145,20 @@ class ProductsRepository
     }
 
     /**
+     * @param string $code
+     * @return Collection
+     */
+    public function getProductsByCategoryCode(string $code): Collection
+    {
+        return Product::query()
+            ->join('category', 'product.category_id', '=', 'category.id')
+            ->where('category.code', '=', $code)
+            ->get(['product.id', 'product.category_id', 'product.sku', 'product.title',
+                'product.brand', 'product.price', 'product.short_description', 'product.description',
+                'product.image', 'product.enabled', 'product.featured', 'product.view_count']);
+    }
+
+    /**
      * Update product.
      *
      * @param array $data
@@ -221,9 +236,9 @@ class ProductsRepository
         return Product::query()
             ->whereIn('sku', $skuArray)
             ->update(
-              [
-                  'enabled' => 1,
-              ]
+                [
+                    'enabled' => 1,
+                ]
             );
     }
 
@@ -255,9 +270,9 @@ class ProductsRepository
         return Product::query()
             ->whereIn('sku', $skuArray)
             ->update(
-              [
-                  'enabled' => 0,
-              ]
+                [
+                    'enabled' => 0,
+                ]
             );
     }
 
@@ -272,63 +287,25 @@ class ProductsRepository
     }
 
     /**
-     * Get products where title is like keyword.
+     * Get products by keyword.
      *
      * @param string $keyword
      * @return Collection
      */
-    public function getProductsByTitle(string $keyword): Collection
+    public function getProductsByKeyword(string $keyword): Collection
     {
         return Product::query()
-            ->where('title', 'like', '%' . $keyword . '%')
             ->where('enabled', '=', 1)
-            ->get();
+            ->where(static function (Builder $q) use ($keyword) {
+                $q->orWhere('title', 'like', '%' . $keyword . '%')
+                    ->orWhere('brand', 'like', '%' . $keyword . '%')
+                    ->orWhere('short_description', 'like', '%' . $keyword . '%')
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
+            })->get();
     }
 
     /**
-     * Get products where brand contains keyword.
-     *
-     * @param string $keyword
-     * @return Collection
-     */
-    public function getProductsByBrand(string $keyword): Collection
-    {
-        return Product::query()
-            ->where('brand', 'like', '%' . $keyword . '%')
-            ->where('enabled', '=', 1)
-            ->get();
-    }
-
-    /**
-     * Get products where short description contains keyword.
-     *
-     * @param string $keyword
-     * @return Collection
-     */
-    public function getProductsByShortDesc(string $keyword): Collection
-    {
-        return Product::query()
-            ->where('short_description', 'like', '%' . $keyword . '%')
-            ->where('enabled', '=', 1)
-            ->get();
-    }
-
-    /**
-     * Get products where description contains keyword.
-     *
-     * @param string $keyword
-     * @return Collection
-     */
-    public function getProductsByDescription(string $keyword): Collection
-    {
-        return Product::query()
-            ->where('description', 'like', '%' . $keyword . '%')
-            ->where('enabled', '=', 1)
-            ->get();
-    }
-
-    /**
-     * Get products where price is less then maxPrice.
+     * Get products where price is lower then maxPrice.
      *
      * @param float $maxPrice
      * @return Collection

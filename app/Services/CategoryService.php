@@ -243,4 +243,15 @@ class CategoryService
     {
         return $this->categoryRepository->getCategoryByCode($code);
     }
+
+    /**
+     * Get subcategories by code.
+     *
+     * @param string $code
+     * @return Collection
+     */
+    public function getSubcategoriesByCode(string $code): Collection
+    {
+        return $this->categoryRepository->getSubcategoriesByCode($code);
+    }
 }

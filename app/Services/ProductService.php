@@ -193,22 +193,11 @@ class ProductService
      * Get product by sku.
      *
      * @param string $sku
-     * @return Builder|Model|null
+     * @return Product|null
      */
-    public function getProductBySku(string $sku): ?Model
+    public function getProductBySku(string $sku): ?Product
     {
         return $this->productsRepository->getProductBySku($sku);
-    }
-
-    /**
-     * Save image to /img directory.
-     *
-     * @param array $file
-     */
-    private function saveFile(array $file): void
-    {
-        $targetFile = __DIR__ . '/../../public/img/' . basename($file['name']);
-        move_uploaded_file($file['tmp_name'], $targetFile);
     }
 
     /**
@@ -296,43 +285,20 @@ class ProductService
     }
 
     /**
-     * Get products for category display.
+     * Get products for category and it's subcategories.
      *
      * @param string $code
      * @return Collection
      */
     public function getDataForCategoryDisplay(string $code): Collection
     {
-        $categoryService = ServiceRegistry::get('CategoryService');
-
-        if (!$code) {
-            return null;
-        }
-
-        $category = $categoryService->getCategoryByCode($code);
-
-        if (!$category) {
-            return null;
-        }
-
-        return $this->getProductsForCategory($category->id);
-    }
-
-    /**
-     * Get products for category and it's subcategories.
-     *
-     * @param int $id
-     * @return Collection
-     */
-    public function getProductsForCategory(int $id): Collection
-    {
         /** @var CategoryService $categoryService */
         $categoryService = ServiceRegistry::get('CategoryService');
 
-        $products = $this->getProductsByCategoryId($id);
-        $children = $categoryService->getCategoriesForParent($id);
+        $products = $this->productsRepository->getProductsByCategoryCode($code);
+        $children = $categoryService->getSubcategoriesByCode($code);
         foreach ($children as $child) {
-            $products = $products->merge($this->getProductsForCategory($child['id']));
+            $products = $products->merge($this->getDataForCategoryDisplay($child['code']));
         }
 
         return $products;
@@ -357,7 +323,7 @@ class ProductService
      */
     public function searchProducts(array &$data): Collection
     {
-        $products = null;
+        $products = new Collection();
 
         if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
                 && empty($data['maxPrice']) && empty($data['minPrice']))) {
@@ -373,45 +339,87 @@ class ProductService
             }
 
             if (!empty($data['category'])) {
-                if ($products === null) {
-                    $products = $this->productsRepository->getEnabledProductsByCategoryId($data['category']);
-                } else {
-                    foreach ($products as $productKey => $product) {
-                        if ((string)$product['category_id'] !== $data['category']) {
-                            unset($products[$productKey]);
-                        }
-                    }
-                }
+                $products = $this->getProductsByCategory($products, $data['category']);
             }
 
             if (!empty($data['maxPrice'])) {
-                if ($products === null) {
-                    $products = $this->productsRepository->getProductsMaxPrice($data['maxPrice']);
-                } else {
-                    foreach ($products as $productKey => $product) {
-                        if ($product['price'] > $data['maxPrice']) {
-                            unset($products[$productKey]);
-                        }
-                    }
-                }
+                $products = $this->getProductsByMaxPrice($products, $data['maxPrice']);
             }
 
             if (!empty($data['minPrice'])) {
-                if ($products === null) {
-                    $products = $this->productsRepository->getProductsMinPrice($data['minPrice']);
-                } else {
-                    foreach ($products as $productKey => $product) {
-                        if ($product['price'] < $data['minPrice']) {
-                            unset($products[$productKey]);
-                        }
-                    }
-                }
+                $products = $this->getProductsByMinPrice($products, $data['minPrice']);
             }
 
-            if ($products === null) {
+            if (!$products->first()) {
                 $products = $this->productsRepository->getEnabledProducts();
                 if (empty($data['sorting'])) {
                     $data['sorting'] = 'relevance';
+                }
+            }
+        }
+
+        return $products;
+    }
+
+    /**
+     * Get products for searched category.
+     *
+     * @param Collection $products
+     * @param int $id
+     * @return Collection
+     */
+    public function getProductsByCategory(Collection $products, int $id): Collection
+    {
+        if (!$products->first()) {
+            $products = $this->productsRepository->getEnabledProductsByCategoryId($id);
+        } else {
+            foreach ($products as $productKey => $product) {
+                if ((string)$product['category_id'] !== $id) {
+                    unset($products[$productKey]);
+                }
+            }
+        }
+
+        return $products;
+    }
+
+    /**
+     * Get products where price is lower than maxPrice.
+     *
+     * @param Collection $products
+     * @param float $maxPrice
+     * @return Collection
+     */
+    public function getProductsByMaxPrice(Collection $products, float $maxPrice): Collection
+    {
+        if (!$products->first()) {
+            $products = $this->productsRepository->getProductsMaxPrice($maxPrice);
+        } else {
+            foreach ($products as $productKey => $product) {
+                if ($product['price'] > $maxPrice) {
+                    unset($products[$productKey]);
+                }
+            }
+        }
+
+        return $products;
+    }
+
+    /**
+     * Get products where price is greater than minPrice.
+     *
+     * @param Collection $products
+     * @param float $minPrice
+     * @return Collection
+     */
+    public function getProductsByMinPrice(Collection $products, float $minPrice): Collection
+    {
+        if (!$products->first()) {
+            $products = $this->productsRepository->getProductsMinPrice($minPrice);
+        } else {
+            foreach ($products as $productKey => $product) {
+                if ($product['price'] < $minPrice) {
+                    unset($products[$productKey]);
                 }
             }
         }
@@ -427,45 +435,33 @@ class ProductService
      */
     public function getProductsByKeyword(string $keyword): Collection
     {
-        $products = $this->productsRepository->getEnabledProducts();
-        $searchedProducts = new \Illuminate\Database\Eloquent\Collection();
-
-        foreach ($products as $product) {
-            $title = strtolower($product->title);
-            if (stripos($title, $keyword) !== false) {
-                $searchedProducts = $searchedProducts->merge([$product]);
-            }
-        }
-
-        foreach ($products as $product) {
-            $brand = strtolower($product->brand);
-            if (strpos($brand, $keyword) !== false && !$searchedProducts->contains($product)) {
-                $searchedProducts = $searchedProducts->concat([$product]);
-            }
-        }
+        $products = $this->productsRepository->getProductsByKeyword($keyword);
 
         /** @var CategoryService $categoryService */
         $categoryService = ServiceRegistry::get('CategoryService');
         $categories = $categoryService->getCategoriesByTitle($keyword);
 
         foreach ($categories as $category) {
-            $searchedProducts = $searchedProducts->merge($this->productsRepository->getEnabledProductsByCategoryId($category['id']));
+            $products =
+                $products->merge($this->productsRepository->getEnabledProductsByCategoryId($category['id']));
         }
 
-        foreach ($products as $product) {
-            $shortDesc = strtolower($product->short_description);
-            if (strpos($shortDesc, $keyword) !== false && !$searchedProducts->contains($product)) {
-                $searchedProducts = $searchedProducts->concat([$product]);
+        foreach($products as $product) {
+            if(strpos($product->title, $keyword) !== false) {
+                $product->weight = 1;
+            } else if(strpos($product->brand, $keyword) !== false) {
+                $product->weight = 2;
+            } else if(strpos($product->short_description, $keyword) !== false) {
+                $product->weight = 4;
+            } else if(strpos($product->description, $keyword) !== false) {
+                $product->weight = 5;
+            } else {
+                $product->weight = 3;
             }
         }
 
-        foreach ($products as $product) {
-            $desc = strtolower($product->description);
-            if (strpos($desc, $keyword) !== false && !$searchedProducts->contains($product)) {
-                $searchedProducts = $searchedProducts->concat([$product]);
-            }
-        }
+        $products->sortBy('weight');
 
-        return $searchedProducts;
+        return $products;
     }
 }

@@ -60,9 +60,9 @@ class CategoryRepository
      * Get category by id.
      *
      * @param int $id
-     * @return Category | null
+     * @return Category
      */
-    public function getCategoryById(int $id): ?Category
+    public function getCategoryById(int $id): Category
     {
         return Category::query()->where('id', '=', $id)->first();
     }
@@ -168,5 +168,19 @@ class CategoryRepository
     public function getCategoryByCode(string $code): ?Category
     {
         return Category::query()->where('code', '=', $code)->first();
+    }
+
+    /**
+     * Get subcategories by code.
+     *
+     * @param string $code
+     * @return Collection
+     */
+    public function getSubcategoriesByCode(string $code): Collection
+    {
+        return Category::query()
+            ->join('category as parent', 'category.parent_id', '=', 'parent.id')
+            ->where('parent.code', '=', $code)
+            ->get(['category.code']);
     }
 }

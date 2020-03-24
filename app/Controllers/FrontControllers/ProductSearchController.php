@@ -54,7 +54,6 @@ class ProductSearchController extends FrontController
             'maxPrice' => $getData['maxPrice'],
             'minPrice' => $getData['minPrice'],
             'selectedCategory' => $getData['category'],
-            'message' => 'No search results.',
         ];
 
         return new HTMLResponse('/views/visitor/categoryDisplay.php', $searchArguments);

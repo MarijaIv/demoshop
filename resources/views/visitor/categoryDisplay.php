@@ -13,7 +13,6 @@
  * @var string $maxPrice
  * @var string $minPrice
  * @var array $selectedCategory
- * @var string $message
  */
 ?>
 <!DOCTYPE html>
@@ -54,8 +53,12 @@
     </div>
     <div class="all-products">
         <?php
-        if (empty($products)) {
-            echo '<label class="empty-message">' . $message . '</label>';
+        if (empty($products) && !$searchOrCategory) {
+            echo '<label class="empty-message">' . 'This category is empty.' . '</label>';
+        }
+
+        if(empty($products) && $searchOrCategory) {
+            echo '<label class="empty-message">' . 'No search results.' . '</label>';
         }
 
         foreach ($products as $item) {

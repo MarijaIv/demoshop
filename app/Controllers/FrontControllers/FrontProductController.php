@@ -79,7 +79,6 @@ class FrontProductController extends FrontController
             'categories' => $categories,
             'searchOrCategory' => 0,
             'selectedCategory' => $categoryService->getCategoryByCode($code),
-            'message' => 'This category is empty.',
         ];
         return new HTMLResponse('/views/visitor/categoryDisplay.php', $categoryDisplayArguments);
     }
