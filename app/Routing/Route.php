@@ -30,6 +30,10 @@ class Route
      * @var array
      */
     private $middlewareList;
+    /**
+     * @var array
+     */
+    private $actionParams;
 
     /**
      * Route constructor.
@@ -39,8 +43,13 @@ class Route
      * @param string $action
      * @param array $middlewareList
      */
-    public function __construct(string $httpMethod, string $path, string $controller,
-                                string $action, array $middlewareList)
+    public function __construct(
+        string $httpMethod,
+        string $path,
+        string $controller,
+        string $action,
+        array $middlewareList
+    )
     {
         $this->httpMethod = $httpMethod;
         $this->path = $path;
@@ -147,5 +156,25 @@ class Route
     public function setMiddlewareList(array $middlewareList): void
     {
         $this->middlewareList = $middlewareList;
+    }
+
+    /**
+     * Get action parameters.
+     *
+     * @return array
+     */
+    public function getActionParams(): array
+    {
+        return $this->actionParams;
+    }
+
+    /**
+     * Set action parameters.
+     *
+     * @param array $actionParams
+     */
+    public function setActionParams(array $actionParams): void
+    {
+        $this->actionParams = $actionParams;
     }
 }

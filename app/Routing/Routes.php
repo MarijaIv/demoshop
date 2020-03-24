@@ -69,6 +69,7 @@ class Routes
      */
     public static function get(Request $request): ?Route
     {
+        /** @var Route $routeForRequest */
         $routeForRequest = null;
 
         foreach (self::$listOfRoutes as $route) {
@@ -97,6 +98,19 @@ class Routes
                 }
             }
         }
+
+        $uriSegments = explode('/', parse_url($request->getRequestURI(), PHP_URL_PATH));
+        $routeSegments = explode('/', $routeForRequest->getPath());
+        $pathSegments = array_combine($routeSegments, $uriSegments);
+        $params = [];
+
+        foreach ($pathSegments as $routeSegment => $uriSegment) {
+            if ($routeSegment === '%') {
+                $params[] = $uriSegment;
+            }
+        }
+
+        $routeForRequest->setActionParams($params);
 
         return $routeForRequest;
     }
