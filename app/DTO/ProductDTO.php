@@ -75,7 +75,7 @@ class ProductDTO
         $this->price = $data['price'];
         $this->shortDescription = $data['short_description'];
         $this->description = $data['description'];
-        $this->image = base64_encode($data['image']);
+        $this->image = $data['image'];
         $this->enabled = $data['enabled'];
         $this->featured = $data['featured'];
         $this->viewCount = $data['viewCount'];

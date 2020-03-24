@@ -27,13 +27,13 @@ class ProductController extends AdminController
         $productService = $this->getProductService();
         $formatter = new ProductFormatter();
 
-        $products = $productService->getProductsForCurrentPage(1);
+        $products = $productService->getProductsForCurrentPage(1, 10);
         $products = $formatter->formatProductsForTable($products);
 
         $productsViewArguments = [
             'products' => $products,
             'currentPage' => 1,
-            'numberOfPages' => $productService->getNumberOfPages(),
+            'numberOfPages' => $productService->getNumberOfPages(10),
         ];
 
         return new HTMLResponse('/views/admin/product.php', $productsViewArguments);
@@ -62,14 +62,14 @@ class ProductController extends AdminController
             $product = $productService->getProductBySku($sku);
 
             if (!$product) {
-                $products = $productService->getProductsForCurrentPage(1);
+                $products = $productService->getProductsForCurrentPage(1, 10);
                 $products = $productFormatter->formatProductsForTable($products);
 
                 $addEditViewArguments = [
                     'message' => 'Error! Product with given sku not found.',
                     'products' => $products,
                     'currentPage' => 1,
-                    'numberOfPages' => $productService->getNumberOfPages(),
+                    'numberOfPages' => $productService->getNumberOfPages(10),
                 ];
                 $response = new HTMLResponse('/views/admin/product.php');
             } else {
@@ -104,14 +104,14 @@ class ProductController extends AdminController
         $file = $request->getFile('img');
 
         if ($productService->createNewProduct($request->getPostData(), $file)) {
-            $products = $productService->getProductsForCurrentPage(1);
+            $products = $productService->getProductsForCurrentPage(1, 10);
             $products = $formatter->formatProductsForTable($products);
 
             $createProgramViewArguments = [
                 'message' => 'Product insert successful.',
                 'products' => $products,
                 'currentPage' => 1,
-                'numberOfPages' => $productService->getNumberOfPages(),
+                'numberOfPages' => $productService->getNumberOfPages(10),
             ];
         } else {
             $categories = $categoryService->getCategories();
@@ -164,14 +164,14 @@ class ProductController extends AdminController
 
             $response = new HTMLResponse('/views/admin/addEditProduct.php');
         } else {
-            $products = $productService->getProductsForCurrentPage(1);
+            $products = $productService->getProductsForCurrentPage(1, 10);
             $products = $formatter->formatProductsForTable($products);
 
             $updateProductViewArguments = [
                 'message' => 'Product update successful.',
                 'products' => $products,
                 'currentPage' => 1,
-                'numberOfPages' => $productService->getNumberOfPages(),
+                'numberOfPages' => $productService->getNumberOfPages(10),
             ];
         }
 
@@ -201,16 +201,18 @@ class ProductController extends AdminController
             unset($deleteViewArguments['message']);
         }
 
-        if ($currentPage > $productService->getNumberOfPages()) {
-            $currentPage = $productService->getNumberOfPages();
+        $numberOfPages = $productService->getNumberOfPages(10);
+
+        if ($currentPage > $numberOfPages) {
+            $currentPage = $numberOfPages;
         }
 
-        $products = $productService->getProductsForCurrentPage($currentPage);
+        $products = $productService->getProductsForCurrentPage($currentPage, 10);
         $products = $formatter->formatProductsForTable($products);
 
         $deleteViewArguments['products'] = $products;
         $deleteViewArguments['currentPage'] = $currentPage;
-        $deleteViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $deleteViewArguments['numberOfPages'] = $numberOfPages;
         $response->setViewArguments($deleteViewArguments);
 
         return $response;
@@ -242,16 +244,18 @@ class ProductController extends AdminController
             }
         }
 
-        if ($currentPage > $productService->getNumberOfPages()) {
-            $currentPage = $productService->getNumberOfPages();
+        $numberOfPages = $productService->getNumberOfPages(10);
+
+        if ($currentPage > $numberOfPages) {
+            $currentPage = $numberOfPages;
         }
 
-        $products = $productService->getProductsForCurrentPage($currentPage);
+        $products = $productService->getProductsForCurrentPage($currentPage, 10);
         $products = $formatter->formatProductsForTable($products);
 
         $deleteViewArguments['products'] = $products;
         $deleteViewArguments['currentPage'] = $currentPage;
-        $deleteViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $deleteViewArguments['numberOfPages'] = $numberOfPages;
         $response->setViewArguments($deleteViewArguments);
 
         return $response;
@@ -276,11 +280,11 @@ class ProductController extends AdminController
             ];
         }
 
-        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage']);
+        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage'], 10);
 
         $enableViewArguments['products'] = $formatter->formatProductsForTable($products);
         $enableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
-        $enableViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $enableViewArguments['numberOfPages'] = $productService->getNumberOfPages(10);
         $response->setViewArguments($enableViewArguments);
 
         return $response;
@@ -304,11 +308,11 @@ class ProductController extends AdminController
             ];
         }
 
-        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage']);
+        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage'], 10);
 
         $disableViewArguments['products'] = $formatter->formatProductsForTable($products);
         $disableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
-        $disableViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $disableViewArguments['numberOfPages'] = $productService->getNumberOfPages(10);
         $response->setViewArguments($disableViewArguments);
 
         return $response;
@@ -332,11 +336,11 @@ class ProductController extends AdminController
             ];
         }
 
-        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage']);
+        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage'], 10);
 
         $enableDisableViewArguments['products'] = $formatter->formatProductsForTable($products);
         $enableDisableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
-        $enableDisableViewArguments['numberOfPages'] = $productService->getNumberOfPages();
+        $enableDisableViewArguments['numberOfPages'] = $productService->getNumberOfPages(10);
         $response->setViewArguments($enableDisableViewArguments);
 
         return $response;
@@ -353,12 +357,12 @@ class ProductController extends AdminController
         $productService = $this->getProductService();
         $formatter = new ProductFormatter();
 
-        $products = $productService->getProductsForCurrentPage(1);
+        $products = $productService->getProductsForCurrentPage(1, 10);
 
         $firstPageViewArguments = [
             'products' => $formatter->formatProductsForTable($products),
             'currentPage' => 1,
-            'numberOfPages' => $productService->getNumberOfPages(),
+            'numberOfPages' => $productService->getNumberOfPages(10),
         ];
 
         return new HTMLResponse('/views/admin/product.php', $firstPageViewArguments);
@@ -375,18 +379,20 @@ class ProductController extends AdminController
         $productService = $this->getProductService();
         $formatter = new ProductFormatter();
 
-        if ($request->getGetData()['currentPage'] >= $productService->getNumberOfPages()) {
-            $currentPage = $productService->getNumberOfPages();
+        $numberOfPages = $productService->getNumberOfPages(10);
+
+        if ($request->getGetData()['currentPage'] >= $numberOfPages) {
+            $currentPage = $numberOfPages;
         } else {
             $currentPage = $request->getGetData()['currentPage'] + 1;
         }
 
-        $products = $productService->getProductsForCurrentPage($currentPage);
+        $products = $productService->getProductsForCurrentPage($currentPage, 10);
 
         $nextPageViewArguments = [
             'products' => $formatter->formatProductsForTable($products),
             'currentPage' => $currentPage,
-            'numberOfPages' => $productService->getNumberOfPages(),
+            'numberOfPages' => $numberOfPages,
         ];
 
         return new HTMLResponse('/views/admin/product.php', $nextPageViewArguments);
@@ -403,8 +409,8 @@ class ProductController extends AdminController
         $productService = $this->getProductService();
         $formatter = new ProductFormatter();
 
-        $lastPage = $productService->getNumberOfPages();
-        $products = $productService->getProductsForCurrentPage($lastPage);
+        $lastPage = $productService->getNumberOfPages(10);
+        $products = $productService->getProductsForCurrentPage($lastPage, 10);
 
         $lastPageViewArguments = [
             'products' => $formatter->formatProductsForTable($products),
@@ -432,12 +438,12 @@ class ProductController extends AdminController
             $currentPage = $request->getGetData()['currentPage'] - 1;
         }
 
-        $products = $productService->getProductsForCurrentPage($currentPage);
+        $products = $productService->getProductsForCurrentPage($currentPage, 10);
 
         $prevPageViewArguments = [
             'products' => $formatter->formatProductsForTable($products),
             'currentPage' => $currentPage,
-            'numberOfPages' => $productService->getNumberOfPages(),
+            'numberOfPages' => $productService->getNumberOfPages(10),
         ];
 
         return new HTMLResponse('/views/admin/product.php', $prevPageViewArguments);

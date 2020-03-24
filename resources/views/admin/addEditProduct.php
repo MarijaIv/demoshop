@@ -78,17 +78,17 @@
                               required><?php echo $description; ?></textarea>
                     <?php if ($enabled) {
                         echo '<input type="checkbox" class="enable-feature" id="enabled"
-                           name="enabled" checked>';
+                           name="enabled" checked value="true">';
                     } else {
                         echo '<input type="checkbox" class="enable-feature" id="enabled"
-                           name="enabled">';
+                           name="enabled" value="true">';
                     } ?>
                     <?php if ($featured) {
                         echo '<input type="checkbox" class="enable-feature" id="featured"
-                           name="featured" checked>';
+                           name="featured" checked value="true">';
                     } else {
                         echo '<input type="checkbox" class="enable-feature" id="featured"
-                           name="featured">';
+                           name="featured" value="true">';
                     } ?>
                     <input type="submit" value="OK" class="upload-btn">
                 </div>

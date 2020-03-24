@@ -5,9 +5,7 @@ namespace Demoshop\Repositories;
 
 
 use Demoshop\Model\Product;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ProductsRepository
@@ -28,9 +26,9 @@ class ProductsRepository
     /**
      * Get product which details page is displayed most often.
      *
-     * @return Model
+     * @return Product|null
      */
-    public function getMostViewedProduct(): Model
+    public function getMostViewedProduct(): ?Product
     {
         return Product::query()->orderBy('view_count', 'desc')->first();
     }
@@ -138,9 +136,9 @@ class ProductsRepository
      * Get product by sku.
      *
      * @param string $sku
-     * @return Builder|Model
+     * @return Product|null
      */
-    public function getProductBySku(string $sku): ?Model
+    public function getProductBySku(string $sku): ?Product
     {
         return Product::query()->where('sku', '=', $sku)->first();
     }
@@ -221,9 +219,9 @@ class ProductsRepository
     /**
      * Get all featured products.
      *
-     * @return Collection
+     * @return Collection | null
      */
-    public function getFeaturedProducts(): Collection
+    public function getFeaturedProducts(): ?Collection
     {
         return Product::query()->where('featured', '=', 1)->get();
     }

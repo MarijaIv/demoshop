@@ -81,7 +81,7 @@ class ProductFormatter
     {
         $formattedProducts = [];
 
-        foreach($products as $product) {
+        foreach ($products as $product) {
             $formattedProducts[] = (new ProductDTO($product))->toArray();
         }
 
@@ -141,30 +141,37 @@ class ProductFormatter
      */
     public function sortProducts(array $products, string $sortOrder): array
     {
-        if ($sortOrder === 'priceDesc') {
-            usort($products, static function ($a, $b) {
-                return $a['price'] < $b['price'];
-            });
-        } else if ($sortOrder === 'priceAsc') {
-            usort($products, static function ($a, $b) {
-                return $a['price'] > $b['price'];
-            });
-        } else if ($sortOrder === 'titleDesc') {
-            usort($products, static function ($a, $b) {
-                return strtolower($a['title']) < strtolower($b['title']);
-            });
-        } else if ($sortOrder === 'titleAsc') {
-            usort($products, static function ($a, $b) {
-                return strtolower($a['title']) > strtolower($b['title']);
-            });
-        } else if ($sortOrder === 'brandDesc') {
-            usort($products, static function ($a, $b) {
-                return strtolower($a['brand']) < strtolower($b['brand']);
-            });
-        } else if ($sortOrder === 'brandAsc') {
-            usort($products, static function ($a, $b) {
-                return strtolower($a['brand']) > strtolower($b['brand']);
-            });
+        switch ($sortOrder) {
+            case 'priceDesc' :
+                usort($products, static function ($a, $b) {
+                    return $a['price'] < $b['price'];
+                });
+                break;
+            case 'priceAsc':
+                usort($products, static function ($a, $b) {
+                    return $a['price'] > $b['price'];
+                });
+                break;
+            case 'titleDesc' :
+                usort($products, static function ($a, $b) {
+                    return strtolower($a['title']) < strtolower($b['title']);
+                });
+                break;
+            case 'titleAsc' :
+                usort($products, static function ($a, $b) {
+                    return strtolower($a['title']) > strtolower($b['title']);
+                });
+                break;
+            case 'brandDesc':
+                usort($products, static function ($a, $b) {
+                    return strtolower($a['brand']) < strtolower($b['brand']);
+                });
+                break;
+            case 'brandAsc':
+                usort($products, static function ($a, $b) {
+                    return strtolower($a['brand']) > strtolower($b['brand']);
+                });
+                break;
         }
 
         return $products;

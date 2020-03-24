@@ -2,6 +2,7 @@
 
 namespace Demoshop\Services;
 
+use Demoshop\Model\Product;
 use Demoshop\Repositories\ProductsRepository;
 use Demoshop\ServiceRegistry\ServiceRegistry;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +17,6 @@ class ProductService
 {
     public const MAX_HEIGHT_WIDTH_RATIO = 1.78;
     public const MIN_HEIGHT_WIDTH_RATIO = 1.33;
-    public const RECORDS_PER_PAGE = 10;
 
     /**
      * @var ProductsRepository
@@ -45,9 +45,9 @@ class ProductService
     /**
      * Get product which details page is displayed most often.
      *
-     * @return Model
+     * @return Product|null
      */
-    public function getMostViewedProduct(): Model
+    public function getMostViewedProduct(): ?Product
     {
         return $this->productsRepository->getMostViewedProduct();
     }
@@ -67,12 +67,13 @@ class ProductService
      * Get all products for current page.
      *
      * @param int $currentPage
+     * @param int $pageSize
      * @return Collection
      */
-    public function getProductsForCurrentPage(int $currentPage): Collection
+    public function getProductsForCurrentPage(int $currentPage, int $pageSize): Collection
     {
-        $offset = ($currentPage - 1) * self::RECORDS_PER_PAGE;
-        return $this->productsRepository->getProductsForCurrentPage($offset, self::RECORDS_PER_PAGE);
+        $offset = ($currentPage - 1) * $pageSize;
+        return $this->productsRepository->getProductsForCurrentPage($offset, $pageSize);
     }
 
     /**
@@ -84,35 +85,34 @@ class ProductService
      */
     public function createNewProduct(array $data, array $file): bool
     {
-        if (empty($data['sku']) || empty($data['title']) || empty($data['brand']) || empty($data['price'])
-            || empty($data['shortDesc']) || empty($data['description'])) {
-            return false;
-        }
-
-        if ($this->productsRepository->productSkuExists($data['sku'])) {
+        if (!$this->isProductValid($data)) {
             return false;
         }
 
         $data['price'] = (float)$data['price'];
         $this->setEnabledAndFeaturedValue($data);
 
-        if (!$this->checkImageCharacteristics($file)) {
+        if (!$this->checkImageHeightWidthRatio($file)) {
             return false;
         }
 
-        $this->saveFile($file);
+        $content = fopen($file['tmp_name'], 'rb');
+        $content = fread($content, filesize($file['tmp_name']));
 
-        $fileName = __DIR__ . '/../../public/img/' . $file['name'];
-        $content = fopen($fileName, 'rb');
-        $content = fread($content, filesize($fileName));
+        return $this->productsRepository->createNewProduct($data, base64_encode($content));
+    }
 
-        if (!$this->productsRepository->createNewProduct($data, $content)) {
-            unlink($fileName);
-            return false;
-        }
-
-        unlink($fileName);
-        return true;
+    /**
+     * Check if request data is valid.
+     *
+     * @param array $data
+     * @return bool
+     */
+    public function isProductValid(array $data): bool
+    {
+        return !((empty($data['sku']) || empty($data['title']) || empty($data['brand']) || empty($data['price'])
+                || empty($data['shortDesc']) || empty($data['description']))
+            || $this->productsRepository->productSkuExists($data['sku']));
     }
 
     /**
@@ -122,8 +122,8 @@ class ProductService
      */
     private function setEnabledAndFeaturedValue(array &$data): void
     {
-        $data['enabled'] = $data['enabled'] === 'on' ? 1 : 0;
-        $data['featured'] = $data['featured'] === 'on' ? 1 : 0;
+        $data['enabled'] = $data['enabled'] ? 1 : 0;
+        $data['featured'] = $data['featured'] ? 1 : 0;
     }
 
     /**
@@ -132,7 +132,7 @@ class ProductService
      * @param array $file
      * @return bool
      */
-    private function checkImageCharacteristics(array $file): bool
+    private function checkImageHeightWidthRatio(array $file): bool
     {
         $imageSize = getimagesize($file['tmp_name']);
 
@@ -143,17 +143,6 @@ class ProductService
         $heightWidthRatio = $imageSize[0] / $imageSize[1];
 
         return !($heightWidthRatio < self::MIN_HEIGHT_WIDTH_RATIO || $heightWidthRatio > self::MAX_HEIGHT_WIDTH_RATIO);
-    }
-
-    /**
-     * Save image to /img directory.
-     *
-     * @param array $file
-     */
-    private function saveFile(array $file): void
-    {
-        $targetFile = __DIR__ . '/../../public/img/' . basename($file['name']);
-        move_uploaded_file($file['tmp_name'], $targetFile);
     }
 
     /**
@@ -179,7 +168,7 @@ class ProductService
             return false;
         }
 
-        if ($file['tmp_name'] !== '' && !$this->checkImageCharacteristics($file)) {
+        if ($file['tmp_name'] !== '' && !$this->checkImageHeightWidthRatio($file)) {
             return false;
         }
 
@@ -210,6 +199,17 @@ class ProductService
     public function getProductBySku(string $sku): ?Model
     {
         return $this->productsRepository->getProductBySku($sku);
+    }
+
+    /**
+     * Save image to /img directory.
+     *
+     * @param array $file
+     */
+    private function saveFile(array $file): void
+    {
+        $targetFile = __DIR__ . '/../../public/img/' . basename($file['name']);
+        move_uploaded_file($file['tmp_name'], $targetFile);
     }
 
     /**
@@ -294,27 +294,22 @@ class ProductService
     /**
      * Get number of pages.
      *
+     * @param int $pageSize
      * @return int
      */
-    public function getNumberOfPages(): int
+    public function getNumberOfPages(int $pageSize): int
     {
-        return ceil($this->productsRepository->getNumberOfProducts() / self::RECORDS_PER_PAGE) ?: 1;
+        return ceil($this->productsRepository->getNumberOfProducts() / $pageSize) ?: 1;
     }
 
     /**
      * Get all featured products.
      *
-     * @return Collection
+     * @return Collection | null
      */
-    public function getFeaturedProducts(): Collection
+    public function getFeaturedProducts(): ?Collection
     {
-        $products = $this->productsRepository->getFeaturedProducts();
-
-        foreach ($products as $item) {
-            $item['image'] = base64_encode($item['image']);
-        }
-
-        return $products;
+        return $this->productsRepository->getFeaturedProducts();
     }
 
     /**
@@ -384,7 +379,7 @@ class ProductService
         if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
                 && empty($data['maxPrice']) && empty($data['minPrice']))) {
             $products = $this->getProductsByKeyword($data['search']);
-            if(empty($data['sorting'])) {
+            if (empty($data['sorting'])) {
                 $data['sorting'] = 'relevance';
             }
         } else {
@@ -430,9 +425,9 @@ class ProductService
                 }
             }
 
-            if($products === null) {
+            if ($products === null) {
                 $products = $this->productsRepository->getEnabledProducts();
-                if(empty($data['sorting'])) {
+                if (empty($data['sorting'])) {
                     $data['sorting'] = 'relevance';
                 }
             }
@@ -454,14 +449,14 @@ class ProductService
 
         foreach ($products as $product) {
             $title = strtolower($product->title);
-            if(stripos($title, $keyword) !== false) {
+            if (stripos($title, $keyword) !== false) {
                 $searchedProducts = $searchedProducts->merge([$product]);
             }
         }
 
         foreach ($products as $product) {
             $brand = strtolower($product->brand);
-            if(strpos($brand, $keyword) !== false && !$searchedProducts->contains($product)) {
+            if (strpos($brand, $keyword) !== false && !$searchedProducts->contains($product)) {
                 $searchedProducts = $searchedProducts->concat([$product]);
             }
         }
@@ -476,14 +471,14 @@ class ProductService
 
         foreach ($products as $product) {
             $shortDesc = strtolower($product->short_description);
-            if(strpos($shortDesc, $keyword) !== false && !$searchedProducts->contains($product)) {
+            if (strpos($shortDesc, $keyword) !== false && !$searchedProducts->contains($product)) {
                 $searchedProducts = $searchedProducts->concat([$product]);
             }
         }
 
         foreach ($products as $product) {
             $desc = strtolower($product->description);
-            if(strpos($desc, $keyword) !== false && !$searchedProducts->contains($product)) {
+            if (strpos($desc, $keyword) !== false && !$searchedProducts->contains($product)) {
                 $searchedProducts = $searchedProducts->concat([$product]);
             }
         }
