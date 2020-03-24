@@ -2,6 +2,7 @@
 
 namespace Demoshop\Services;
 
+use Demoshop\Model\Product;
 use Demoshop\Repositories\ProductsRepository;
 use Demoshop\ServiceRegistry\ServiceRegistry;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,9 +46,9 @@ class ProductService
     /**
      * Get product which details page is displayed most often.
      *
-     * @return Model
+     * @return Product | null
      */
-    public function getMostViewedProduct(): Model
+    public function getMostViewedProduct(): ?Product
     {
         return $this->productsRepository->getMostViewedProduct();
     }
@@ -68,8 +69,10 @@ class ProductService
      *
      * @param int $currentPage
      * @return Collection
+     *
+     * Please ensure separation of presentation and business layers
      */
-    public function getProductsForCurrentPage(int $currentPage): Collection
+    public function getProductsForCurrentPage(int $currentPage, int $pageSize): Collection
     {
         $offset = ($currentPage - 1) * self::RECORDS_PER_PAGE;
         return $this->productsRepository->getProductsForCurrentPage($offset, self::RECORDS_PER_PAGE);
@@ -84,6 +87,7 @@ class ProductService
      */
     public function createNewProduct(array $data, array $file): bool
     {
+        // Maybe consider extracting this into a separate method...
         if (empty($data['sku']) || empty($data['title']) || empty($data['brand']) || empty($data['price'])
             || empty($data['shortDesc']) || empty($data['description'])) {
             return false;
@@ -96,23 +100,23 @@ class ProductService
         $data['price'] = (float)$data['price'];
         $this->setEnabledAndFeaturedValue($data);
 
+        // What does this method name mean?
         if (!$this->checkImageCharacteristics($file)) {
             return false;
         }
 
+        // ?????
+
+        // Read uploaded file content.
+        // And save the file content in the database.
+        // There is no need to move the file.
         $this->saveFile($file);
 
         $fileName = __DIR__ . '/../../public/img/' . $file['name'];
         $content = fopen($fileName, 'rb');
         $content = fread($content, filesize($fileName));
 
-        if (!$this->productsRepository->createNewProduct($data, $content)) {
-            unlink($fileName);
-            return false;
-        }
-
-        unlink($fileName);
-        return true;
+        return $this->productsRepository->createNewProduct($data, $content);
     }
 
     /**
@@ -122,6 +126,8 @@ class ProductService
      */
     private function setEnabledAndFeaturedValue(array &$data): void
     {
+        // please dont send on or off. Keep presentation layer separated from the
+        // business layer
         $data['enabled'] = $data['enabled'] === 'on' ? 1 : 0;
         $data['featured'] = $data['featured'] === 'on' ? 1 : 0;
     }
@@ -231,6 +237,9 @@ class ProductService
      */
     public function deleteMultipleProducts(array $skuArray): bool
     {
+
+        // The database is fire.
+
         foreach ($skuArray as $sku) {
             $this->productsRepository->deleteProduct($sku);
         }
@@ -246,6 +255,8 @@ class ProductService
      */
     public function enableProducts(array $skuArray): bool
     {
+        // The database is fire.
+
         foreach ($skuArray as $sku) {
             $this->productsRepository->enableProduct($sku);
         }
@@ -261,6 +272,8 @@ class ProductService
      */
     public function disableProducts(array $skuArray): bool
     {
+        // The database is fire.
+
         foreach ($skuArray as $sku) {
             $this->productsRepository->disableProduct($sku);
         }
@@ -276,6 +289,8 @@ class ProductService
      */
     public function enableOrDisableProduct($sku): bool
     {
+        // The database is fire.
+
         $product = $this->productsRepository->getProductBySku($sku);
 
         if (!$product) {
@@ -310,6 +325,8 @@ class ProductService
     {
         $products = $this->productsRepository->getFeaturedProducts();
 
+        // Encode when inserting
+        // Foreach is fire (not really)
         foreach ($products as $item) {
             $item['image'] = base64_encode($item['image']);
         }
@@ -325,11 +342,10 @@ class ProductService
      */
     public function getDataForCategoryDisplay(string $code): Collection
     {
-        $categoryService = ServiceRegistry::get('CategoryService');
+        // The database is fire.
+        // Please consider using joins.
 
-        if (!$code) {
-            return null;
-        }
+        $categoryService = ServiceRegistry::get('CategoryService');
 
         $category = $categoryService->getCategoryByCode($code);
 
@@ -380,6 +396,8 @@ class ProductService
     public function searchProducts(array &$data): Collection
     {
         $products = null;
+
+        // Please refactor this into multiple methods if possible.
 
         if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
                 && empty($data['maxPrice']) && empty($data['minPrice']))) {
@@ -449,6 +467,8 @@ class ProductService
      */
     public function getProductsByKeyword(string $keyword): Collection
     {
+        // NOPE
+        // You can not retrieve all products from the database.
         $products = $this->productsRepository->getEnabledProducts();
         $searchedProducts = new \Illuminate\Database\Eloquent\Collection();
 

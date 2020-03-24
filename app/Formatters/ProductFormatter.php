@@ -141,6 +141,7 @@ class ProductFormatter
      */
     public function sortProducts(array $products, string $sortOrder): array
     {
+        // SWITCH?
         if ($sortOrder === 'priceDesc') {
             usort($products, static function ($a, $b) {
                 return $a['price'] < $b['price'];

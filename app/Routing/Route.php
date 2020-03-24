@@ -30,6 +30,10 @@ class Route
      * @var array
      */
     private $middlewareList;
+    /**
+     * @var array
+     */
+    private $actionParameters;
 
     /**
      * Route constructor.

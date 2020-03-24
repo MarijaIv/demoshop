@@ -43,6 +43,8 @@ class StatisticsService
      */
     public function increaseHomeViewCount(int $count = 1): void
     {
+        // Please consider using only update.
+
         $this->statisticsRepository->increaseHomeViewCount($count);
     }
 

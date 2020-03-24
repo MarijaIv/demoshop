@@ -24,7 +24,8 @@ class Router
      */
     public function route(Request $request): Response
     {
-        if (empty($request->getRequestURI()) || empty($request->getMethod())) {
+
+        if ($request->getRequestURI() === '' || empty($request->getMethod())) {
             throw new InvalidRequestUriOrMethodException();
         }
 
@@ -39,28 +40,25 @@ class Router
         $middlewareList = $route->getMiddlewareList();
 
         foreach ($middlewareList as $middleware) {
-            $methods = get_class_methods($middleware);
-
-            foreach ($methods as $method) {
-                $middleware::$method($request);
-            }
+            call_user_func($middleware . '::handle', $request);
         }
 
+        // Use fully qualified controller name.
         $controllerName = ucfirst($route->getController());
         $action = $route->getAction();
 
-        $adminControllerName = 'Demoshop\Controllers\AdminControllers\\' . $controllerName
-            . 'Controller';
-
-        $frontControllerName = 'Demoshop\Controllers\FrontControllers\\' . $controllerName
-            . 'Controller';
-
-        if (!class_exists($adminControllerName, true) && !class_exists($frontControllerName, true)) {
-            throw new ControllerOrActionNotFoundException();
-        }
-
-        $controller = class_exists($adminControllerName, true) ?
-            new $adminControllerName() : new $frontControllerName();
+//        $adminControllerName = 'Demoshop\Controllers\AdminControllers\\' . $controllerName
+//            . 'Controller';
+//
+//        $frontControllerName = 'Demoshop\Controllers\FrontControllers\\' . $controllerName
+//            . 'Controller';
+//
+//        if (!class_exists($adminControllerName, true) && !class_exists($frontControllerName, true)) {
+//            throw new ControllerOrActionNotFoundException();
+//        }
+//
+//        $controller = class_exists($adminControllerName, true) ?
+//            new $adminControllerName() : new $frontControllerName();
 
         if (!is_callable($action, true)) {
             throw new ControllerOrActionNotFoundException();
@@ -76,11 +74,13 @@ class Router
                 $params[] = $uriSegment;
             }
         }
+        $response = $controller->$action($request);
 
         if ($params) {
-            return $controller->$action($request, ...$params);
+            $response =  $controller->$action($request, ...$params);
         }
 
-        return $controller->$action($request);
+
+        return $response;
     }
 }
