@@ -67,10 +67,12 @@
                         <td>' . $product['price'] . '</td>
                         <td>
                             <a href="/admin/products/enableDisable?sku='
-                        . $product['sku'] . '&currentPage=' . $currentPage . '">';
+                        . $product['sku'] . '&currentPage=' . $currentPage;
                     if ($product['enabled']) {
+                        echo '&enabled=true">';
                         echo '<input type="checkbox" checked="checked">';
                     } else {
+                        echo '&enabled=false">';
                         echo '<input type="checkbox">';
                     }
                     echo '</a>

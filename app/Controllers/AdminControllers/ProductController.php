@@ -330,7 +330,7 @@ class ProductController extends AdminController
         $formatter = new ProductFormatter();
         $response = new HTMLResponse('/views/admin/product.php');
 
-        if (!$productService->enableOrDisableProduct($request->getGetData()['sku'])) {
+        if (!$productService->enableOrDisableProduct($request->getGetData())) {
             $enableDisableViewArguments = [
                 'failMessage' => 'Failed to change enable.',
             ];

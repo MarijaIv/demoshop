@@ -17,9 +17,9 @@ class AdminRepository
      *
      * @param string $username
      *
-     * @return Model
+     * @return Admin|null
      */
-    public function getAdminWithUsername(string $username): Model
+    public function getAdminWithUsername(string $username): ?Admin
     {
         return Admin::query()
             ->where('username', '=', $username)

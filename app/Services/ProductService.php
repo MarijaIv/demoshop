@@ -145,6 +145,13 @@ class ProductService
         return !($heightWidthRatio < self::MIN_HEIGHT_WIDTH_RATIO || $heightWidthRatio > self::MAX_HEIGHT_WIDTH_RATIO);
     }
 
+    public function isProductValidUpdate(array $data, string $oldSku): bool
+    {
+        return (isset($data['sku'], $data['title'], $data['brand'],
+            $data['price'], $data['shortDesc'], $data['description']) &&
+            $this->productsRepository->productSkuExists($oldSku));
+    }
+
     /**
      * Update product.
      *
@@ -155,12 +162,7 @@ class ProductService
      */
     public function updateProduct(array $data, string $oldSku, array $file): bool
     {
-        if (!isset($data['sku'], $data['title'], $data['brand'],
-            $data['price'], $data['shortDesc'], $data['description'])) {
-            return false;
-        }
-
-        if (!$this->productsRepository->productSkuExists($oldSku)) {
+        if (!$this->isProductValidUpdate($data, $oldSku)) {
             return false;
         }
 
@@ -179,14 +181,11 @@ class ProductService
         if ($file['tmp_name'] === '' && $product = $this->getProductBySku($oldSku)) {
             $content = $product['image'];
         } else {
-            $this->saveFile($file);
-            $fileName = __DIR__ . '/../../public/img/' . $file['name'];
-            $content = fopen($fileName, 'rb');
-            $content = fread($content, filesize($fileName));
-            unlink($fileName);
+            $content = fopen($file['tmp_name'], 'rb');
+            $content = fread($content, filesize($file['tmp_name']));
         }
 
-        $this->productsRepository->updateProduct($data, $oldSku, $content);
+        $this->productsRepository->updateProduct($data, $oldSku, base64_encode($content));
         return true;
     }
 
@@ -231,11 +230,7 @@ class ProductService
      */
     public function deleteMultipleProducts(array $skuArray): bool
     {
-        foreach ($skuArray as $sku) {
-            $this->productsRepository->deleteProduct($sku);
-        }
-
-        return true;
+        return $this->productsRepository->deleteMultipleProducts($skuArray);
     }
 
     /**
@@ -246,9 +241,7 @@ class ProductService
      */
     public function enableProducts(array $skuArray): bool
     {
-        foreach ($skuArray as $sku) {
-            $this->productsRepository->enableProduct($sku);
-        }
+        $this->productsRepository->enableMultiple($skuArray);
 
         return true;
     }
@@ -261,9 +254,7 @@ class ProductService
      */
     public function disableProducts(array $skuArray): bool
     {
-        foreach ($skuArray as $sku) {
-            $this->productsRepository->disableProduct($sku);
-        }
+        $this->productsRepository->disableMultipleProducts($skuArray);
 
         return true;
     }
@@ -271,24 +262,16 @@ class ProductService
     /**
      * Enable or disable product.
      *
-     * @param $sku
+     * @param array $data
      * @return bool
      */
-    public function enableOrDisableProduct($sku): bool
+    public function enableOrDisableProduct(array $data): bool
     {
-        $product = $this->productsRepository->getProductBySku($sku);
-
-        if (!$product) {
-            return false;
+        if($data['enabled'] !== 'false') {
+            return $this->productsRepository->disableProduct($data['sku']);
         }
 
-        if ($product->enabled) {
-            $this->productsRepository->disableProduct($sku);
-            return true;
-        }
-
-        $this->productsRepository->enableProduct($sku);
-        return true;
+        return $this->productsRepository->enableProduct($data['sku']);
     }
 
     /**

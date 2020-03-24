@@ -44,9 +44,9 @@ class CategoryService
      * Get category by id.
      *
      * @param int $id
-     * @return Category
+     * @return Category|null
      */
-    public function getCategoryById(int $id): Category
+    public function getCategoryById(int $id): ?Category
     {
         return $this->categoryRepository->getCategoryById($id);
     }
@@ -237,9 +237,9 @@ class CategoryService
      * Get category by code.
      *
      * @param string $code
-     * @return Model
+     * @return Category|null
      */
-    public function getCategoryByCode(string $code): ?Model
+    public function getCategoryByCode(string $code): ?Category
     {
         return $this->categoryRepository->getCategoryByCode($code);
     }

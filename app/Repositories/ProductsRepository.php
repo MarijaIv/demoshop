@@ -183,6 +183,17 @@ class ProductsRepository
     }
 
     /**
+     * Delete multiple products by sku.
+     *
+     * @param array $skuArray
+     * @return int
+     */
+    public function deleteMultipleProducts(array $skuArray): int
+    {
+        return Product::query()->whereIn('sku', $skuArray)->delete();
+    }
+
+    /**
      * Enable product.
      *
      * @param string $sku
@@ -200,6 +211,23 @@ class ProductsRepository
     }
 
     /**
+     * Enable multiple products.
+     *
+     * @param array $skuArray
+     * @return int
+     */
+    public function enableMultiple(array $skuArray): int
+    {
+        return Product::query()
+            ->whereIn('sku', $skuArray)
+            ->update(
+              [
+                  'enabled' => 1,
+              ]
+            );
+    }
+
+    /**
      * Disable product.
      *
      * @param string $sku
@@ -213,6 +241,23 @@ class ProductsRepository
                 [
                     'enabled' => 0,
                 ]
+            );
+    }
+
+    /**
+     * Disable multiple products.
+     *
+     * @param array $skuArray
+     * @return int
+     */
+    public function disableMultipleProducts(array $skuArray): int
+    {
+        return Product::query()
+            ->whereIn('sku', $skuArray)
+            ->update(
+              [
+                  'enabled' => 0,
+              ]
             );
     }
 
