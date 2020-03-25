@@ -36,6 +36,6 @@
         <label class="search-criteria-labels">Min price:
             <input type="text" class="search-criteria-input" name="minPrice" value="<?php echo $minPrice; ?>">
         </label>
-        <input type="submit" value="&#x1f50d" class="search-ok">
+        <button type="button" class="search-ok" onclick="Demoshop.Visitor.Menu.menu.setConfig()">&#x1f50d</button>
     </div>
 </div>

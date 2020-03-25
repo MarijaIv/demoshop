@@ -325,35 +325,36 @@ class ProductService
     {
         $products = new Collection();
 
-        if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
+        if (empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
                 && empty($data['maxPrice']) && empty($data['minPrice']))) {
-            $products = $this->getProductsByKeyword($data['search']);
+            $products = $this->productsRepository->getEnabledProducts();
             if (empty($data['sorting'])) {
                 $data['sorting'] = 'relevance';
             }
         } else {
-            $data['search'] = '';
-
-            if (!empty($data['keyword'])) {
-                $products = $this->getProductsByKeyword($data['keyword']);
-            }
-
-            if (!empty($data['category'])) {
-                $products = $this->getProductsByCategory($products, $data['category']);
-            }
-
-            if (!empty($data['maxPrice'])) {
-                $products = $this->getProductsByMaxPrice($products, $data['maxPrice']);
-            }
-
-            if (!empty($data['minPrice'])) {
-                $products = $this->getProductsByMinPrice($products, $data['minPrice']);
-            }
-
-            if (!$products->first()) {
-                $products = $this->productsRepository->getEnabledProducts();
+            if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
+                    && empty($data['maxPrice']) && empty($data['minPrice']))) {
+                $products = $this->getProductsByKeyword($data['search']);
                 if (empty($data['sorting'])) {
                     $data['sorting'] = 'relevance';
+                }
+            } else {
+                $data['search'] = '';
+
+                if (!empty($data['keyword'])) {
+                    $products = $this->getProductsByKeyword($data['keyword']);
+                }
+
+                if (!empty($data['category'])) {
+                    $products = $this->getProductsByCategory($products, $data['category']);
+                }
+
+                if (!empty($data['maxPrice'])) {
+                    $products = $this->getProductsByMaxPrice($products, $data['maxPrice']);
+                }
+
+                if (!empty($data['minPrice'])) {
+                    $products = $this->getProductsByMinPrice($products, $data['minPrice']);
                 }
             }
         }
@@ -374,7 +375,7 @@ class ProductService
             $products = $this->productsRepository->getEnabledProductsByCategoryId($id);
         } else {
             foreach ($products as $productKey => $product) {
-                if ((string)$product['category_id'] !== $id) {
+                if ($product['category_id'] !== $id) {
                     unset($products[$productKey]);
                 }
             }

@@ -48,6 +48,9 @@ Demoshop.Visitor.Menu = class {
 
         productsPerPage.selected = true;
         sorting.selected = true;
+
+        let form = document.getElementById("configuration");
+        form.submit();
     }
 };
 

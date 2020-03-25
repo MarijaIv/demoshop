@@ -48,7 +48,7 @@ class LoginService
         if ($keepLoggedIn) {
             $cookie = ServiceRegistry::get('Cookie');
             $hash = $username . ' ' . md5('demoshop');
-            $cookie->add('user', $hash, time() + 120);
+            $cookie->add('user', $hash, time() + 3600);
 
             return true;
         }

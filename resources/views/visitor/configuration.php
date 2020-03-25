@@ -63,7 +63,7 @@
         <button type="submit" name="pagination" value="lastPage" class="page-button"> >></button>
     </div>
     <label for="productsPerPage" class="per-page">Products per page:
-        <select id="productsPerPage" name="productsPerPage" class="options"
+        <select id="productsPerPage" name="productsPerPage" class="options" value="<?php echo $productsPerPage; ?>"
                 onchange="Demoshop.Visitor.Menu.menu.submitForm()">
             <option id="option5" value="5" <?php if ($productsPerPage === '5') {
                 echo 'selected';
