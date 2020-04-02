@@ -20,8 +20,9 @@ $request = RequestInit::init();
 $router = new Router();
 try {
     $response = $router->route($request);
+    $response->render();
 } catch (ControllerOrActionNotFoundException $e) {
+    echo "<h1 style=\"color:red\">{$e->getMessage()}</h1>";
 } catch (InvalidRequestUriOrMethodException $e) {
+    echo "<h1 style=\"color:red\">{$e->getMessage()}</h1>";
 }
-
-$response->render();

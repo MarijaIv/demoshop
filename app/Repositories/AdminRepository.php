@@ -3,8 +3,6 @@
 namespace Demoshop\Repositories;
 
 use Demoshop\Model\Admin;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 
 /**
  * Class AdminRepository
@@ -37,15 +35,5 @@ class AdminRepository
         return Admin::query()
             ->where('username', '=', $username)
             ->exists();
-    }
-
-    /**
-     * Get all admins.
-     *
-     * @return Collection
-     */
-    public function getAllAdmins(): Collection
-    {
-        return Admin::query()->select('username', 'password')->get();
     }
 }

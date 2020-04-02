@@ -33,4 +33,14 @@ class PHPSession implements Session
     {
         return $_SESSION[$key] ?? $default;
     }
+
+    /**
+     * Remove session data.
+     *
+     * @param string $key
+     */
+    public function remove(string $key): void
+    {
+        unset($_SESSION[$key]);
+    }
 }

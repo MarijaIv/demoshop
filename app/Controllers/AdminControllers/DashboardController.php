@@ -27,14 +27,19 @@ class DashboardController extends AdminController
         $statisticsService = $this->getStatisticsService();
 
         $mostViewedProduct = $productService->getMostViewedProduct();
+        $product = [
+            'id' => $mostViewedProduct ? $mostViewedProduct->id : 0,
+            'title' => $mostViewedProduct ? $mostViewedProduct->title : '',
+            'viewCount' => $mostViewedProduct ? $mostViewedProduct->view_count : '',
+        ];
 
         $myObj = [
             'amountOfProducts' => $productService->getNumberOfProducts(),
             'amountOfCategories' => $categoryService->getCountOfCategories(),
             'homeViewCount' => $statisticsService->getTotalHomeViewCount(),
-            'mostViewedProductId' => $mostViewedProduct->id,
-            'mostViewedProduct' => $mostViewedProduct->title,
-            'numberOfMostViews' => $mostViewedProduct->view_count,
+            'mostViewedProductId' => $product['id'],
+            'mostViewedProduct' => $product['title'],
+            'numberOfMostViews' => $product['viewCount'],
         ];
 
         return new HTMLResponse('/views/admin/dashboard.php', $myObj);

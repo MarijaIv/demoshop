@@ -45,4 +45,22 @@ class CategoryFormatter
 
         return $formattedCategories;
     }
+
+    public function formatCategoriesForTreeView(Collection $categories): array
+    {
+        $visitedCategories = [];
+        $tree = [];
+
+        while($category = $categories->shift()) {
+            $visitedCategories[$category['id']] = (new CategoryDTO($category))->toArray();
+
+            if ($category['parent_id'] === NULL) {
+                $tree[] = &$visitedCategories[$category['id']];
+            } else {
+                $visitedCategories[$category['parent_id']]['children'][] = &$visitedCategories[$category['id']];
+            }
+        }
+
+        return $tree;
+    }
 }

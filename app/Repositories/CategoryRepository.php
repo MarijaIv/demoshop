@@ -6,7 +6,6 @@ namespace Demoshop\Repositories;
 
 use Demoshop\Model\Category;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class CategoryRepository
@@ -22,16 +21,6 @@ class CategoryRepository
     public function getCountOfCategories(): int
     {
         return Category::query()->count();
-    }
-
-    /**
-     * Get all root categories.
-     *
-     * @return Collection
-     */
-    public function getRootCategories(): Collection
-    {
-        return Category::query()->where('parent_id', '=', null)->get();
     }
 
     /**

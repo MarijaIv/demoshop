@@ -31,8 +31,8 @@ class ProductSearchController extends FrontController
 
         $getData = $request->getGetData();
 
-        $categories = $categoryService->getRootCategories();
-        $categories = $categoryService->formatCategoriesForTreeView($categories);
+        $allCategories = $categoryService->getCategories();
+        $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
 
         $optionCategories = $categoryService->getCategories();
         $optionCategories = $categoryFormatter->getFormattedCategories($optionCategories);

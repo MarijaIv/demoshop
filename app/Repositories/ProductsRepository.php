@@ -42,13 +42,7 @@ class ProductsRepository
      */
     public function increaseViewCount(string $sku): bool
     {
-        $product = Product::query()->where('sku', '=', $sku)->first();
-        if ($product) {
-            ++$product->view_count;
-            return $product->save();
-        }
-
-        return false;
+        return Product::query()->where('sku', '=', $sku)->increment('view_count');
     }
 
     /**
@@ -92,12 +86,12 @@ class ProductsRepository
      * Create new product.
      *
      * @param array $data
-     * @param $file
+     * @param string $fileContent
      * @return bool
      */
-    public function createNewProduct($data, $file): bool
+    public function createNewProduct(array $data, string $fileContent): bool
     {
-        Product::query()->insert(
+        return Product::query()->insert(
             [
                 'category_id' => $data['category'],
                 'sku' => $data['sku'],
@@ -106,20 +100,11 @@ class ProductsRepository
                 'price' => $data['price'],
                 'short_description' => $data['shortDesc'],
                 'description' => $data['description'],
-                'image' => 'img',
+                'image' => $fileContent,
                 'enabled' => $data['enabled'],
                 'featured' => $data['featured'],
             ]
         );
-
-        if (!$product = Product::query()->where('sku', '=', $data['sku'])->first()) {
-            return false;
-        }
-
-        $product->image = $file;
-        $product->save();
-
-        return true;
     }
 
     /**
@@ -145,6 +130,8 @@ class ProductsRepository
     }
 
     /**
+     * Get products by category code.
+     *
      * @param string $code
      * @return Collection
      */

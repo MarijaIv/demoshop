@@ -35,11 +35,11 @@ class LoginService
      */
     public function login($username, $password, $keepLoggedIn): bool
     {
-        if (!$this->adminRepository->adminExists($username)) {
+        $admin = $this->adminRepository->getAdminWithUsername($username);
+
+        if (!$admin) {
             return false;
         }
-
-        $admin = $this->adminRepository->getAdminWithUsername($username);
 
         if ($admin->password !== md5($password)) {
             return false;

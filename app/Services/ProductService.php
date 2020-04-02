@@ -2,11 +2,10 @@
 
 namespace Demoshop\Services;
 
+use Demoshop\AuthorizationMiddleware\Exceptions\ProductDataInvalidException;
 use Demoshop\Model\Product;
 use Demoshop\Repositories\ProductsRepository;
 use Demoshop\ServiceRegistry\ServiceRegistry;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
@@ -82,37 +81,21 @@ class ProductService
      * @param array $data
      * @param array $file
      * @return bool
+     * @throws ProductDataInvalidException
      */
     public function createNewProduct(array $data, array $file): bool
     {
-        if (!$this->isProductValid($data)) {
-            return false;
-        }
-
         $data['price'] = (float)$data['price'];
         $this->setEnabledAndFeaturedValue($data);
 
-        if (!$this->checkImageHeightWidthRatio($file)) {
-            return false;
-        }
+        $this->checkImageHeightWidthRatio($file);
 
         $content = fopen($file['tmp_name'], 'rb');
-        $content = fread($content, filesize($file['tmp_name']));
+        $fileContent = fread($content, filesize($file['tmp_name']));
 
-        return $this->productsRepository->createNewProduct($data, base64_encode($content));
-    }
-
-    /**
-     * Check if request data is valid.
-     *
-     * @param array $data
-     * @return bool
-     */
-    public function isProductValid(array $data): bool
-    {
-        return !((empty($data['sku']) || empty($data['title']) || empty($data['brand']) || empty($data['price'])
-                || empty($data['shortDesc']) || empty($data['description']))
-            || $this->productsRepository->productSkuExists($data['sku']));
+        $product = $this->productsRepository->createNewProduct($data, base64_encode($fileContent));
+        fclose($content);
+        return $product;
     }
 
     /**
@@ -130,26 +113,39 @@ class ProductService
      * Check image characteristics.
      *
      * @param array $file
-     * @return bool
+     * @throws ProductDataInvalidException
      */
-    private function checkImageHeightWidthRatio(array $file): bool
+    private function checkImageHeightWidthRatio(array $file): void
     {
         $imageSize = getimagesize($file['tmp_name']);
 
         if ($imageSize[0] < 600) {
-            return false;
+            throw new ProductDataInvalidException('Image size is not valid.');
         }
 
         $heightWidthRatio = $imageSize[0] / $imageSize[1];
 
-        return !($heightWidthRatio < self::MIN_HEIGHT_WIDTH_RATIO || $heightWidthRatio > self::MAX_HEIGHT_WIDTH_RATIO);
+        if ($heightWidthRatio < self::MIN_HEIGHT_WIDTH_RATIO || $heightWidthRatio > self::MAX_HEIGHT_WIDTH_RATIO) {
+            throw new ProductDataInvalidException('Image height-width ratio is not valid.');
+        }
     }
 
-    public function isProductValidUpdate(array $data, string $oldSku): bool
+    /**
+     * Check if request data is valid.
+     *
+     * @param array $data
+     * @throws ProductDataInvalidException
+     */
+    public function isProductValid(array $data): void
     {
-        return (isset($data['sku'], $data['title'], $data['brand'],
-            $data['price'], $data['shortDesc'], $data['description']) &&
-            $this->productsRepository->productSkuExists($oldSku));
+        if ((empty($data['sku']) || empty($data['title']) || empty($data['brand']) || empty($data['price'])
+                || empty($data['shortDesc']) || empty($data['description']))) {
+            throw new ProductDataInvalidException('Product data is not valid.');
+        }
+
+        if($this->productsRepository->productSkuExists($data['sku'])) {
+            throw new ProductDataInvalidException('Product with given sku already exists.');
+        }
     }
 
     /**
@@ -159,19 +155,16 @@ class ProductService
      * @param string $oldSku
      * @param array $file
      * @return bool
+     * @throws ProductDataInvalidException
      */
     public function updateProduct(array $data, string $oldSku, array $file): bool
     {
-        if (!$this->isProductValidUpdate($data, $oldSku)) {
-            return false;
-        }
-
         if ($oldSku !== $data['sku'] && $this->productsRepository->productSkuExists($data['sku'])) {
             return false;
         }
 
-        if ($file['tmp_name'] !== '' && !$this->checkImageHeightWidthRatio($file)) {
-            return false;
+        if ($file['tmp_name'] !== '') {
+            $this->checkImageHeightWidthRatio($file);
         }
 
         $this->setEnabledAndFeaturedValue($data);
@@ -182,10 +175,11 @@ class ProductService
             $content = $product['image'];
         } else {
             $content = fopen($file['tmp_name'], 'rb');
-            $content = fread($content, filesize($file['tmp_name']));
+            $fileContent = fread($content, filesize($file['tmp_name']));
         }
 
-        $this->productsRepository->updateProduct($data, $oldSku, base64_encode($content));
+        $this->productsRepository->updateProduct($data, $oldSku, base64_encode($fileContent));
+        fclose($content);
         return true;
     }
 
@@ -198,6 +192,22 @@ class ProductService
     public function getProductBySku(string $sku): ?Product
     {
         return $this->productsRepository->getProductBySku($sku);
+    }
+
+    /**
+     * Check if product data is valid (for update).
+     *
+     * @param array $data
+     * @param string $oldSku
+     * @throws ProductDataInvalidException
+     */
+    public function isProductValidUpdate(array $data, string $oldSku): void
+    {
+        if (isset($data['sku'], $data['title'], $data['brand'],
+                $data['price'], $data['shortDesc'], $data['description']) &&
+            !$this->productsRepository->productSkuExists($oldSku)) {
+            throw new ProductDataInvalidException('Product data is not valid');
+        }
     }
 
     /**
@@ -256,7 +266,7 @@ class ProductService
      */
     public function enableOrDisableProduct(array $data): bool
     {
-        if($data['enabled'] !== 'false') {
+        if ($data['enabled'] !== 'false') {
             return $this->productsRepository->disableProduct($data['sku']);
         }
 
@@ -325,39 +335,76 @@ class ProductService
     {
         $products = new Collection();
 
-        if (empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
-                && empty($data['maxPrice']) && empty($data['minPrice']))) {
-            $products = $this->productsRepository->getEnabledProducts();
-            if (empty($data['sorting'])) {
-                $data['sorting'] = 'relevance';
-            }
-        } else {
-            if (!empty($data['search']) && (empty($data['keyword']) && empty($data['category'])
-                    && empty($data['maxPrice']) && empty($data['minPrice']))) {
-                $products = $this->getProductsByKeyword($data['search']);
+        if (empty($data['keyword']) && empty($data['category'])
+            && empty($data['maxPrice']) && empty($data['minPrice'])) {
+            if (empty($data['search'])) {
+                $products = $this->productsRepository->getEnabledProducts();
                 if (empty($data['sorting'])) {
                     $data['sorting'] = 'relevance';
                 }
             } else {
+                $products = $this->getProductsByKeyword($data['search']);
+                if (empty($data['sorting'])) {
+                    $data['sorting'] = 'relevance';
+                }
                 $data['search'] = '';
+            }
+        } else {
+            if (!empty($data['keyword'])) {
+                $products = $this->getProductsByKeyword($data['keyword']);
+            }
 
-                if (!empty($data['keyword'])) {
-                    $products = $this->getProductsByKeyword($data['keyword']);
-                }
+            if (!empty($data['category'])) {
+                $products = $this->getProductsByCategory($products, $data['category']);
+            }
 
-                if (!empty($data['category'])) {
-                    $products = $this->getProductsByCategory($products, $data['category']);
-                }
+            if (!empty($data['maxPrice'])) {
+                $products = $this->getProductsByMaxPrice($products, $data['maxPrice']);
+            }
 
-                if (!empty($data['maxPrice'])) {
-                    $products = $this->getProductsByMaxPrice($products, $data['maxPrice']);
-                }
-
-                if (!empty($data['minPrice'])) {
-                    $products = $this->getProductsByMinPrice($products, $data['minPrice']);
-                }
+            if (!empty($data['minPrice'])) {
+                $products = $this->getProductsByMinPrice($products, $data['minPrice']);
             }
         }
+
+        return $products;
+    }
+
+    /**
+     * Get products by keyword.
+     *
+     * @param string $keyword
+     * @return Collection
+     */
+    public
+    function getProductsByKeyword(string $keyword): Collection
+    {
+        $products = $this->productsRepository->getProductsByKeyword($keyword);
+
+        /** @var CategoryService $categoryService */
+        $categoryService = ServiceRegistry::get('CategoryService');
+        $categories = $categoryService->getCategoriesByTitle($keyword);
+
+        foreach ($categories as $category) {
+            $products =
+                $products->merge($this->productsRepository->getEnabledProductsByCategoryId($category['id']));
+        }
+
+        foreach ($products as $product) {
+            if (strpos($product->title, $keyword) !== false) {
+                $product->weight = 1;
+            } else if (strpos($product->brand, $keyword) !== false) {
+                $product->weight = 2;
+            } else if (strpos($product->short_description, $keyword) !== false) {
+                $product->weight = 4;
+            } else if (strpos($product->description, $keyword) !== false) {
+                $product->weight = 5;
+            } else {
+                $product->weight = 3;
+            }
+        }
+
+        $products->sortBy('weight');
 
         return $products;
     }
@@ -369,7 +416,8 @@ class ProductService
      * @param int $id
      * @return Collection
      */
-    public function getProductsByCategory(Collection $products, int $id): Collection
+    public
+    function getProductsByCategory(Collection $products, int $id): Collection
     {
         if (!$products->first()) {
             $products = $this->productsRepository->getEnabledProductsByCategoryId($id);
@@ -391,7 +439,8 @@ class ProductService
      * @param float $maxPrice
      * @return Collection
      */
-    public function getProductsByMaxPrice(Collection $products, float $maxPrice): Collection
+    public
+    function getProductsByMaxPrice(Collection $products, float $maxPrice): Collection
     {
         if (!$products->first()) {
             $products = $this->productsRepository->getProductsMaxPrice($maxPrice);
@@ -413,7 +462,8 @@ class ProductService
      * @param float $minPrice
      * @return Collection
      */
-    public function getProductsByMinPrice(Collection $products, float $minPrice): Collection
+    public
+    function getProductsByMinPrice(Collection $products, float $minPrice): Collection
     {
         if (!$products->first()) {
             $products = $this->productsRepository->getProductsMinPrice($minPrice);
@@ -424,44 +474,6 @@ class ProductService
                 }
             }
         }
-
-        return $products;
-    }
-
-    /**
-     * Get products by keyword.
-     *
-     * @param string $keyword
-     * @return Collection
-     */
-    public function getProductsByKeyword(string $keyword): Collection
-    {
-        $products = $this->productsRepository->getProductsByKeyword($keyword);
-
-        /** @var CategoryService $categoryService */
-        $categoryService = ServiceRegistry::get('CategoryService');
-        $categories = $categoryService->getCategoriesByTitle($keyword);
-
-        foreach ($categories as $category) {
-            $products =
-                $products->merge($this->productsRepository->getEnabledProductsByCategoryId($category['id']));
-        }
-
-        foreach($products as $product) {
-            if(strpos($product->title, $keyword) !== false) {
-                $product->weight = 1;
-            } else if(strpos($product->brand, $keyword) !== false) {
-                $product->weight = 2;
-            } else if(strpos($product->short_description, $keyword) !== false) {
-                $product->weight = 4;
-            } else if(strpos($product->description, $keyword) !== false) {
-                $product->weight = 5;
-            } else {
-                $product->weight = 3;
-            }
-        }
-
-        $products->sortBy('weight');
 
         return $products;
     }

@@ -4,6 +4,7 @@
 namespace Demoshop\Controllers\AdminControllers;
 
 
+use Demoshop\AuthorizationMiddleware\Exceptions\CategoryDataEmptyException;
 use Demoshop\Controllers\AdminController;
 use Demoshop\Formatters\CategoryFormatter;
 use Demoshop\HTTP\HTMLResponse;
@@ -36,8 +37,9 @@ class CategoryController extends AdminController
     public function listCategories(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
-        $categories = $categoryService->getRootCategories();
-        $categoriesForTreeView = $categoryService->formatCategoriesForTreeView($categories);
+        $categoryFormatter = new CategoryFormatter();
+        $categories = $categoryService->getCategories();
+        $categoriesForTreeView = $categoryFormatter->formatCategoriesForTreeView($categories);
 
         return new JSONResponse($categoriesForTreeView);
     }
@@ -63,7 +65,7 @@ class CategoryController extends AdminController
      * @param Request $request
      * @return JSONResponse
      */
-    public function getCategoriesForEdit(Request $request):JSONResponse
+    public function getCategoriesForEdit(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
         $formatter = new CategoryFormatter();
@@ -87,7 +89,7 @@ class CategoryController extends AdminController
 
         $category = $categoryService->getCategoryById($request->getGetData()['id']);
         $parent = null;
-        if($category->parent_id) {
+        if ($category && $category->parent_id) {
             $parent = $categoryService->getCategoryById($category->parent_id);
         }
 
@@ -105,6 +107,7 @@ class CategoryController extends AdminController
     public function delete(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
+        $categoryFormatter = new CategoryFormatter();
 
         $category = $categoryService->deleteCategoryById($request->getGetData()['id']);
         if (!$category) {
@@ -114,8 +117,9 @@ class CategoryController extends AdminController
             return $json;
         }
 
-        $categories = $categoryService->getRootCategories();
-        $categoriesForTreeView = $categoryService->formatCategoriesForTreeView($categories);
+        $categories = $categoryService->getCategories();
+        $categoriesForTreeView = $categoryFormatter->formatCategoriesForTreeView($categories);
+
         return new JSONResponse($categoriesForTreeView);
     }
 
@@ -128,18 +132,30 @@ class CategoryController extends AdminController
     public function addNewCategory(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
+        $categoryFormatter = new CategoryFormatter();
+
         $category = json_decode(file_get_contents('php://input'), true,
             512, JSON_THROW_ON_ERROR);
 
-        if (!$categoryService->addNewCategory($category)) {
-            $json = new JSONResponse(['message' => 'Failed to insert new category.']);
+        try {
+            $categoryService->isRequestDataValid($category);
+
+            if (!$categoryService->addNewCategory($category)) {
+                $json = new JSONResponse(['message' => 'Category id already exists.']);
+                $json->setStatus(400);
+                return $json;
+            }
+
+            $categories = $categoryService->getCategories();
+            $categoriesForTreeView = $categoryFormatter->formatCategoriesForTreeView($categories);
+
+            return new JSONResponse($categoriesForTreeView);
+        } catch (CategoryDataEmptyException $e) {
+            $json = new JSONResponse(['message' => $e->getMessage()]);
             $json->setStatus(400);
             return $json;
         }
 
-        $categories = $categoryService->getRootCategories();
-        $categoriesForTreeView = $categoryService->formatCategoriesForTreeView($categories);
-        return new JSONResponse($categoriesForTreeView);
     }
 
     /**
@@ -151,17 +167,28 @@ class CategoryController extends AdminController
     public function updateCategory(Request $request): JSONResponse
     {
         $categoryService = $this->getCategoryService();
+        $categoryFormatter = new CategoryFormatter();
 
         $category = json_decode(file_get_contents('php://input'), true,
             512, JSON_THROW_ON_ERROR);
-        if (!$categoryService->updateCategory($category)) {
-            $json = new JSONResponse(['Failed to update category.']);
+
+        try {
+            $categoryService->isRequestDataValid($category);
+
+            if (!$categoryService->updateCategory($category)) {
+                $json = new JSONResponse(['message' => 'Category id doesn\'t exists.']);
+                $json->setStatus(400);
+                return $json;
+            }
+
+            $categories = $categoryService->getCategories();
+            $categoriesForTreeView = $categoryFormatter->formatCategoriesForTreeView($categories);
+
+            return new JSONResponse($categoriesForTreeView);
+        } catch (CategoryDataEmptyException $e) {
+            $json = new JSONResponse(['message' => $e->getMessage()]);
             $json->setStatus(400);
             return $json;
         }
-
-        $categories = $categoryService->getRootCategories();
-        $categoriesForTreeView = $categoryService->formatCategoriesForTreeView($categories);
-        return new JSONResponse($categoriesForTreeView);
     }
 }

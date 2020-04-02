@@ -5,7 +5,6 @@
  * @var string $maxPrice
  * @var string $minPrice
  * @var array $selectedCategory
- * @var string $search
  */
 ?>
 

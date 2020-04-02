@@ -5,6 +5,7 @@ namespace Demoshop\Controllers\FrontControllers;
 
 
 use Demoshop\Controllers\FrontController;
+use Demoshop\Formatters\CategoryFormatter;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
 
@@ -27,8 +28,9 @@ class HomeController extends FrontController
         $statisticsService = $this->getStatisticsService();
 
         $statisticsService->increaseHomeViewCount();
-        $categories = $categoryService->getRootCategories();
-        $categories = $categoryService->formatCategoriesForTreeView($categories);
+        $categoryFormatter = new CategoryFormatter();
+        $allCategories = $categoryService->getCategories();
+        $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
         $products = $productService->getFeaturedProducts();
 
         $homePageArguments = [

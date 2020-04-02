@@ -1,11 +1,13 @@
 <?php
 /**
  * @var string $message
- * @var string $failMessage
  * @var array $products
  * @var int $currentPage
  * @var int $numberOfPages
  */
+
+use Demoshop\ServiceRegistry\ServiceRegistry;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,10 +27,14 @@
     ?>
     <div class="products-content" id="tableTab">
         <h2 class="products-header">Products</h2>
+        <?php
+        $session = ServiceRegistry::get('Session');
+        echo '<output class="message-fail">' . $session->get('errorMessage') . '</output>';
+        $session->remove('errorMessage');
+        ?>
+
         <?php if ($message) {
             echo '<output class="message-success">' . $message . '</output>';
-        } else {
-            echo '<output class="message-fail">' . $failMessage . '</output>';
         } ?>
         <form action="/admin/products" method="post" id="productsTable" class="products-table">
             <div>

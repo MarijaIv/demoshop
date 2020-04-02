@@ -3,12 +3,11 @@
 namespace Demoshop\Services;
 
 
-use Demoshop\DTO\CategoryDTO;
+use Demoshop\AuthorizationMiddleware\Exceptions\CategoryDataEmptyException;
 use Demoshop\Model\Category;
 use Demoshop\Repositories\CategoryRepository;
 use Demoshop\Repositories\ProductsRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class CategoryService
@@ -52,43 +51,6 @@ class CategoryService
     }
 
     /**
-     * Format array for JSON encoding (for treeview).
-     *
-     * @param Collection $rootCategories
-     * @return array
-     */
-    public function formatCategoriesForTreeView(Collection $rootCategories): array
-    {
-        $unvisitedCategories = $rootCategories;
-        $tree = [];
-        $visitedCategories = [];
-
-        while ($category = $unvisitedCategories->shift()) {
-            $visitedCategories[$category['id']] = (new CategoryDTO($category))->toArray();
-            $unvisitedCategories = $unvisitedCategories->merge($this->getCategoriesForParent($category['id']));
-
-            if ($category['parent_id'] === NULL) {
-                $tree[] = &$visitedCategories[$category['id']];
-            } else {
-                $visitedCategories[$category['parent_id']]['children'][] = &$visitedCategories[$category['id']];
-            }
-        }
-
-        return $tree;
-    }
-
-    /**
-     * Get subcategories for parent.
-     *
-     * @param int $id
-     * @return Collection
-     */
-    public function getCategoriesForParent(int $id): Collection
-    {
-        return $this->categoryRepository->getCategoriesForParent($id);
-    }
-
-    /**
      * Get categories for category edit.
      *
      * @param int $id
@@ -121,16 +83,6 @@ class CategoryService
     public function getCategories(): Collection
     {
         return $this->categoryRepository->getCategories();
-    }
-
-    /**
-     * Get root categories.
-     *
-     * @return Collection
-     */
-    public function getRootCategories(): Collection
-    {
-        return $this->categoryRepository->getRootCategories();
     }
 
     /**
@@ -177,12 +129,8 @@ class CategoryService
      * @param array $data
      * @return bool
      */
-    public function addNewCategory($data): bool
+    public function addNewCategory(array $data): bool
     {
-        if ($this->isRequestDataValid($data)) {
-            return false;
-        }
-
         if ($this->categoryRepository->categoryExistsCode($data['code'])) {
             return false;
         }
@@ -194,11 +142,13 @@ class CategoryService
      * Check if request data is empty.
      *
      * @param array $data
-     * @return bool
+     * @throws CategoryDataEmptyException
      */
-    public function isRequestDataValid(array $data): bool
+    public function isRequestDataValid(array $data): void
     {
-        return empty($data['title']) || empty($data['code']) || empty($data['description']);
+        if (empty($data['title']) || empty($data['code']) || empty($data['description']) || empty($data['id'])) {
+            throw new CategoryDataEmptyException('Category data is not valid.');
+        }
     }
 
     /**
@@ -209,11 +159,7 @@ class CategoryService
      */
     public function updateCategory($data): bool
     {
-        if ($this->isRequestDataValid($data)) {
-            return false;
-        }
-
-        if (empty($data['id']) && !$this->categoryRepository->categoryExists($data['id'])) {
+        if (!$this->categoryRepository->categoryExists($data['id'])) {
             return false;
         }
 

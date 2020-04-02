@@ -23,7 +23,7 @@ class Router
     public function route(Request $request): Response
     {
         if (empty($request->getRequestURI()) || empty($request->getMethod())) {
-            throw new InvalidRequestUriOrMethodException();
+            throw new InvalidRequestUriOrMethodException('Invalid request uri or method.');
         }
 
         $route = Routes::get($request);
@@ -46,7 +46,7 @@ class Router
         $action = $route->getAction();
 
         if (!is_callable($action, true)) {
-            throw new ControllerOrActionNotFoundException();
+            throw new ControllerOrActionNotFoundException('Controller or action not found.');
         }
 
         if ($route->getActionParams()) {

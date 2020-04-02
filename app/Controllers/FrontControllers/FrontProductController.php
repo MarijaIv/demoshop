@@ -5,6 +5,7 @@ namespace Demoshop\Controllers\FrontControllers;
 
 
 use Demoshop\Controllers\FrontController;
+use Demoshop\Formatters\CategoryFormatter;
 use Demoshop\Formatters\ProductFormatter;
 use Demoshop\HTTP\HTMLResponse;
 use Demoshop\HTTP\Request;
@@ -29,8 +30,9 @@ class FrontProductController extends FrontController
         $product = $productService->getProductBySku($sku);
 
         $categoryService = $this->getCategoryService();
-        $categories = $categoryService->getRootCategories();
-        $categories = $categoryService->formatCategoriesForTreeView($categories);
+        $categoryFormatter = new CategoryFormatter();
+        $allCategories = $categoryService->getCategories();
+        $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
 
         if (!$product) {
             $landingPageViewArguments = [
@@ -67,8 +69,9 @@ class FrontProductController extends FrontController
         $dataForCategoryDisplay = $formatter->formatProductsForVisitor($dataForCategoryDisplay, $request->getGetData());
 
         $categoryService = $this->getCategoryService();
-        $categories = $categoryService->getRootCategories();
-        $categories = $categoryService->formatCategoriesForTreeView($categories);
+        $categoryFormatter = new CategoryFormatter();
+        $allCategories = $categoryService->getCategories();
+        $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
 
         $categoryDisplayArguments = [
             'products' => $dataForCategoryDisplay['products'],
