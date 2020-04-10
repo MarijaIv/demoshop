@@ -6,6 +6,7 @@ namespace Demoshop\Controllers;
 
 use Demoshop\ServiceRegistry\ServiceRegistry;
 use Demoshop\Services\CategoryService;
+use Demoshop\Services\FrontProductService;
 use Demoshop\Services\LoginService;
 use Demoshop\Services\ProductService;
 use Demoshop\Services\StatisticsService;
@@ -54,5 +55,10 @@ abstract class BaseController
     protected function getStatisticsService(): StatisticsService
     {
         return ServiceRegistry::get('StatisticsService');
+    }
+
+    protected function getFrontProductService(): FrontProductService
+    {
+        return ServiceRegistry::get('FrontProductService');
     }
 }

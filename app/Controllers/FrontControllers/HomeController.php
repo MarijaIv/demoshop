@@ -24,7 +24,7 @@ class HomeController extends FrontController
     public function index(Request $request): HTMLResponse
     {
         $categoryService = $this->getCategoryService();
-        $productService = $this->getProductService();
+        $productService = $this->getFrontProductService();
         $statisticsService = $this->getStatisticsService();
 
         $statisticsService->increaseHomeViewCount();

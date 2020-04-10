@@ -89,20 +89,20 @@ class ProductsRepository
      * @param string $fileContent
      * @return bool
      */
-    public function createNewProduct(array $data, string $fileContent): bool
+    public function createNewProduct(\Demoshop\Entity\Product $data, string $fileContent): bool
     {
         return Product::query()->insert(
             [
-                'category_id' => $data['category'],
-                'sku' => $data['sku'],
-                'title' => $data['title'],
-                'brand' => $data['brand'],
-                'price' => $data['price'],
-                'short_description' => $data['shortDesc'],
-                'description' => $data['description'],
+                'category_id' => $data->getCategoryId(),
+                'sku' => $data->getSku(),
+                'title' => $data->getTitle(),
+                'brand' => $data->getBrand(),
+                'price' => $data->getPrice(),
+                'short_description' => $data->getShortDescription(),
+                'description' => $data->getDescription(),
                 'image' => $fileContent,
-                'enabled' => $data['enabled'],
-                'featured' => $data['featured'],
+                'enabled' => $data->isEnabled(),
+                'featured' => $data->isFeatured(),
             ]
         );
     }
@@ -132,14 +132,14 @@ class ProductsRepository
     /**
      * Get products by category code.
      *
-     * @param string $code
+     * @param array $codes
      * @return Collection
      */
-    public function getProductsByCategoryCode(string $code): Collection
+    public function getProductsByCategoryCode(array $codes): Collection
     {
         return Product::query()
             ->join('category', 'product.category_id', '=', 'category.id')
-            ->where('category.code', '=', $code)
+            ->whereIn('category.code', $codes)
             ->get(['product.id', 'product.category_id', 'product.sku', 'product.title',
                 'product.brand', 'product.price', 'product.short_description', 'product.description',
                 'product.image', 'product.enabled', 'product.featured', 'product.view_count']);
@@ -153,21 +153,21 @@ class ProductsRepository
      * @param string $image
      * @return int
      */
-    public function updateProduct(array $data, string $oldSku, string $image): int
+    public function updateProduct(\Demoshop\Entity\Product $data, string $oldSku, string $image): int
     {
         return Product::query()
             ->where('sku', '=', $oldSku)
             ->update(
                 [
-                    'category_id' => $data['category'],
-                    'sku' => $data['sku'],
-                    'title' => $data['title'],
-                    'brand' => $data['brand'],
-                    'price' => $data['price'],
-                    'short_description' => $data['shortDesc'],
-                    'description' => $data['description'],
-                    'enabled' => $data['enabled'],
-                    'featured' => $data['featured'],
+                    'category_id' => $data->getCategoryId(),
+                    'sku' => $data->getSku(),
+                    'title' => $data->getTitle(),
+                    'brand' => $data->getBrand(),
+                    'price' => $data->getPrice(),
+                    'short_description' => $data->getShortDescription(),
+                    'description' => $data->getDescription(),
+                    'enabled' => $data->isEnabled(),
+                    'featured' => $data->isFeatured(),
                     'image' => $image,
                 ]
             );
@@ -196,23 +196,6 @@ class ProductsRepository
     }
 
     /**
-     * Enable product.
-     *
-     * @param string $sku
-     * @return int
-     */
-    public function enableProduct(string $sku): int
-    {
-        return Product::query()
-            ->where('sku', '=', $sku)
-            ->update(
-                [
-                    'enabled' => 1,
-                ]
-            );
-    }
-
-    /**
      * Enable multiple products.
      *
      * @param array $skuArray
@@ -225,23 +208,6 @@ class ProductsRepository
             ->update(
                 [
                     'enabled' => 1,
-                ]
-            );
-    }
-
-    /**
-     * Disable product.
-     *
-     * @param string $sku
-     * @return int
-     */
-    public function disableProduct(string $sku): int
-    {
-        return Product::query()
-            ->where('sku', '=', $sku)
-            ->update(
-                [
-                    'enabled' => 0,
                 ]
             );
     }
@@ -274,49 +240,50 @@ class ProductsRepository
     }
 
     /**
-     * Get products by keyword.
+     * Search products.
      *
      * @param string $keyword
-     * @return Collection
+     * @param float|null $maxPrice
+     * @param float|null $minPrice
+     * @param int $categoryId
+     * @return Builder[]|Collection
      */
-    public function getProductsByKeyword(string $keyword): Collection
+    public function search(
+        string $keyword = null,
+        float $maxPrice = null,
+        float $minPrice = null,
+        int $categoryId = null
+    )
     {
-        return Product::query()
-            ->where('enabled', '=', 1)
-            ->where(static function (Builder $q) use ($keyword) {
-                $q->orWhere('title', 'like', '%' . $keyword . '%')
-                    ->orWhere('brand', 'like', '%' . $keyword . '%')
-                    ->orWhere('short_description', 'like', '%' . $keyword . '%')
-                    ->orWhere('description', 'like', '%' . $keyword . '%');
-            })->get();
-    }
+        $query = Product::query()
+            ->join('category', 'product.category_id', '=', 'category.id')
+            ->where('product.enabled', '=', 1);
 
-    /**
-     * Get products where price is lower then maxPrice.
-     *
-     * @param float $maxPrice
-     * @return Collection
-     */
-    public function getProductsMaxPrice(float $maxPrice): Collection
-    {
-        return Product::query()
-            ->where('price', '<', $maxPrice)
-            ->where('enabled', '=', 1)
-            ->get();
-    }
+        if ($keyword) {
+            $query = $query->where(static function (Builder $q) use ($keyword) {
+                $q->orWhere('product.title', 'like', '%' . $keyword . '%')
+                    ->orWhere('product.brand', 'like', '%' . $keyword . '%')
+                    ->orWhere('category.title', 'like', '%' . $keyword . '%')
+                    ->orWhere('product.short_description', 'like', '%' . $keyword . '%')
+                    ->orWhere('product.description', 'like', '%' . $keyword . '%');
+            });
+        }
 
-    /**
-     * Get products where price is greater then minPrice.
-     *
-     * @param float $minPrice
-     * @return Collection
-     */
-    public function getProductsMinPrice(float $minPrice): Collection
-    {
-        return Product::query()
-            ->where('price', '>', $minPrice)
-            ->where('enabled', '=', 1)
-            ->get();
+        if ($maxPrice) {
+            $query = $query->where('product.price', '<', $maxPrice);
+        }
+
+        if ($minPrice) {
+            $query = $query->where('product.price', '>', $minPrice);
+        }
+
+        if ($categoryId) {
+            $query = $query->where('product.category_id', '=', $categoryId);
+        }
+
+        return $query->get(['product.id', 'product.category_id', 'product.sku', 'product.title',
+            'product.brand', 'product.price', 'product.short_description', 'product.description',
+            'product.image', 'product.enabled', 'product.featured', 'product.view_count']);
     }
 
     /**

@@ -12,13 +12,13 @@ use Demoshop\Repositories\ProductsRepository;
 use Demoshop\Repositories\StatisticsRepository;
 use Demoshop\ServiceRegistry\ServiceRegistry;
 use Demoshop\Services\CategoryService;
+use Demoshop\Services\FrontProductService;
 use Demoshop\Services\LoginService;
 use Demoshop\Services\ProductService;
 use Demoshop\Services\StatisticsService;
 use Demoshop\Session\PHPSession;
 
 DatabaseInit::init();
-
 
 try {
     ServiceRegistry::register('Session', static function () {
@@ -50,6 +50,9 @@ try {
     });
     ServiceRegistry::register('StatisticsService', static function () {
         return new StatisticsService(Demoshop\ServiceRegistry\ServiceRegistry::get('StatisticsRepository'));
+    });
+    ServiceRegistry::register('FrontProductService', static function() {
+        return new FrontProductService(Demoshop\ServiceRegistry\ServiceRegistry::get('ProductsRepository'));
     });
 } catch (ServiceAlreadyRegisteredException $e) {
     echo "<h1 style=\"color:red\">{$e->getMessage()}</h1>";

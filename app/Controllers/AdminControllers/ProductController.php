@@ -6,6 +6,7 @@ namespace Demoshop\Controllers\AdminControllers;
 
 use Demoshop\AuthorizationMiddleware\Exceptions\ProductDataInvalidException;
 use Demoshop\Controllers\AdminController;
+use Demoshop\Entity\Product;
 use Demoshop\Formatters\CategoryFormatter;
 use Demoshop\Formatters\ProductFormatter;
 use Demoshop\HTTP\HTMLResponse;
@@ -14,6 +15,7 @@ use Demoshop\HTTP\Request;
 use Demoshop\HTTP\Response;
 use Demoshop\ServiceRegistry\ServiceRegistry;
 use Demoshop\Session\PHPSession;
+use Illuminate\Support\Collection;
 
 /**
  * Class ProductController
@@ -30,18 +32,22 @@ class ProductController extends AdminController
     public function index(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
-        $products = $productService->getProductsForCurrentPage(1, 10);
-        $products = $formatter->formatProductsForTable($products);
-
-        $productsViewArguments = [
-            'products' => $products,
-            'currentPage' => 1,
-            'numberOfPages' => $productService->getNumberOfPages(10),
-        ];
+        $products = $productService->getProducts(1, 10);
+        $productsViewArguments = $this->setViewArguments($products, 1);
 
         return new HTMLResponse('/views/admin/product.php', $productsViewArguments);
+    }
+
+    private function setViewArguments(Collection $products, int $currentPage): array
+    {
+        $formatter = new ProductFormatter();
+        $productService = $this->getProductService();
+
+        return [
+            'products' => $formatter->formatProductsForTable($products),
+            'currentPage' => $currentPage,
+            'numberOfPages' => $productService->getNumberOfPages(10),
+        ];
     }
 
     /**
@@ -67,21 +73,19 @@ class ProductController extends AdminController
             $product = $productService->getProductBySku($sku);
 
             if (!$product) {
-                /** @var PHPSession $session */
-                $session = ServiceRegistry::get('Session');
-                $session->add('errorMessage', 'Product with given sku does not exist.');
+                $this->setSessionMessage('errorMessage', 'Product with given sku does not exist.');
                 return new RedirectResponse('/admin/products');
             }
 
-            $addEditViewArguments = $productFormatter->formatProduct($product);
-            $addEditViewArguments['categories'] = $categories;
+            $viewArguments = $productFormatter->formatProduct($product);
+            $viewArguments['categories'] = $categories;
         } else {
-            $addEditViewArguments = [
+            $viewArguments = [
                 'categories' => $categories,
             ];
         }
 
-        $response->setViewArguments($addEditViewArguments);
+        $response->setViewArguments($viewArguments);
         return $response;
     }
 
@@ -94,32 +98,22 @@ class ProductController extends AdminController
     public function createNewProduct(Request $request): Response
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
         $response = new HTMLResponse('/views/admin/product.php');
-
         $file = $request->getFile('img');
+        $product = $this->createProduct($request->getPostData());
 
         try {
-            $productService->isProductValid($request->getGetData());
+            $productService->validateProduct($product);
+            $productService->createNewProduct($product, $file);
+            $products = $productService->getProducts(1, 10);
 
-            $productService->createNewProduct($request->getPostData(), $file);
-            $products = $productService->getProductsForCurrentPage(1, 10);
-            $products = $formatter->formatProductsForTable($products);
+            $this->setSessionMessage('message', 'Product insert successful.');
+            $viewArguments = $this->setViewArguments($products, 1);
 
-            $createProgramViewArguments = [
-                'message' => 'Product insert successful.',
-                'products' => $products,
-                'currentPage' => 1,
-                'numberOfPages' => $productService->getNumberOfPages(10),
-            ];
-
-            $response->setViewArguments($createProgramViewArguments);
+            $response->setViewArguments($viewArguments);
             return $response;
         } catch (ProductDataInvalidException $e) {
-            /** @var PHPSession $session */
-            $session = ServiceRegistry::get('Session');
-            $session->add('errorMessage', $e->getMessage());
+            $this->setSessionMessage('errorMessage', $e->getMessage());
             return new RedirectResponse('/admin/products');
         }
     }
@@ -134,31 +128,21 @@ class ProductController extends AdminController
     public function updateProduct(Request $request, string $oldSku): Response
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
         $response = new HTMLResponse('/views/admin/product.php');
-
         $file = $request->getFile('img');
+        $product = $this->createProduct($request->getPostData());
 
         try {
-            $productService->isProductValidUpdate($request->getGetData(), $oldSku);
-            $productService->updateProduct($request->getPostData(), $oldSku, $file);
-            $products = $productService->getProductsForCurrentPage(1, 10);
-            $products = $formatter->formatProductsForTable($products);
+            $productService->validateProductForUpdate($product, $oldSku);
+            $productService->updateProduct($product, $oldSku, $file);
+            $products = $productService->getProducts(1, 10);
+            $this->setSessionMessage('message', 'Product update successful.');
+            $viewArguments = $this->setViewArguments($products, 1);
 
-            $updateProductViewArguments = [
-                'message' => 'Product update successful.',
-                'products' => $products,
-                'currentPage' => 1,
-                'numberOfPages' => $productService->getNumberOfPages(10),
-            ];
-
-            $response->setViewArguments($updateProductViewArguments);
+            $response->setViewArguments($viewArguments);
             return $response;
         } catch (ProductDataInvalidException $e) {
-            /** @var PHPSession $session */
-            $session = ServiceRegistry::get('Session');
-            $session->add('errorMessage', $e->getMessage());
+            $this->setSessionMessage('errorMessage', $e->getMessage());
             return new RedirectResponse('/admin/products');
         }
     }
@@ -172,18 +156,11 @@ class ProductController extends AdminController
     public function deleteProduct(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
         $response = new HTMLResponse('/views/admin/product.php');
-        $deleteViewArguments = [
-            'message' => 'Product deleted.',
-        ];
         $currentPage = $request->getGetData()['currentPage'];
 
         if (!$productService->deleteProduct($request->getGetData()['sku'])) {
-            /** @var PHPSession $session */
-            $session = ServiceRegistry::get('Session');
-            $session->add('errorMessage', 'Failed to delete product.');
+            $this->setSessionMessage('errorMessage', 'Failed to delete product.');
             return new RedirectResponse('/admin/products');
         }
 
@@ -193,13 +170,11 @@ class ProductController extends AdminController
             $currentPage = $numberOfPages;
         }
 
-        $products = $productService->getProductsForCurrentPage($currentPage, 10);
-        $products = $formatter->formatProductsForTable($products);
+        $products = $productService->getProducts($currentPage, 10);
+        $this->setSessionMessage('message', 'Product deleted.');
+        $viewArguments = $this->setViewArguments($products, $currentPage);
 
-        $deleteViewArguments['products'] = $products;
-        $deleteViewArguments['currentPage'] = $currentPage;
-        $deleteViewArguments['numberOfPages'] = $numberOfPages;
-        $response->setViewArguments($deleteViewArguments);
+        $response->setViewArguments($viewArguments);
 
         return $response;
     }
@@ -213,22 +188,14 @@ class ProductController extends AdminController
     public function deleteMultiple(Request $request): Response
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
         $response = new HTMLResponse('/views/admin/product.php');
         $currentPage = $request->getGetData()['currentPage'];
 
         if (!empty($request->getPostData())) {
             if (!$productService->deleteMultipleProducts($request->getPostData())) {
-                /** @var PHPSession $session */
-                $session = ServiceRegistry::get('Session');
-                $session->add('errorMessage', 'Failed to delete products.');
+                $this->setSessionMessage('errorMessage', 'Failed to delete products.');
                 return new RedirectResponse('/admin/products');
             }
-
-            $deleteViewArguments = [
-                'message' => 'Products deleted.',
-            ];
         }
 
         $numberOfPages = $productService->getNumberOfPages(10);
@@ -237,13 +204,10 @@ class ProductController extends AdminController
             $currentPage = $numberOfPages;
         }
 
-        $products = $productService->getProductsForCurrentPage($currentPage, 10);
-        $products = $formatter->formatProductsForTable($products);
-
-        $deleteViewArguments['products'] = $products;
-        $deleteViewArguments['currentPage'] = $currentPage;
-        $deleteViewArguments['numberOfPages'] = $numberOfPages;
-        $response->setViewArguments($deleteViewArguments);
+        $products = $productService->getProducts($currentPage, 10);
+        $this->setSessionMessage('message', 'Products deleted.');
+        $viewArguments = $this->setViewArguments($products, $currentPage);
+        $response->setViewArguments($viewArguments);
 
         return $response;
     }
@@ -257,23 +221,11 @@ class ProductController extends AdminController
     public function enableSelected(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
         $response = new HTMLResponse('/views/admin/product.php');
-
-        if (!$productService->enableProducts($request->getPostData())) {
-            /** @var PHPSession $session */
-            $session = ServiceRegistry::get('Session');
-            $session->add('errorMessage', 'Failed to enable products.');
-            return new RedirectResponse('/admin/products');
-        }
-
-        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage'], 10);
-
-        $enableViewArguments['products'] = $formatter->formatProductsForTable($products);
-        $enableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
-        $enableViewArguments['numberOfPages'] = $productService->getNumberOfPages(10);
-        $response->setViewArguments($enableViewArguments);
+        $productService->enableProducts($request->getPostData());
+        $products = $productService->getProducts($request->getGetData()['currentPage'], 10);
+        $viewArguments = $this->setViewArguments($products, $request->getGetData()['currentPage']);
+        $response->setViewArguments($viewArguments);
 
         return $response;
     }
@@ -287,22 +239,11 @@ class ProductController extends AdminController
     public function disableSelected(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
         $response = new HTMLResponse('/views/admin/product.php');
-
-        if (!$productService->disableProducts($request->getPostData())) {
-            /** @var PHPSession $session */
-            $session = ServiceRegistry::get('Session');
-            $session->add('errorMessage', 'Failed to disable products.');
-            return new RedirectResponse('/admin/products');
-        }
-
-        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage'], 10);
-
-        $disableViewArguments['products'] = $formatter->formatProductsForTable($products);
-        $disableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
-        $disableViewArguments['numberOfPages'] = $productService->getNumberOfPages(10);
-        $response->setViewArguments($disableViewArguments);
+        $productService->disableProducts($request->getPostData());
+        $products = $productService->getProducts($request->getGetData()['currentPage'], 10);
+        $viewArguments = $this->setViewArguments($products, $request->getGetData()['currentPage']);
+        $response->setViewArguments($viewArguments);
 
         return $response;
     }
@@ -316,22 +257,17 @@ class ProductController extends AdminController
     public function enableOrDisableProduct(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
         $response = new HTMLResponse('/views/admin/product.php');
 
-        if (!$productService->enableOrDisableProduct($request->getGetData())) {
-            /** @var PHPSession $session */
-            $session = ServiceRegistry::get('Session');
-            $session->add('errorMessage', 'Failed to change enabled.');
-            return new RedirectResponse('/admin/products');
+        if ($request->getGetData()['enabled'] === 'true') {
+            $productService->disableProducts([$request->getGetData()['sku']]);
+        } else {
+            $productService->enableProducts([$request->getGetData()['sku']]);
         }
 
-        $products = $productService->getProductsForCurrentPage($request->getGetData()['currentPage'], 10);
-
-        $enableDisableViewArguments['products'] = $formatter->formatProductsForTable($products);
-        $enableDisableViewArguments['currentPage'] = $request->getGetData()['currentPage'];
-        $enableDisableViewArguments['numberOfPages'] = $productService->getNumberOfPages(10);
-        $response->setViewArguments($enableDisableViewArguments);
+        $products = $productService->getProducts($request->getGetData()['currentPage'], 10);
+        $viewArguments = $this->setViewArguments($products, $request->getGetData()['currentPage']);
+        $response->setViewArguments($viewArguments);
 
         return $response;
     }
@@ -345,15 +281,8 @@ class ProductController extends AdminController
     public function firstPage(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
-        $products = $productService->getProductsForCurrentPage(1, 10);
-
-        $firstPageViewArguments = [
-            'products' => $formatter->formatProductsForTable($products),
-            'currentPage' => 1,
-            'numberOfPages' => $productService->getNumberOfPages(10),
-        ];
+        $products = $productService->getProducts(1, 10);
+        $firstPageViewArguments = $this->setViewArguments($products, 1);
 
         return new HTMLResponse('/views/admin/product.php', $firstPageViewArguments);
     }
@@ -367,8 +296,6 @@ class ProductController extends AdminController
     public function nextPage(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
         $numberOfPages = $productService->getNumberOfPages(10);
 
         if ($request->getGetData()['currentPage'] >= $numberOfPages) {
@@ -377,13 +304,8 @@ class ProductController extends AdminController
             $currentPage = $request->getGetData()['currentPage'] + 1;
         }
 
-        $products = $productService->getProductsForCurrentPage($currentPage, 10);
-
-        $nextPageViewArguments = [
-            'products' => $formatter->formatProductsForTable($products),
-            'currentPage' => $currentPage,
-            'numberOfPages' => $numberOfPages,
-        ];
+        $products = $productService->getProducts($currentPage, 10);
+        $nextPageViewArguments = $this->setViewArguments($products, $currentPage);
 
         return new HTMLResponse('/views/admin/product.php', $nextPageViewArguments);
     }
@@ -397,16 +319,9 @@ class ProductController extends AdminController
     public function lastPage(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
-
         $lastPage = $productService->getNumberOfPages(10);
-        $products = $productService->getProductsForCurrentPage($lastPage, 10);
-
-        $lastPageViewArguments = [
-            'products' => $formatter->formatProductsForTable($products),
-            'currentPage' => $lastPage,
-            'numberOfPages' => $lastPage,
-        ];
+        $products = $productService->getProducts($lastPage, 10);
+        $lastPageViewArguments = $this->setViewArguments($products, $lastPage);
 
         return new HTMLResponse('/views/admin/product.php', $lastPageViewArguments);
     }
@@ -420,7 +335,6 @@ class ProductController extends AdminController
     public function prevPage(Request $request): HTMLResponse
     {
         $productService = $this->getProductService();
-        $formatter = new ProductFormatter();
 
         if ($request->getGetData()['currentPage'] === '1') {
             $currentPage = 1;
@@ -428,14 +342,31 @@ class ProductController extends AdminController
             $currentPage = $request->getGetData()['currentPage'] - 1;
         }
 
-        $products = $productService->getProductsForCurrentPage($currentPage, 10);
-
-        $prevPageViewArguments = [
-            'products' => $formatter->formatProductsForTable($products),
-            'currentPage' => $currentPage,
-            'numberOfPages' => $productService->getNumberOfPages(10),
-        ];
+        $products = $productService->getProducts($currentPage, 10);
+        $prevPageViewArguments = $this->setViewArguments($products, $currentPage);
 
         return new HTMLResponse('/views/admin/product.php', $prevPageViewArguments);
+    }
+
+    private function createProduct(array $data): Product
+    {
+        return new Product(
+            $data['category'],
+            $data['sku'],
+            $data['title'],
+            $data['brand'],
+            $data['price'],
+            $data['shortDesc'],
+            $data['description'],
+            $data['enabled'] ? true : false,
+            $data['featured'] ? true : false
+        );
+    }
+
+    private function setSessionMessage(string $messageName, string $message): void
+    {
+        /** @var PHPSession $session */
+        $session = ServiceRegistry::get('Session');
+        $session->add($messageName, $message);
     }
 }

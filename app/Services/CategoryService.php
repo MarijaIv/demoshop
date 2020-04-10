@@ -200,4 +200,23 @@ class CategoryService
     {
         return $this->categoryRepository->getSubcategoriesByCode($code);
     }
+
+    /**
+     * Get category and all it's subcategories.
+     *
+     * @param string $code
+     * @return Collection
+     */
+    public function getAllSubcategories(string $code): Collection
+    {
+        $category = $this->getCategoryByCode($code);
+        $children = $this->getSubcategoriesByCode($code);
+        foreach ($children as $child) {
+            $children = $children->merge($this->getAllSubcategories($child['code']));
+        }
+
+        $children->add($category);
+
+        return $children;
+    }
 }

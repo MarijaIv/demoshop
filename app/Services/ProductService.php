@@ -3,9 +3,9 @@
 namespace Demoshop\Services;
 
 use Demoshop\AuthorizationMiddleware\Exceptions\ProductDataInvalidException;
+use Demoshop\Entity\Product as ProductEntity;
 use Demoshop\Model\Product;
 use Demoshop\Repositories\ProductsRepository;
-use Demoshop\ServiceRegistry\ServiceRegistry;
 use Illuminate\Support\Collection;
 
 /**
@@ -69,7 +69,7 @@ class ProductService
      * @param int $pageSize
      * @return Collection
      */
-    public function getProductsForCurrentPage(int $currentPage, int $pageSize): Collection
+    public function getProducts(int $currentPage, int $pageSize): Collection
     {
         $offset = ($currentPage - 1) * $pageSize;
         return $this->productsRepository->getProductsForCurrentPage($offset, $pageSize);
@@ -78,16 +78,13 @@ class ProductService
     /**
      * Create new product.
      *
-     * @param array $data
+     * @param ProductEntity $data
      * @param array $file
      * @return bool
      * @throws ProductDataInvalidException
      */
-    public function createNewProduct(array $data, array $file): bool
+    public function createNewProduct(ProductEntity $data, array $file): bool
     {
-        $data['price'] = (float)$data['price'];
-        $this->setEnabledAndFeaturedValue($data);
-
         $this->checkImageHeightWidthRatio($file);
 
         $content = fopen($file['tmp_name'], 'rb');
@@ -96,17 +93,6 @@ class ProductService
         $product = $this->productsRepository->createNewProduct($data, base64_encode($fileContent));
         fclose($content);
         return $product;
-    }
-
-    /**
-     * Set product enable and featured value.
-     *
-     * @param array $data
-     */
-    private function setEnabledAndFeaturedValue(array &$data): void
-    {
-        $data['enabled'] = $data['enabled'] ? 1 : 0;
-        $data['featured'] = $data['featured'] ? 1 : 0;
     }
 
     /**
@@ -133,17 +119,17 @@ class ProductService
     /**
      * Check if request data is valid.
      *
-     * @param array $data
+     * @param ProductEntity $data
      * @throws ProductDataInvalidException
      */
-    public function isProductValid(array $data): void
+    public function validateProduct(ProductEntity $data): void
     {
-        if ((empty($data['sku']) || empty($data['title']) || empty($data['brand']) || empty($data['price'])
-                || empty($data['shortDesc']) || empty($data['description']))) {
+        if ((empty($data->getSku()) || empty($data->getTitle()) || empty($data->getBrand()) || empty($data->getPrice())
+            || empty($data->getShortDescription()) || empty($data->getDescription()))) {
             throw new ProductDataInvalidException('Product data is not valid.');
         }
 
-        if($this->productsRepository->productSkuExists($data['sku'])) {
+        if ($this->productsRepository->productSkuExists($data->getSku())) {
             throw new ProductDataInvalidException('Product with given sku already exists.');
         }
     }
@@ -151,36 +137,31 @@ class ProductService
     /**
      * Update product.
      *
-     * @param array $data
+     * @param ProductEntity $data
      * @param string $oldSku
      * @param array $file
-     * @return bool
+     * @return void
      * @throws ProductDataInvalidException
      */
-    public function updateProduct(array $data, string $oldSku, array $file): bool
+    public function updateProduct(ProductEntity $data, string $oldSku, array $file): void
     {
-        if ($oldSku !== $data['sku'] && $this->productsRepository->productSkuExists($data['sku'])) {
-            return false;
+        if ($oldSku !== $data->getSku() && $this->productsRepository->productSkuExists($data->getSku())) {
+            throw new ProductDataInvalidException('Product sku already exists.');
         }
 
         if ($file['tmp_name'] !== '') {
             $this->checkImageHeightWidthRatio($file);
         }
 
-        $this->setEnabledAndFeaturedValue($data);
-        $data['price'] = (float)$data['price'];
-        $data['category'] = (int)$data['category'];
-
         if ($file['tmp_name'] === '' && $product = $this->getProductBySku($oldSku)) {
-            $content = $product['image'];
+            $fileContent = $product['image'];
+            $this->productsRepository->updateProduct($data, $oldSku, $fileContent);
         } else {
-            $content = fopen($file['tmp_name'], 'rb');
-            $fileContent = fread($content, filesize($file['tmp_name']));
+            $handle = fopen($file['tmp_name'], 'rb');
+            $fileContent = fread($handle, filesize($file['tmp_name']));
+            $this->productsRepository->updateProduct($data, $oldSku, base64_encode($fileContent));
+            fclose($handle);
         }
-
-        $this->productsRepository->updateProduct($data, $oldSku, base64_encode($fileContent));
-        fclose($content);
-        return true;
     }
 
     /**
@@ -197,15 +178,16 @@ class ProductService
     /**
      * Check if product data is valid (for update).
      *
-     * @param array $data
+     * @param ProductEntity $data
      * @param string $oldSku
      * @throws ProductDataInvalidException
      */
-    public function isProductValidUpdate(array $data, string $oldSku): void
+    public function validateProductForUpdate(ProductEntity $data, string $oldSku): void
     {
-        if (isset($data['sku'], $data['title'], $data['brand'],
-                $data['price'], $data['shortDesc'], $data['description']) &&
-            !$this->productsRepository->productSkuExists($oldSku)) {
+        if (!$this->productsRepository->productSkuExists($oldSku)
+            && (empty($data->getSku()) || empty($data->getTitle()) ||
+                empty($data->getBrand()) || empty($data->getPrice()) ||
+                empty($data->getShortDescription()) || empty($data->getShortDescription()))) {
             throw new ProductDataInvalidException('Product data is not valid');
         }
     }
@@ -236,41 +218,22 @@ class ProductService
      * Enable products.
      *
      * @param array $skuArray
-     * @return bool
+     * @return void
      */
-    public function enableProducts(array $skuArray): bool
+    public function enableProducts(array $skuArray): void
     {
         $this->productsRepository->enableMultiple($skuArray);
-
-        return true;
     }
 
     /**
      * Disable products.
      *
      * @param array $skuArray
-     * @return bool
+     * @return void
      */
-    public function disableProducts(array $skuArray): bool
+    public function disableProducts(array $skuArray): void
     {
         $this->productsRepository->disableMultipleProducts($skuArray);
-
-        return true;
-    }
-
-    /**
-     * Enable or disable product.
-     *
-     * @param array $data
-     * @return bool
-     */
-    public function enableOrDisableProduct(array $data): bool
-    {
-        if ($data['enabled'] !== 'false') {
-            return $this->productsRepository->disableProduct($data['sku']);
-        }
-
-        return $this->productsRepository->enableProduct($data['sku']);
     }
 
     /**
@@ -282,199 +245,5 @@ class ProductService
     public function getNumberOfPages(int $pageSize): int
     {
         return ceil($this->productsRepository->getNumberOfProducts() / $pageSize) ?: 1;
-    }
-
-    /**
-     * Get all featured products.
-     *
-     * @return Collection | null
-     */
-    public function getFeaturedProducts(): ?Collection
-    {
-        return $this->productsRepository->getFeaturedProducts();
-    }
-
-    /**
-     * Get products for category and it's subcategories.
-     *
-     * @param string $code
-     * @return Collection
-     */
-    public function getDataForCategoryDisplay(string $code): Collection
-    {
-        /** @var CategoryService $categoryService */
-        $categoryService = ServiceRegistry::get('CategoryService');
-
-        $products = $this->productsRepository->getProductsByCategoryCode($code);
-        $children = $categoryService->getSubcategoriesByCode($code);
-        foreach ($children as $child) {
-            $products = $products->merge($this->getDataForCategoryDisplay($child['code']));
-        }
-
-        return $products;
-    }
-
-    /**
-     * Get products by category id.
-     *
-     * @param int $id
-     * @return Collection
-     */
-    public function getProductsByCategoryId(int $id): Collection
-    {
-        return $this->productsRepository->getEnabledProductsByCategoryId($id);
-    }
-
-    /**
-     * Search products.
-     *
-     * @param array $data
-     * @return Collection
-     */
-    public function searchProducts(array &$data): Collection
-    {
-        $products = new Collection();
-
-        if (empty($data['keyword']) && empty($data['category'])
-            && empty($data['maxPrice']) && empty($data['minPrice'])) {
-            if (empty($data['search'])) {
-                $products = $this->productsRepository->getEnabledProducts();
-                if (empty($data['sorting'])) {
-                    $data['sorting'] = 'relevance';
-                }
-            } else {
-                $products = $this->getProductsByKeyword($data['search']);
-                if (empty($data['sorting'])) {
-                    $data['sorting'] = 'relevance';
-                }
-                $data['search'] = '';
-            }
-        } else {
-            if (!empty($data['keyword'])) {
-                $products = $this->getProductsByKeyword($data['keyword']);
-            }
-
-            if (!empty($data['category'])) {
-                $products = $this->getProductsByCategory($products, $data['category']);
-            }
-
-            if (!empty($data['maxPrice'])) {
-                $products = $this->getProductsByMaxPrice($products, $data['maxPrice']);
-            }
-
-            if (!empty($data['minPrice'])) {
-                $products = $this->getProductsByMinPrice($products, $data['minPrice']);
-            }
-        }
-
-        return $products;
-    }
-
-    /**
-     * Get products by keyword.
-     *
-     * @param string $keyword
-     * @return Collection
-     */
-    public
-    function getProductsByKeyword(string $keyword): Collection
-    {
-        $products = $this->productsRepository->getProductsByKeyword($keyword);
-
-        /** @var CategoryService $categoryService */
-        $categoryService = ServiceRegistry::get('CategoryService');
-        $categories = $categoryService->getCategoriesByTitle($keyword);
-
-        foreach ($categories as $category) {
-            $products =
-                $products->merge($this->productsRepository->getEnabledProductsByCategoryId($category['id']));
-        }
-
-        foreach ($products as $product) {
-            if (strpos($product->title, $keyword) !== false) {
-                $product->weight = 1;
-            } else if (strpos($product->brand, $keyword) !== false) {
-                $product->weight = 2;
-            } else if (strpos($product->short_description, $keyword) !== false) {
-                $product->weight = 4;
-            } else if (strpos($product->description, $keyword) !== false) {
-                $product->weight = 5;
-            } else {
-                $product->weight = 3;
-            }
-        }
-
-        $products->sortBy('weight');
-
-        return $products;
-    }
-
-    /**
-     * Get products for searched category.
-     *
-     * @param Collection $products
-     * @param int $id
-     * @return Collection
-     */
-    public
-    function getProductsByCategory(Collection $products, int $id): Collection
-    {
-        if (!$products->first()) {
-            $products = $this->productsRepository->getEnabledProductsByCategoryId($id);
-        } else {
-            foreach ($products as $productKey => $product) {
-                if ($product['category_id'] !== $id) {
-                    unset($products[$productKey]);
-                }
-            }
-        }
-
-        return $products;
-    }
-
-    /**
-     * Get products where price is lower than maxPrice.
-     *
-     * @param Collection $products
-     * @param float $maxPrice
-     * @return Collection
-     */
-    public
-    function getProductsByMaxPrice(Collection $products, float $maxPrice): Collection
-    {
-        if (!$products->first()) {
-            $products = $this->productsRepository->getProductsMaxPrice($maxPrice);
-        } else {
-            foreach ($products as $productKey => $product) {
-                if ($product['price'] > $maxPrice) {
-                    unset($products[$productKey]);
-                }
-            }
-        }
-
-        return $products;
-    }
-
-    /**
-     * Get products where price is greater than minPrice.
-     *
-     * @param Collection $products
-     * @param float $minPrice
-     * @return Collection
-     */
-    public
-    function getProductsByMinPrice(Collection $products, float $minPrice): Collection
-    {
-        if (!$products->first()) {
-            $products = $this->productsRepository->getProductsMinPrice($minPrice);
-        } else {
-            foreach ($products as $productKey => $product) {
-                if ($product['price'] < $minPrice) {
-                    unset($products[$productKey]);
-                }
-            }
-        }
-
-        return $products;
     }
 }

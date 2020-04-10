@@ -46,6 +46,12 @@ class CategoryFormatter
         return $formattedCategories;
     }
 
+    /**
+     * Format categories for treeview.
+     *
+     * @param Collection $categories
+     * @return array
+     */
     public function formatCategoriesForTreeView(Collection $categories): array
     {
         $visitedCategories = [];
@@ -62,5 +68,21 @@ class CategoryFormatter
         }
 
         return $tree;
+    }
+
+    /**
+     * Get categories codes.
+     *
+     * @param Collection $collection
+     * @return array
+     */
+    public function getCategoriesCodes(Collection $collection): array
+    {
+        $codes = [];
+        foreach ($collection as $item) {
+            $codes[] = $item['code'];
+        }
+
+        return $codes;
     }
 }

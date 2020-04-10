@@ -31,11 +31,9 @@ use Demoshop\ServiceRegistry\ServiceRegistry;
         $session = ServiceRegistry::get('Session');
         echo '<output class="message-fail">' . $session->get('errorMessage') . '</output>';
         $session->remove('errorMessage');
+        echo '<output class="message-success">' . $session->get('message') . '</output>';
+        $session->remove('message');
         ?>
-
-        <?php if ($message) {
-            echo '<output class="message-success">' . $message . '</output>';
-        } ?>
         <form action="/admin/products" method="post" id="productsTable" class="products-table">
             <div>
                 <a href="/admin/products/create" class="products-btn-add"> Add new product</a>

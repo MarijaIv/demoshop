@@ -24,7 +24,7 @@ class ProductSearchController extends FrontController
      */
     public function index(Request $request): HTMLResponse
     {
-        $productService = $this->getProductService();
+        $productService = $this->getFrontProductService();
         $categoryService = $this->getCategoryService();
         $formatter = new ProductFormatter();
         $categoryFormatter = new CategoryFormatter();

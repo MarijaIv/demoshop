@@ -26,6 +26,7 @@ class FrontProductController extends FrontController
     public function index(Request $request, string $sku): HTMLResponse
     {
         $productService = $this->getProductService();
+        $frontProductService = $this->getFrontProductService();
         $formatter = new ProductFormatter();
         $product = $productService->getProductBySku($sku);
 
@@ -37,7 +38,7 @@ class FrontProductController extends FrontController
         if (!$product) {
             $landingPageViewArguments = [
                 'categories' => $categories,
-                'products' => $productService->getFeaturedProducts(),
+                'products' => $frontProductService->getFeaturedProducts(),
             ];
             return new HTMLResponse('/views/visitor/landingPage.php', $landingPageViewArguments);
         }
@@ -62,10 +63,14 @@ class FrontProductController extends FrontController
      */
     public function listProducts(Request $request, string $code): HTMLResponse
     {
-        $productService = $this->getProductService();
+        $productService = $this->getFrontProductService();
+        $categoryService = $this->getCategoryService();
         $formatter = new ProductFormatter();
+        $categoryFormatter = new CategoryFormatter();
 
-        $dataForCategoryDisplay = $productService->getDataForCategoryDisplay($code);
+        $categories = $categoryService->getAllSubcategories($code);
+        $categoryCodes = $categoryFormatter->getCategoriesCodes($categories);
+        $dataForCategoryDisplay = $productService->getDataForCategoryDisplay($categoryCodes);
         $dataForCategoryDisplay = $formatter->formatProductsForVisitor($dataForCategoryDisplay, $request->getGetData());
 
         $categoryService = $this->getCategoryService();
