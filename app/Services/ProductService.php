@@ -85,12 +85,15 @@ class ProductService
      */
     public function createNewProduct(ProductEntity $data, array $file): bool
     {
+        $this->validateProduct($data);
         $this->checkImageHeightWidthRatio($file);
 
         $content = fopen($file['tmp_name'], 'rb');
         $fileContent = fread($content, filesize($file['tmp_name']));
 
-        $product = $this->productsRepository->createNewProduct($data, base64_encode($fileContent));
+        $data->setImage(base64_encode($fileContent));
+
+        $product = $this->productsRepository->createNewProduct($data);
         fclose($content);
         return $product;
     }
@@ -145,6 +148,8 @@ class ProductService
      */
     public function updateProduct(ProductEntity $data, string $oldSku, array $file): void
     {
+        $this->validateProductForUpdate($data, $oldSku);
+
         if ($oldSku !== $data->getSku() && $this->productsRepository->productSkuExists($data->getSku())) {
             throw new ProductDataInvalidException('Product sku already exists.');
         }

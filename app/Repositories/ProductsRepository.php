@@ -89,7 +89,7 @@ class ProductsRepository
      * @param string $fileContent
      * @return bool
      */
-    public function createNewProduct(\Demoshop\Entity\Product $data, string $fileContent): bool
+    public function createNewProduct(\Demoshop\Entity\Product $data): bool
     {
         return Product::query()->insert(
             [
@@ -100,7 +100,7 @@ class ProductsRepository
                 'price' => $data->getPrice(),
                 'short_description' => $data->getShortDescription(),
                 'description' => $data->getDescription(),
-                'image' => $fileContent,
+                'image' => $data->getImage(),
                 'enabled' => $data->isEnabled(),
                 'featured' => $data->isFeatured(),
             ]

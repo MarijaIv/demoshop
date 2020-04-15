@@ -61,8 +61,6 @@ class RoutesInit
             ProductController::class, 'enableSelected', [Authorization::class]));
         Routes::add(new Route('POST', '/admin/products/disableSelected',
             ProductController::class, 'disableSelected', [Authorization::class]));
-        Routes::add(new Route('GET', '/admin/products/enableDisable',
-            ProductController::class, 'enableOrDisableProduct', [Authorization::class]));
         Routes::add(new Route('GET', '/admin/products/create',
             ProductController::class, 'addEditProduct', [Authorization::class]));
         Routes::add(new Route('GET', '/admin/products/%',

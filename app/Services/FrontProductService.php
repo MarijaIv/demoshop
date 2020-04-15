@@ -4,6 +4,7 @@
 namespace Demoshop\Services;
 
 
+use Demoshop\Entity\SearchParameters;
 use Demoshop\Repositories\ProductsRepository;
 use Illuminate\Support\Collection;
 
@@ -51,37 +52,20 @@ class FrontProductService
     /**
      * Search products.
      *
-     * @param array $data
+     * @param SearchParameters $data
      * @return Collection
      */
-    public function searchProducts(array &$data): Collection
+    public function searchProducts(SearchParameters $data): Collection
     {
-        if (!empty($data['search'])) {
-            $products = $this->productsRepository->search($data['search']);
-            $data['search'] = '';
+        if (!empty($data->getSearch())) {
+            $products = $this->productsRepository->search($data->getSearch());
         } else {
-            if (!$data['maxPrice']) {
-                $data['maxPrice'] = null;
-            }
-
-            if (!$data['minPrice']) {
-                $data['minPrice'] = null;
-            }
-
-            if (!$data['category']) {
-                $data['category'] = null;
-            }
-
             $products = $this->productsRepository->search(
-                $data['keyword'],
-                $data['maxPrice'],
-                $data['minPrice'],
-                $data['category']
+                $data->getKeyword(),
+                $data->getMaxPrice(),
+                $data->getMinPrice(),
+                $data->getCategoryId()
             );
-        }
-
-        if (empty($data['sorting'])) {
-            $data['sorting'] = 'relevance';
         }
 
         return $products;

@@ -21,7 +21,7 @@
                 echo '<option value=""> Any </option>';
                 foreach ($optionCategories as $category) {
                     echo '<option value="' . $category->id . '"';
-                    if ((int)$selectedCategory['id'] === $category->id) {
+                    if ((int)$selectedCategory === $category->id) {
                         echo ' selected ';
                     }
                     echo '>' . $category->title . '</option>';

@@ -54,6 +54,19 @@ class ProductsTable {
             rows[0].getElementsByTagName("TH")[n].classList.add("sortable");
         }
     }
+
+    checkboxSubmit(sku, url)
+    {
+        let form = document.getElementById("productsTable");
+        form.setAttribute('action', url);
+        let postVar = document.createElement('input');
+        postVar.setAttribute('name', 'sku');
+        postVar.setAttribute('type', 'hidden');
+        postVar.setAttribute('value', sku);
+        form.appendChild(postVar);
+        form.submit();
+    }
 }
+
 
 productsTable = new ProductsTable();

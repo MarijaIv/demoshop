@@ -2,44 +2,52 @@
 
 namespace Demoshop\Entity;
 
+/**
+ * Class Product
+ * @package Demoshop\Entity
+ */
 class Product
 {
     /**
      * @var int
      */
-    public $categoryId;
+    private $categoryId;
     /**
      * @var string
      */
-    public $sku;
+    private $sku;
     /**
      * @var string
      */
-    public $title;
+    private $title;
     /**
      * @var string
      */
-    public $brand;
+    private $brand;
     /**
      * @var float
      */
-    public $price;
+    private $price;
     /**
      * @var string
      */
-    public $shortDescription;
+    private $shortDescription;
     /**
      * @var string
      */
-    public $description;
+    private $description;
     /**
      * @var bool
      */
-    public $enabled;
+    private $enabled;
     /**
      * @var bool
      */
-    public $featured;
+    private $featured;
+    /**
+     * @var string
+     */
+    private $image;
 
     /**
      * Product constructor.
@@ -53,6 +61,7 @@ class Product
      * @param string $description
      * @param bool $enabled
      * @param bool $featured
+     * @param string $image
      */
     public function __construct(
         int $categoryId,
@@ -63,7 +72,8 @@ class Product
         string $shortDescription,
         string $description,
         bool $enabled,
-        bool $featured
+        bool $featured,
+        string $image = ''
     )
     {
         $this->categoryId = $categoryId;
@@ -75,6 +85,27 @@ class Product
         $this->description = $description;
         $this->enabled = $enabled;
         $this->featured = $featured;
+        $this->image = $image;
+    }
+
+    /**
+     * Get image.
+     *
+     * @return string
+     */
+    public function getImage(): string
+    {
+        return $this->image;
+    }
+
+    /**
+     * Set image
+     *
+     * @param string $image
+     */
+    public function setImage(string $image): void
+    {
+        $this->image = $image;
     }
 
     /**

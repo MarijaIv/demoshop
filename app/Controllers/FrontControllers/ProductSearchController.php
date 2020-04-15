@@ -5,6 +5,7 @@ namespace Demoshop\Controllers\FrontControllers;
 
 
 use Demoshop\Controllers\FrontController;
+use Demoshop\Entity\SearchParameters;
 use Demoshop\Formatters\CategoryFormatter;
 use Demoshop\Formatters\ProductFormatter;
 use Demoshop\HTTP\HTMLResponse;
@@ -32,12 +33,20 @@ class ProductSearchController extends FrontController
         $getData = $request->getGetData();
 
         $allCategories = $categoryService->getCategories();
+        $optionCategories = $categoryFormatter->getFormattedCategories($allCategories);
         $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
 
-        $optionCategories = $categoryService->getCategories();
-        $optionCategories = $categoryFormatter->getFormattedCategories($optionCategories);
+        $getData['sorting'] = empty($getData['sorting'])? 'relevance' : $getData['sorting'];
 
-        $searchProducts = $productService->searchProducts($getData);
+        $searchParameters = new SearchParameters(
+            empty($getData['keyword']) ? '' : $getData['keyword'],
+            empty($getData['minPrice'])? null : $getData['minPrice'],
+            empty($getData['maxPrice'])? null : $getData['maxPrice'],
+            empty($getData['category'])? null : $getData['category'],
+            empty($getData['search'])? '' : $getData['search']
+        );
+
+        $searchProducts = $productService->searchProducts($searchParameters);
         $searchProducts = $formatter->formatProductsForVisitor($searchProducts, $getData);
 
         $searchArguments = [
@@ -49,7 +58,7 @@ class ProductSearchController extends FrontController
             'currentPage' => $searchProducts['currentPage'],
             'sorting' => $searchProducts['sorting'],
             'productsPerPage' => $searchProducts['productsPerPage'],
-            'search' => $getData['search'],
+            'search' => '',
             'keyword' => $getData['keyword'],
             'maxPrice' => $getData['maxPrice'],
             'minPrice' => $getData['minPrice'],

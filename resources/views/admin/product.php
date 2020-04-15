@@ -69,17 +69,19 @@ use Demoshop\ServiceRegistry\ServiceRegistry;
                         <td>' . $product['category'] . '</td>
                         <td>' . $product['shortDesc'] . '</td>
                         <td>' . $product['price'] . '</td>
-                        <td>
-                            <a href="/admin/products/enableDisable?sku='
-                        . $product['sku'] . '&currentPage=' . $currentPage;
+                        <td>';
                     if ($product['enabled']) {
-                        echo '&enabled=true">';
-                        echo '<input type="checkbox" checked="checked">';
+                        echo '<input type="checkbox" 
+                        value="'. $product['sku'] . '" 
+                        onchange="productsTable.checkboxSubmit(this.value, 
+                        \'/admin/products/disableSelected?currentPage='. $currentPage .'\');" checked="checked">';
                     } else {
-                        echo '&enabled=false">';
-                        echo '<input type="checkbox">';
+                        echo '<input type="checkbox" 
+                        value="'. $product['sku'] . '" 
+                        onchange="productsTable.checkboxSubmit(this.value, 
+                        \'/admin/products/enableSelected?currentPage=' . $currentPage . '\');">';
                     }
-                    echo '</a>
+                    echo '
                         </td>
                         <td>
                             <a href="/admin/products/' . $product['sku'] . '">
