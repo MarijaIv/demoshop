@@ -25,14 +25,12 @@ class ProductSearchController extends FrontController
      */
     public function index(Request $request): HTMLResponse
     {
-        $productService = $this->getFrontProductService();
-        $categoryService = $this->getCategoryService();
         $formatter = new ProductFormatter();
         $categoryFormatter = new CategoryFormatter();
 
         $getData = $request->getGetData();
 
-        $allCategories = $categoryService->getCategories();
+        $allCategories = $this->getCategoryService()->getCategories();
         $optionCategories = $categoryFormatter->getFormattedCategories($allCategories);
         $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
 
@@ -46,7 +44,7 @@ class ProductSearchController extends FrontController
             empty($getData['search'])? '' : $getData['search']
         );
 
-        $searchProducts = $productService->searchProducts($searchParameters);
+        $searchProducts = $this->getFrontProductService()->searchProducts($searchParameters);
         $searchProducts = $formatter->formatProductsForVisitor($searchProducts, $getData);
 
         $searchArguments = [

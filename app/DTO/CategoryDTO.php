@@ -3,7 +3,6 @@
 namespace Demoshop\DTO;
 
 use Demoshop\Model\Category;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class CategoryDTO

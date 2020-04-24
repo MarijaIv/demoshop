@@ -3,7 +3,7 @@
 
 namespace Demoshop\Repositories;
 
-
+use Demoshop\Entity\Category as CategoryEntity;
 use Demoshop\Model\Category;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -21,17 +21,6 @@ class CategoryRepository
     public function getCountOfCategories(): int
     {
         return Category::query()->count();
-    }
-
-    /**
-     * Get subcategories for category.
-     *
-     * @param int $id
-     * @return Collection
-     */
-    public function getCategoriesForParent(int $id): Collection
-    {
-        return Category::query()->where('parent_id', '=', $id)->get();
     }
 
     /**
@@ -80,17 +69,17 @@ class CategoryRepository
     /**
      * Insert new category.
      *
-     * @param array $data
+     * @param CategoryEntity $category
      * @return bool
      */
-    public function addNewCategory($data): bool
+    public function addNewCategory(CategoryEntity $category): bool
     {
         return Category::query()->insert(
             [
-                'parent_id' => $data['parentCategory'],
-                'code' => $data['code'],
-                'title' => $data['title'],
-                'description' => $data['description'],
+                'parent_id' => $category->getParentId(),
+                'code' => $category->getCode(),
+                'title' => $category->getTitle(),
+                'description' => $category->getDescription(),
             ]
         );
     }
@@ -98,19 +87,19 @@ class CategoryRepository
     /**
      * Update existing category.
      *
-     * @param array $data
+     * @param CategoryEntity $data
      * @return int
      */
-    public function updateCategory($data): int
+    public function updateCategory(CategoryEntity $data): int
     {
         return Category::query()
-            ->where('id', '=', $data['id'])
+            ->where('id', '=', $data->getId())
             ->update(
                 [
-                    'parent_id' => $data['parentCategory'],
-                    'code' => $data['code'],
-                    'title' => $data['title'],
-                    'description' => $data['description'],
+                    'parent_id' => $data->getParentId(),
+                    'code' => $data->getCode(),
+                    'title' => $data->getTitle(),
+                    'description' => $data->getDescription(),
                 ]
             );
     }
@@ -135,17 +124,6 @@ class CategoryRepository
     public function categoryExistsCode(string $code): bool
     {
         return Category::query()->where('code', '=', $code)->exists();
-    }
-
-    /**
-     * Get categories where title contains keyword.
-     *
-     * @param string $keyword
-     * @return Collection
-     */
-    public function getCategoriesByTitle(string $keyword): Collection
-    {
-        return Category::query()->where('title', 'like', '%' . $keyword . '%')->get();
     }
 
     /**

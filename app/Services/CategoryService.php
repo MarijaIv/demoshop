@@ -3,7 +3,10 @@
 namespace Demoshop\Services;
 
 
+use Demoshop\AuthorizationMiddleware\Exceptions\CategoryCantBeDeletedException;
 use Demoshop\AuthorizationMiddleware\Exceptions\CategoryDataEmptyException;
+use Demoshop\AuthorizationMiddleware\Exceptions\CategoryDoesntExistException;
+use Demoshop\Entity\Category as CategoryEntity;
 use Demoshop\Model\Category;
 use Demoshop\Repositories\CategoryRepository;
 use Demoshop\Repositories\ProductsRepository;
@@ -89,16 +92,13 @@ class CategoryService
      * Delete category by id.
      *
      * @param int $id
-     * @return bool
+     * @throws CategoryCantBeDeletedException
+     * @throws CategoryDoesntExistException
      */
-    public function deleteCategoryById(int $id): bool
+    public function deleteCategoryById(int $id): void
     {
-        if (!$this->canBeDeleted($id)) {
-            return false;
-        }
-
+        $this->canBeDeleted($id);
         $this->categoryRepository->deleteCategoryById($id);
-        return true;
     }
 
     /**
@@ -106,77 +106,111 @@ class CategoryService
      * CategoryService having subcategories or products can't be deleted.
      *
      * @param int $id
-     * @return bool
+     * @return void
+     * @throws CategoryCantBeDeletedException
+     * @throws CategoryDoesntExistException
      */
-    public function canBeDeleted(int $id): bool
+    public function canBeDeleted(int $id): void
     {
         $category = $this->categoryRepository->getCategoryById($id);
         if ($category) {
-            $children = $this->categoryRepository->categoryHasSubcategories($category->id);
-
             $productRepository = new ProductsRepository();
-            $products = $productRepository->categoryHasProducts($category->id);
 
-            return !($children || $products);
+            if ($this->categoryRepository->categoryHasSubcategories($category->id)) {
+                throw new CategoryCantBeDeletedException('Category has subcategories.');
+            }
+
+            if ($productRepository->categoryHasProducts($category->id)) {
+                throw new CategoryCantBeDeletedException('Category contains products.');
+            }
+        } else {
+            throw new CategoryDoesntExistException('Category doesn\'t exist.');
         }
-
-        return false;
     }
 
     /**
      * Add new category.
      *
-     * @param array $data
-     * @return bool
+     * @param CategoryEntity $category
+     * @return void
+     * @throws CategoryDataEmptyException
+     * @throws CategoryDoesntExistException
      */
-    public function addNewCategory(array $data): bool
+    public function addNewCategory(CategoryEntity $category): void
     {
-        if ($this->categoryRepository->categoryExistsCode($data['code'])) {
-            return false;
+        $this->categoryValidInsert($category);
+
+        if ($this->categoryRepository->categoryExistsCode($category->getCode())) {
+            throw new CategoryDoesntExistException('Category code exists.');
         }
 
-        return $this->categoryRepository->addNewCategory($data);
+        $this->categoryRepository->addNewCategory($category);
     }
 
     /**
-     * Check if request data is empty.
+     * Check if category is valid for insert.
      *
-     * @param array $data
+     * @param CategoryEntity $category
      * @throws CategoryDataEmptyException
      */
-    public function isRequestDataValid(array $data): void
+    private function categoryValidInsert(CategoryEntity $category): void
     {
-        if (empty($data['title']) || empty($data['code']) || empty($data['description']) || empty($data['id'])) {
-            throw new CategoryDataEmptyException('Category data is not valid.');
+        if (empty($category->getTitle()) || empty($category->getCode()) ||
+            empty($category->getDescription())) {
+            throw new CategoryDataEmptyException('Category data is not valid');
         }
     }
 
     /**
      * Update existing category.
      *
-     * @param array $data
-     * @return bool
+     * @param CategoryEntity $category
+     * @return void
+     * @throws CategoryDataEmptyException
+     * @throws CategoryDoesntExistException
      */
-    public function updateCategory($data): bool
+    public function updateCategory(CategoryEntity $category): void
     {
-        if (!$this->categoryRepository->categoryExists($data['id'])) {
-            return false;
+        $this->categoryValidUpdate($category);
+
+        if (!$this->categoryRepository->categoryExists($category->getId())) {
+            throw new CategoryDoesntExistException('Category doesn\'t exist.');
         }
 
-        $this->categoryRepository->updateCategory($data);
-
-        return true;
+        $this->categoryRepository->updateCategory($category);
     }
 
     /**
-     * Get categories where title contains keyword.
+     * Check if category is valid for update.
      *
-     * @param string $keyword
+     * @param CategoryEntity $category
+     * @throws CategoryDataEmptyException
+     */
+    private function categoryValidUpdate(CategoryEntity $category): void
+    {
+        if (empty($category->getTitle()) || empty($category->getCode()) ||
+            empty($category->getDescription()) || $category->getId() === null) {
+            throw new CategoryDataEmptyException('Category data is not valid.');
+        }
+    }
+
+    /**
+     * Get category and all it's subcategories.
+     *
+     * @param string $code
      * @return Collection
      */
-    public function getCategoriesByTitle(string $keyword): Collection
+    public function getAllSubcategories(string $code): Collection
     {
-        return $this->categoryRepository->getCategoriesByTitle($keyword);
+        $category = $this->getCategoryByCode($code);
+        $children = $this->getSubcategoriesByCode($code);
+        foreach ($children as $child) {
+            $children = $children->merge($this->getAllSubcategories($child['code']));
+        }
+
+        $children->add($category);
+
+        return $children;
     }
 
     /**
@@ -199,24 +233,5 @@ class CategoryService
     public function getSubcategoriesByCode(string $code): Collection
     {
         return $this->categoryRepository->getSubcategoriesByCode($code);
-    }
-
-    /**
-     * Get category and all it's subcategories.
-     *
-     * @param string $code
-     * @return Collection
-     */
-    public function getAllSubcategories(string $code): Collection
-    {
-        $category = $this->getCategoryByCode($code);
-        $children = $this->getSubcategoriesByCode($code);
-        foreach ($children as $child) {
-            $children = $children->merge($this->getAllSubcategories($child['code']));
-        }
-
-        $children->add($category);
-
-        return $children;
     }
 }

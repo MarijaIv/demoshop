@@ -57,6 +57,11 @@ abstract class BaseController
         return ServiceRegistry::get('StatisticsService');
     }
 
+    /**
+     * Get front product service.
+     *
+     * @return FrontProductService
+     */
     protected function getFrontProductService(): FrontProductService
     {
         return ServiceRegistry::get('FrontProductService');

@@ -23,15 +23,11 @@ class HomeController extends FrontController
      */
     public function index(Request $request): HTMLResponse
     {
-        $categoryService = $this->getCategoryService();
-        $productService = $this->getFrontProductService();
-        $statisticsService = $this->getStatisticsService();
-
-        $statisticsService->increaseHomeViewCount();
+        $this->getStatisticsService()->increaseHomeViewCount();
         $categoryFormatter = new CategoryFormatter();
-        $allCategories = $categoryService->getCategories();
+        $allCategories = $this->getCategoryService()->getCategories();
         $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
-        $products = $productService->getFeaturedProducts();
+        $products = $this->getFrontProductService()->getFeaturedProducts();
 
         $homePageArguments = [
             'categories' => $categories,

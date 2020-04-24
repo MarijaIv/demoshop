@@ -26,19 +26,15 @@ class FrontProductController extends FrontController
     public function index(Request $request, string $sku): HTMLResponse
     {
         $productService = $this->getProductService();
-        $frontProductService = $this->getFrontProductService();
         $formatter = new ProductFormatter();
         $product = $productService->getProductBySku($sku);
 
-        $categoryService = $this->getCategoryService();
-        $categoryFormatter = new CategoryFormatter();
-        $allCategories = $categoryService->getCategories();
-        $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
+        $categories = $this->categories();
 
         if (!$product) {
             $landingPageViewArguments = [
                 'categories' => $categories,
-                'products' => $frontProductService->getFeaturedProducts(),
+                'products' => $this->getFrontProductService()->getFeaturedProducts(),
             ];
             return new HTMLResponse('/views/visitor/landingPage.php', $landingPageViewArguments);
         }
@@ -63,20 +59,16 @@ class FrontProductController extends FrontController
      */
     public function listProducts(Request $request, string $code): HTMLResponse
     {
-        $productService = $this->getFrontProductService();
         $categoryService = $this->getCategoryService();
         $formatter = new ProductFormatter();
         $categoryFormatter = new CategoryFormatter();
 
         $categories = $categoryService->getAllSubcategories($code);
         $categoryCodes = $categoryFormatter->getCategoriesCodes($categories);
-        $dataForCategoryDisplay = $productService->getDataForCategoryDisplay($categoryCodes);
+        $dataForCategoryDisplay = $this->getFrontProductService()->getDataForCategoryDisplay($categoryCodes);
         $dataForCategoryDisplay = $formatter->formatProductsForVisitor($dataForCategoryDisplay, $request->getGetData());
 
-        $categoryService = $this->getCategoryService();
-        $categoryFormatter = new CategoryFormatter();
-        $allCategories = $categoryService->getCategories();
-        $categories = $categoryFormatter->formatCategoriesForTreeView($allCategories);
+        $allCategories = $this->categories();
 
         $categoryDisplayArguments = [
             'products' => $dataForCategoryDisplay['products'],
@@ -84,10 +76,22 @@ class FrontProductController extends FrontController
             'numberOfPages' => $dataForCategoryDisplay['numberOfPages'],
             'sorting' => $dataForCategoryDisplay['sorting'],
             'productsPerPage' => $dataForCategoryDisplay['productsPerPage'],
-            'categories' => $categories,
+            'categories' => $allCategories,
             'searchOrCategory' => 0,
             'selectedCategory' => $categoryService->getCategoryByCode($code),
         ];
         return new HTMLResponse('/views/visitor/categoryDisplay.php', $categoryDisplayArguments);
+    }
+
+    /**
+     * Get categories for treeview.
+     *
+     * @return array
+     */
+    private function categories(): array
+    {
+        $categoryFormatter = new CategoryFormatter();
+        $allCategories = $this->getCategoryService()->getCategories();
+        return $categoryFormatter->formatCategoriesForTreeView($allCategories);
     }
 }

@@ -22,24 +22,15 @@ class DashboardController extends AdminController
      */
     public function index(Request $request): HTMLResponse
     {
-        $productService = $this->getProductService();
-        $categoryService = $this->getCategoryService();
-        $statisticsService = $this->getStatisticsService();
-
-        $mostViewedProduct = $productService->getMostViewedProduct();
-        $product = [
-            'id' => $mostViewedProduct ? $mostViewedProduct->id : 0,
-            'title' => $mostViewedProduct ? $mostViewedProduct->title : '',
-            'viewCount' => $mostViewedProduct ? $mostViewedProduct->view_count : '',
-        ];
+        $mostViewedProduct = $this->getProductService()->getMostViewedProduct();
 
         $myObj = [
-            'amountOfProducts' => $productService->getNumberOfProducts(),
-            'amountOfCategories' => $categoryService->getCountOfCategories(),
-            'homeViewCount' => $statisticsService->getTotalHomeViewCount(),
-            'mostViewedProductId' => $product['id'],
-            'mostViewedProduct' => $product['title'],
-            'numberOfMostViews' => $product['viewCount'],
+            'amountOfProducts' => $this->getProductService()->getNumberOfProducts(),
+            'amountOfCategories' => $this->getCategoryService()->getCountOfCategories(),
+            'homeViewCount' => $this->getStatisticsService()->getTotalHomeViewCount(),
+            'mostViewedProductId' => $mostViewedProduct ? $mostViewedProduct->id : 0,
+            'mostViewedProduct' => $mostViewedProduct ? $mostViewedProduct->title : '',
+            'numberOfMostViews' => $mostViewedProduct ? $mostViewedProduct->view_count : '',
         ];
 
         return new HTMLResponse('/views/admin/dashboard.php', $myObj);
